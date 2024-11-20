@@ -1,5 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import mongoose from 'mongoose';
+
 
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -17,6 +19,9 @@ export class User extends Document {
 
   @Prop({ required: true, enum: ['student', 'instructor', 'admin'] })
   role: string;
+  
+  @Prop({ type: mongoose.Schema.Types.Mixed, default: {} })
+  roleMetadata: Record<string, any>;// store the rols depending on the user type
 
   @Prop()
   profilePictureUrl?: string;

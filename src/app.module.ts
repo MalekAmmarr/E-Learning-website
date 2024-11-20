@@ -13,10 +13,13 @@ import { InteractionModule } from './interaction/interaction.module';
 import { RecommendationModule } from './recommendation/recommendation.module';
 import { AuthenticationLogModule } from './authentication-log/authentication-log.module';
 import { ConfigurationModule } from './configuration/configuration.module';
+import { NotificationModule } from './notification/notification.module';
+import { FeedbackModule } from './feedback/feedback.module';
+import { CertificateModule } from './certificate/certificate.module';
 
 
 @Module({
-  imports: [UsersModule, CoursesModule, ModulesModule, QuizzesModule, ProgressModule, MongooseModule.forRoot('mongodb://localhost:27017/'), ResponseModule, NoteModule, InteractionModule, RecommendationModule, AuthenticationLogModule, ConfigurationModule,],
+  imports: [UsersModule, CoursesModule, ModulesModule, QuizzesModule, ProgressModule, MongooseModule.forRoot('mongodb://localhost:27017/'), ResponseModule, NoteModule, InteractionModule, RecommendationModule, AuthenticationLogModule, ConfigurationModule, NotificationModule, FeedbackModule, CertificateModule,],
   controllers: [AppController],
   providers: [AppService],
   
