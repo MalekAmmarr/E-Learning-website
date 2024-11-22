@@ -6,7 +6,7 @@ import { Notification, NotificationSchema } from '../schemas/notification.schema
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]),
+    MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }], 'eLearningDB'),
   ],
   controllers: [NotificationController],
   providers: [NotificationService]

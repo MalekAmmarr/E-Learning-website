@@ -6,7 +6,7 @@ import { Recommendation, RecommendationSchema } from '../schemas/recommendation.
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Recommendation.name, schema: RecommendationSchema }]),
+    MongooseModule.forFeature([{ name: Recommendation.name, schema: RecommendationSchema }], 'eLearningDB'),
   ],
   controllers: [RecommendationController],
   providers: [RecommendationService]

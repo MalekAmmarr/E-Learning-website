@@ -6,7 +6,7 @@ import { Feedback, FeedbackSchema } from '../schemas/feedback.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Feedback.name, schema: FeedbackSchema }]),
+    MongooseModule.forFeature([{ name: Feedback.name, schema: FeedbackSchema }], 'eLearningDB'),
   ],
   controllers: [FeedbackController],
   providers: [FeedbackService]

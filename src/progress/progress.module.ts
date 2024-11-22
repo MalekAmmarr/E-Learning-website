@@ -6,7 +6,7 @@ import { ProgressService } from './progress.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Progress.name, schema: ProgressSchema }]),
+    MongooseModule.forFeature([{ name: Progress.name, schema: ProgressSchema }], 'eLearningDB'),
   ],
   controllers: [ProgressController],
   providers: [ProgressService]

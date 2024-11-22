@@ -6,7 +6,7 @@ import { Certificate, CertificateSchema } from '../schemas/certificate.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Certificate.name, schema: CertificateSchema }]),
+    MongooseModule.forFeature([{ name: Certificate.name, schema: CertificateSchema }], 'eLearningDB'),
   ],
   controllers: [CertificateController],
   providers: [CertificateService]

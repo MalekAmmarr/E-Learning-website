@@ -7,7 +7,6 @@ import { ModulesModule } from './modules/modules.module';
 import { QuizzesModule } from './quizzes/quizzes.module';
 import { ProgressModule } from './progress/progress.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ResponseModule } from './response/response.module';
 import { NoteModule } from './note/note.module';
 import { InteractionModule } from './interaction/interaction.module';
 import { RecommendationModule } from './recommendation/recommendation.module';
@@ -23,9 +22,14 @@ import { EnrollementModule } from './enrollement/enrollement.module';
 
 
 @Module({
-  imports: [UsersModule, CoursesModule, ModulesModule, QuizzesModule, ProgressModule, MongooseModule.forRoot('mongodb://localhost:27017/'), ResponseModule, NoteModule, InteractionModule, RecommendationModule, AuthenticationLogModule, ConfigurationModule, NotificationModule, FeedbackModule, CertificateModule, BackupModule, ChathistoryModule, EnrollementModule,],
+  imports: [MongooseModule.forRoot('mongodb://localhost:27017/E_Learning_Platform', {
+    connectionName: 'eLearningDB',
+  }),
+  MongooseModule.forRoot('mongodb://localhost:27017/data_management', {
+    connectionName: 'dataManagementDB',
+  }),UsersModule, CoursesModule, ModulesModule, QuizzesModule, ProgressModule, NoteModule, InteractionModule, RecommendationModule, AuthenticationLogModule, ConfigurationModule, NotificationModule, FeedbackModule, CertificateModule, BackupModule, ChathistoryModule, EnrollementModule,],
   controllers: [AppController],
-  providers: [AppService, EnrollementService],
+  providers: [AppService],
   
 })
 export class AppModule {}

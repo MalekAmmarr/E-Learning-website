@@ -4,8 +4,8 @@ import { Model } from 'mongoose';
 import { ChatHistory } from '../schemas/chathistory.schema';
 
 @Injectable()
-export class ChatHistoryService {
-  constructor(@InjectModel(ChatHistory.name) private chatModel: Model<ChatHistory>) {}
+export class ChathistoryService {
+  constructor(@InjectModel(ChatHistory.name,'dataManagementDB') private chatModel: Model<ChatHistory>) {}
 
   async saveMessage(messageData: Partial<ChatHistory>): Promise<ChatHistory> {
     const message = new this.chatModel(messageData);

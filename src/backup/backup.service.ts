@@ -5,7 +5,7 @@ import { Backup } from '../schemas/backup.schema';
 
 @Injectable()
 export class BackupService {
-  constructor(@InjectModel(Backup.name) private backupModel: Model<Backup>) {}
+  constructor(@InjectModel(Backup.name,'dataManagementDB') private backupModel: Model<Backup>) {}
 
   async createBackup(backupData: Partial<Backup>): Promise<Backup> {
     const backup = new this.backupModel(backupData);

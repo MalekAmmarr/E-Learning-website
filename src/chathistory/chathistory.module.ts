@@ -5,7 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ChatHistory, ChatHistorySchema } from '../schemas/chathistory.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: ChatHistory.name, schema: ChatHistorySchema }]),],
+  imports: [MongooseModule.forFeature([{ name: ChatHistory.name, schema: ChatHistorySchema }], 'dataManagementDB'),],
   controllers: [ChathistoryController],
   providers: [ChathistoryService]
 })

@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Query } from '@nestjs/common';
-import { ChatHistoryService } from './chathistory.service';
+import { ChathistoryService } from './chathistory.service';
 import { ChatHistory } from '../schemas/chathistory.schema';
 
-@Controller('chat')
-export class ChatController {
-  constructor(private readonly chatService: ChatHistoryService) {}
+@Controller('chathistory')
+export class ChathistoryController {
+  constructor(private readonly chatService: ChathistoryService) {}
 
   @Post()
   async saveMessage(@Body() messageData: Partial<ChatHistory>): Promise<ChatHistory> {

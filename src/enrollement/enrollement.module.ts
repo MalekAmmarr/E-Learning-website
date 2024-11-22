@@ -7,7 +7,7 @@ import { EnrollementService } from './enrollement.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Enrollment.name, schema: EnrollmentSchema }]),
+    MongooseModule.forFeature([{ name: Enrollment.name, schema: EnrollmentSchema }], 'eLearningDB'),
   ],
   controllers: [EnrollementController],
   providers:[EnrollementService]
