@@ -6,7 +6,7 @@ import { MongooseModule, Schema } from '@nestjs/mongoose';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Configuration.name, schema: ConfigurationSchema }]),
+    MongooseModule.forFeature([{ name: Configuration.name, schema: ConfigurationSchema }], 'eLearningDB'),
   ],
   controllers: [ConfigurationController],
   providers: [ConfigurationService]

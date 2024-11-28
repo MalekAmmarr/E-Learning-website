@@ -3,20 +3,26 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Progress extends Document {
-  @Prop({ required: true, unique: true })
-  progressId: string;
+  @Prop({ required: true })
+  studentId: string; // Reference to the student
 
   @Prop({ required: true })
-  userId: string;
+  courseId: string; // Reference to the course
 
-  @Prop({ required: true })
-  courseId: string;
+  @Prop({ default: 0 })
+  attendanceCount: number; // Number of classes attended by the student
 
-  @Prop({ required: true })
-  completionPercentage: number;
+  @Prop({ type: [Date], default: [] })
+  attendanceDates: Date[]; // Dates of attendance
 
-  @Prop({ required: true })
-  lastAccessed: Date;
+  @Prop({ required: true, default: 0 })
+  completionPercentage: number; // Progress percentage for the course
+
+  @Prop()
+  lastAccessed: Date; // The last time the student accessed the course
+
+  @Prop({ default: true })
+  isPresent?: boolean; // Optional field for real-time attendance tracking
 }
 
 export const ProgressSchema = SchemaFactory.createForClass(Progress);

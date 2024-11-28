@@ -3,23 +3,20 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Module extends Document {
-  @Prop({ required: true, unique: true })
-  courseId: string;
+  @Prop({ required: true })
+  moduleId: string; // Unique identifier for the module
 
   @Prop({ required: true })
-  title: string;
+  courseId: string; // Reference to the associated course
 
   @Prop({ required: true })
-  description: string;
+  title: string; // Title of the module
 
   @Prop({ required: true })
-  category: string;
+  content: string; // Content of the module
 
-  @Prop({ required: true, enum: ['Beginner', 'Intermediate', 'Advanced'] })
-  difficultyLevel: string;
-
-  @Prop({ required: true })
-  createdBy: string;
+  @Prop({ default: 'medium' })
+  difficulty: string; // Difficulty level (e.g., "easy", "medium", "hard")
 }
 
 export const ModuleSchema = SchemaFactory.createForClass(Module);

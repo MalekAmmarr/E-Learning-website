@@ -6,7 +6,7 @@ import { UserInteraction, UserInteractionSchema } from '../schemas/interaction.s
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: UserInteraction.name, schema: UserInteractionSchema }]),
+    MongooseModule.forFeature([{ name: UserInteraction.name, schema: UserInteractionSchema }], 'eLearningDB'),
   ],
   controllers: [InteractionController],
   providers: [InteractionService]
