@@ -5,7 +5,8 @@ import { Configuration } from 'src/schemas/configuration.schema';
 
 @Injectable()
 export class ConfigurationService {
-    constructor(
-        @InjectModel(Configuration.name, 'eLearningDB') private readonly configurationModel: Model<Configuration>) {}
-    
+  constructor(
+    @InjectModel(Configuration.name, 'eLearningDB')
+    private readonly configurationModel: Model<Configuration>,
+  ) {}
 }
