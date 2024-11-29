@@ -14,6 +14,7 @@ import { AuthenticationLogModule } from './Backend/authentication-log/authentica
 import { ConfigurationModule } from './Backend/configuration/configuration.module';
 import { NotificationModule } from './Backend/notification/notification.module';
 import { FeedbackModule } from './Backend/feedback/feedback.module';
+import { JwtModule } from '@nestjs/jwt';
 import { CertificateModule } from './Backend/certificate/certificate.module';
 import { BackupModule } from './Backend/backup/backup.module';
 import { ChathistoryModule } from './Backend/chathistory/chathistory.module';
@@ -43,7 +44,10 @@ import { EnrollementModule } from './Backend/enrollement/enrollement.module';
     CertificateModule,
     BackupModule,
     ChathistoryModule,
-    EnrollementModule,
+    EnrollementModule, JwtModule.register({
+      secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
+      signOptions: { expiresIn: '1h' }, // Token expiration time
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

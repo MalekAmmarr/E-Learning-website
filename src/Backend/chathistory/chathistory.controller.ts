@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Query } from '@nestjs/common';
 import { ChathistoryService } from './chathistory.service';
-import { ChatHistory } from '../schemas/chathistory.schema';
+import { ChatHistory } from 'src/schemas/chathistory.schema';
 
 @Controller('chathistory')
 export class ChathistoryController {

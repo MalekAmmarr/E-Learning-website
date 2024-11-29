@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { InteractionController } from './interaction.controller';
 import { InteractionService } from './interaction.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserInteraction, UserInteractionSchema } from '../schemas/interaction.schema';
+import { UserInteraction, UserInteractionSchema } from 'src/schemas/interaction.schema';
 
 @Module({
   imports: [

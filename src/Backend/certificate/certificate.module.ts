@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { CertificateController } from './certificate.controller';
 import { CertificateService } from './certificate.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Certificate, CertificateSchema } from '../schemas/certificate.schema';
+import { Certificate, CertificateSchema } from 'src/schemas/certificate.schema';
 
 @Module({
   imports: [

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Progress, ProgressSchema } from '../schemas/progress.schema';
+import { Progress, ProgressSchema } from 'src/schemas/progress.schema';
 import { ProgressController } from './progress.controller';
 import { ProgressService } from './progress.service';
 
