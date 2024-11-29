@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { BackupService } from './backup.service';
-import { Backup } from '../schemas/backup.schema';
+import { Backup } from '../../schemas/backup.schema';
 
 @Controller('backups')
 export class BackupController {
