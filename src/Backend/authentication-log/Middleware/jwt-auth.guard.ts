@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AuthenticationLogService } from '../authentication-log.service'; // Inject log service
+import { AuthenticationLogService } from '../../authentication-log/authentication-log.service'; // Inject log service
 import { ExecutionContext } from '@nestjs/common';
 import { Observable } from 'rxjs';
 

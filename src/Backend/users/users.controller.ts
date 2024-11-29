@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../schemas/user.schema';
 import { AdminGuard } from './guards/admin.guard';
-import { JwtAuthGuard } from 'src/authentication-log/Middleware/jwt-auth.guard';
+import { JwtAuthGuard } from 'src/Backend/Middleware/jwt-auth.guard';
 
 
 

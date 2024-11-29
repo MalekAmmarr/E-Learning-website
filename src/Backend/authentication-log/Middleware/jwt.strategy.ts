@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from 'src/users/users.service'; 
 import { JwtPayload } from './jwt-payload.interface';// Define the JWT payload interface
-import { AuthenticationLogService } from '../authentication-log.service';// To log auth events
+import { AuthenticationLogService } from '../../authentication-log/authentication-log.service';// To log auth events
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AuthenticationLog } from 'src/schemas/authentication-log.schema';
