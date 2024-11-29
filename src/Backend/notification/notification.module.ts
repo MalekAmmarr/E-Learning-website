@@ -6,9 +6,12 @@ import { Notification, NotificationSchema } from 'src/schemas/notification.schem
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }], 'eLearningDB'),
+    MongooseModule.forFeature(
+      [{ name: Notification.name, schema: NotificationSchema }],
+      'eLearningDB',
+    ),
   ],
   controllers: [NotificationController],
-  providers: [NotificationService]
+  providers: [NotificationService],
 })
 export class NotificationModule {}

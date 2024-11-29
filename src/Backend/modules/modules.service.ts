@@ -5,7 +5,8 @@ import { Module, ModuleSchema } from 'src/schemas/module.schema';
 
 @Injectable()
 export class ModulesService {
-    constructor(
-        @InjectModel(Module.name, 'eLearningDB') private readonly userinteractionModel: Model<Module>) {}
-
+  constructor(
+    @InjectModel(Module.name, 'eLearningDB')
+    private readonly userinteractionModel: Model<Module>,
+  ) {}
 }

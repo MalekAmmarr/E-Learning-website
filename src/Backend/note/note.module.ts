@@ -6,9 +6,12 @@ import { Note, NoteSchema } from 'src/schemas/note.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Note.name, schema: NoteSchema }], 'eLearningDB'),
+    MongooseModule.forFeature(
+      [{ name: Note.name, schema: NoteSchema }],
+      'eLearningDB',
+    ),
   ],
   controllers: [NoteController],
-  providers: [NoteService]
+  providers: [NoteService],
 })
 export class NoteModule {}

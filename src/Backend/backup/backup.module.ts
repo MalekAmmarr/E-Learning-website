@@ -5,8 +5,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Backup, BackupSchema } from 'src/schemas/backup.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Backup.name, schema: BackupSchema }], 'dataManagementDB')],
+  imports: [
+    MongooseModule.forFeature(
+      [{ name: Backup.name, schema: BackupSchema }],
+      'dataManagementDB',
+    ),
+  ],
   controllers: [BackupController],
-  providers: [BackupService]
+  providers: [BackupService],
 })
 export class BackupModule {}

@@ -4,12 +4,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Enrollment, EnrollmentSchema } from 'src/schemas/enrollement.schema';
 import { EnrollementService } from './enrollement.service';
 
-
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Enrollment.name, schema: EnrollmentSchema }], 'eLearningDB'),
+    MongooseModule.forFeature(
+      [{ name: Enrollment.name, schema: EnrollmentSchema }],
+      'eLearningDB',
+    ),
   ],
   controllers: [EnrollementController],
-  providers:[EnrollementService]
+  providers: [EnrollementService],
 })
 export class EnrollementModule {}

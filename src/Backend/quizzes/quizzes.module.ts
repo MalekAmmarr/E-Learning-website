@@ -6,9 +6,12 @@ import { QuizzesService } from './quizzes.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Quiz.name, schema: QuizSchema }], 'eLearningDB'),
+    MongooseModule.forFeature(
+      [{ name: Quiz.name, schema: QuizSchema }],
+      'eLearningDB',
+    ),
   ],
   controllers: [QuizzesController],
-  providers: [QuizzesService]
+  providers: [QuizzesService],
 })
 export class QuizzesModule {}
