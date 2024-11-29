@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Course, CourseSchema } from '../schemas/course.schema';
+import { Course, CourseSchema } from '../../schemas/course.schema';
 import { CoursesController } from './courses.controller';
 import { CoursesService } from './courses.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Course.name, schema: CourseSchema }], 'eLearningDB'),
+    MongooseModule.forFeature(
+      [{ name: Course.name, schema: CourseSchema }],
+      'eLearningDB',
+    ),
   ],
   controllers: [CoursesController],
-  providers: [CoursesService]
+  providers: [CoursesService],
 })
 export class CoursesModule {}
