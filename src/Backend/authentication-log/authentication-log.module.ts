@@ -9,6 +9,7 @@ import { AuthenticationLog, AuthenticationLogSchema} from '../schemas/authentica
     MongooseModule.forFeature([{ name: AuthenticationLog.name , schema: AuthenticationLogSchema }], 'eLearningDB'),
   ],
   controllers: [AuthenticationLogController],
-  providers: [AuthenticationLogService]
+  providers: [AuthenticationLogService],
+  exports: [AuthenticationLogService]
 })
 export class AuthenticationLogModule {}
