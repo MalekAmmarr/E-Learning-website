@@ -2,9 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { User, UserSchema } from '../../schemas/user.schema';
-import { AuthenticationLogModule } from 'src/backend/authentication-log/authentication-log.module';
-
+import { User, UserSchema } from 'src/schemas/user.schema';
+import { AuthenticationLogModule } from '../authentication-log/authentication-log.module';
 @Module({
   imports: [
     MongooseModule.forFeature(

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EnrollementController } from './enrollement.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Enrollment, EnrollmentSchema } from '../../schemas/enrollement.schema';
+import { Enrollment, EnrollmentSchema } from 'src/schemas/enrollement.schema';
 import { EnrollementService } from './enrollement.service';
 
 @Module({

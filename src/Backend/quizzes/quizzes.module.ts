@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Quiz, QuizSchema } from '../../schemas/quiz.schema';
+import { Quiz, QuizSchema } from 'src/schemas/quiz.schema';
 import { QuizzesController } from './quizzes.controller';
 import { QuizzesService } from './quizzes.service';
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ChatHistory } from '../../schemas/chathistory.schema';
+import { ChatHistory } from 'src/schemas/chathistory.schema';
 
 @Injectable()
 export class ChathistoryService {

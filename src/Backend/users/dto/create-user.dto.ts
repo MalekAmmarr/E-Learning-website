@@ -1,19 +1,27 @@
-import { IsString, IsEmail, IsNotEmpty, IsEnum } from 'class-validator';
+// create-user.dto.ts
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsEnum } from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  userId: string;
 
   @IsNotEmpty()
+  @IsString()
+  name: string;
+
   @IsEmail()
   email: string;
 
   @IsNotEmpty()
-  @IsString()
-  passwordHash: string;
+  @MinLength(6)
+  passwordHash: string; // This will be hashed before saving
 
-  @IsNotEmpty()
   @IsEnum(['student', 'instructor', 'admin'])
   role: string;
+
+  /*roleMetadata: Record<string, any>;
+  learningPreferences: string[];
+  isHardcoded: boolean;
+  profilePictureUrl?: string;*/
 }

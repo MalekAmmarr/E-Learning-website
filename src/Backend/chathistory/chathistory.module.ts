@@ -2,10 +2,7 @@ import { Module } from '@nestjs/common';
 import { ChathistoryController } from './chathistory.controller';
 import { ChathistoryService } from './chathistory.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import {
-  ChatHistory,
-  ChatHistorySchema,
-} from '../../schemas/chathistory.schema';
+import { ChatHistory, ChatHistorySchema } from 'src/schemas/chathistory.schema';
 
 @Module({
   imports: [
