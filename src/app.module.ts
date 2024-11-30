@@ -24,15 +24,15 @@ import { EnrollementModule } from './Backend/enrollement/enrollement.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb://localhost:27017/E_Learning_Platform',
+      'mongodb://Behz_92:Behz_9204@intifadaa-shard-00-00.69zq2.mongodb.net:27017,intifadaa-shard-00-01.69zq2.mongodb.net:27017,intifadaa-shard-00-02.69zq2.mongodb.net:27017/E_Learning_Platform?replicaSet=atlas-lhst4z-shard-0&ssl=true&authSource=admin',
       {
-        connectionName: 'eLearningDB',
+        connectionName: 'eLearningDB', // For eLearning database
       },
     ),
     MongooseModule.forRoot(
-      'mongodb://localhost:27017/data_management',
+      'mongodb://Behz_92:Behz_9204@intifadaa-shard-00-00.69zq2.mongodb.net:27017,intifadaa-shard-00-01.69zq2.mongodb.net:27017,intifadaa-shard-00-02.69zq2.mongodb.net:27017/data_management?replicaSet=atlas-lhst4z-shard-0&ssl=true&authSource=admin',
       {
-        connectionName: 'dataManagementDB',
+        connectionName: 'dataManagementDB', // For data management database
       },
     ),
     UsersModule,
@@ -50,7 +50,8 @@ import { EnrollementModule } from './Backend/enrollement/enrollement.module';
     CertificateModule,
     BackupModule,
     ChathistoryModule,
-    EnrollementModule, JwtModule.register({
+    EnrollementModule,
+    JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
       signOptions: { expiresIn: '1h' }, // Token expiration time
     }),
