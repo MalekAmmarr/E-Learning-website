@@ -1,6 +1,7 @@
 'use client'; // This marks the component as a client component
 import Image from 'next/image';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
 
@@ -101,7 +102,7 @@ export default function Home() {
                     <a href="#events">Events</a>
                   </li>
                   <li className="scroll-to-section">
-                    <a href="#contact">Register Now!</a>
+                  <Link href="/login">Login!</Link>
                   </li>
                 </ul>
                 <a className="menu-trigger">
