@@ -4,9 +4,11 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     // Set a timeout to simulate the page loading process and hide the preloader
@@ -14,6 +16,16 @@ export default function Home() {
       setIsLoading(false); // This will hide the preloader after 2 seconds
     }, 1000);
   }, []); // Empty array to run this effect once after the initial rend
+  // Handle course click
+  const handleCourseClick = () => {
+    const token = sessionStorage.getItem('authToken');
+    if (!token) {
+      router.push('/login'); // Redirect to login if no token exists
+    } else {
+      console.log(`Navigating to course details `);
+      // Navigate to the course details page or take another action
+    }
+  };
   return (
     <>
       <meta charSet="utf-8" />
@@ -101,8 +113,8 @@ export default function Home() {
                   <li className="scroll-to-section">
                     <a href="#events">Events</a>
                   </li>
-                  <li className="scroll-to-section">
-                  <Link href="/login">Login!</Link>
+                  <li>
+                    <Link href="/login">Login/Register</Link>
                   </li>
                 </ul>
                 <a className="menu-trigger">
@@ -129,11 +141,17 @@ export default function Home() {
                       online educational related websites. This layout is based
                       on the famous Bootstrap v5.3.0 framework.
                     </p>
-                    <div className="buttons">
+                    <div
+                      className="buttons"
+                      onClick={() => handleCourseClick()}
+                    >
                       <div className="main-button">
                         <a href="#">Request Demo</a>
                       </div>
-                      <div className="icon-button">
+                      <div
+                        className="icon-button"
+                        onClick={() => handleCourseClick()}
+                      >
                         <a href="#">
                           <i className="fa fa-play" /> What's Scholar?
                         </a>
@@ -141,7 +159,10 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="item item-2">
+                <div
+                  className="item item-2"
+                  onClick={() => handleCourseClick()}
+                >
                   <div className="header-text">
                     <span className="category">Best Result</span>
                     <h2>Get the best result out of your effort</h2>
@@ -162,7 +183,10 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div className="item item-3">
+                <div
+                  className="item item-3"
+                  onClick={() => handleCourseClick()}
+                >
                   <div className="header-text">
                     <span className="category">Online Learning</span>
                     <h2>Online Learning helps you save the time</h2>
@@ -190,7 +214,7 @@ export default function Home() {
       </div>
       <div className="services section" id="services">
         <div className="container">
-          <div className="row">
+          <div className="row" onClick={() => handleCourseClick()}>
             <div className="col-lg-4 col-md-6">
               <div className="service-item">
                 <div className="icon">
@@ -419,7 +443,7 @@ export default function Home() {
               </a>
             </li>
           </ul>
-          <div className="row event_box">
+          <div className="row event_box" onClick={() => handleCourseClick()}>
             <div className="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 design">
               <div className="events_item">
                 <div className="thumb">
@@ -591,7 +615,7 @@ export default function Home() {
       </div>
       <div className="team section" id="team">
         <div className="container">
-          <div className="row">
+          <div className="row" onClick={() => handleCourseClick()}>
             <div className="col-lg-3 col-md-6">
               <div className="team-member">
                 <div className="main-content">
@@ -758,7 +782,7 @@ export default function Home() {
       </div>
       <div className="section events" id="events">
         <div className="container">
-          <div className="row">
+          <div className="row" onClick={() => handleCourseClick()}>
             <div className="col-lg-12 text-center">
               <div className="section-heading">
                 <h6>Schedule</h6>
