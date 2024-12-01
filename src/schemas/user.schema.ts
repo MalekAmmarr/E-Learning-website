@@ -4,38 +4,29 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class User extends Document {
-  @Prop({ required: true, unique: true })
-  userId: string;
+  @Prop({ required: true, unique: true }) // Make email unique
+  email: string;
 
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true, unique: true })
-  email: string;
+  @Prop({ required: true })
+  age: string;
 
   @Prop({ required: true })
   passwordHash: string;
-
-  @Prop({ required: true, enum: ['student', 'instructor', 'admin'], default: 'student' })
-  role: string;
-
-  @Prop({ type: mongoose.Schema.Types.Mixed, default: {} })
-  roleMetadata: Record<string, any>; // Role-specific details (e.g., enrolledCourses, specialization, permissions)
-
-  @Prop({ type: [String], default: [] })
-  learningPreferences: string[]; // Example: ["Data Science", "Machine Learning"]
-
-  @Prop({ default: false })
-  isHardcoded: boolean; // Distinguish hardcoded admins
-
-  @Prop()
+  // Optional fields
+  @Prop({ required: false })
   profilePictureUrl?: string;
 
-  @Prop({ default: Date.now })
-  createdAt: Date; // Timestamp of account creation
+  @Prop({ type: [String], default: [] })
+  appliedCourses: string[]; // Array of courses the user wants to apply to
 
   @Prop({ type: [String], default: [] })
-  pendingCourses: string[]; // Courses awaiting instructor/admin approval
+  acceptedCourses: string[]; // Array of courses the user has been accepted into
+
+  @Prop({ default: 0 })
+  score: number; // Default score is 0
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

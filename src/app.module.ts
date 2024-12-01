@@ -26,13 +26,13 @@ import { EnrollementModule } from './Backend/enrollement/enrollement.module';
     MongooseModule.forRoot(
       'mongodb://localhost:27017/E_Learning_Platform',
       {
-        connectionName: 'eLearningDB',
+        connectionName: 'eLearningDB', // For eLearning database
       },
     ),
     MongooseModule.forRoot(
       'mongodb://localhost:27017/data_management',
       {
-        connectionName: 'dataManagementDB',
+        connectionName: 'dataManagementDB', // For data management database
       },
     ),
     UsersModule,
@@ -50,7 +50,8 @@ import { EnrollementModule } from './Backend/enrollement/enrollement.module';
     CertificateModule,
     BackupModule,
     ChathistoryModule,
-    EnrollementModule, JwtModule.register({
+    EnrollementModule,
+    JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
       signOptions: { expiresIn: '1h' }, // Token expiration time
     }),
