@@ -172,7 +172,7 @@ const RegisterPage = () => {
 
       {/* Signin Link */}
       <p className="signin">
-        Already have an account? <a href="#">Signin</a>
+        Already have an account? <a href="/login">Signin</a>
       </p>
     </form>
   );
