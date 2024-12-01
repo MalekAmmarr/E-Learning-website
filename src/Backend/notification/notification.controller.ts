@@ -8,7 +8,7 @@ export class NotificationController {
     constructor(private readonly notificationService: NotificationService) {}
 
   // Fetch all notifications for a specific user
-  @Get('user/:userId')
+ /* @Get('user/:userId')
   async getUserNotifications(@Param('userId') userId: string): Promise<Notification[]> {
     return this.notificationService.getNotificationsByUser(userId);
   }
@@ -17,5 +17,5 @@ export class NotificationController {
   @Put('read/:notificationId')
   async markAsRead(@Param('notificationId') notificationId: string): Promise<Notification> {
     return this.notificationService.markAsRead(notificationId);
-  }
+  }*/
 }

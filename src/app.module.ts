@@ -20,6 +20,7 @@ import { BackupModule } from './Backend/backup/backup.module';
 import { ChathistoryModule } from './Backend/chathistory/chathistory.module';
 import { EnrollementService } from './Backend/enrollement/enrollement.service';
 import { EnrollementModule } from './Backend/enrollement/enrollement.module';
+import { InstructorModule } from './instructor/instructor.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { EnrollementModule } from './Backend/enrollement/enrollement.module';
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
       signOptions: { expiresIn: '1h' }, // Token expiration time
     }),
+    InstructorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

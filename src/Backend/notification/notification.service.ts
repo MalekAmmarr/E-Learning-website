@@ -13,7 +13,7 @@ export class NotificationService {
   ) {}
 
 
-  async sendNotification(userId: string, content: string, type: string) {
+ /* async sendNotification(userId: string, content: string, type: string) {
     console.log(`Sending ${type} notification to user ${userId}: ${content}`);
     const notification = new this.notificationModel({
       userId,
@@ -35,6 +35,6 @@ export class NotificationService {
         { isRead: true },
         { new: true },
       );
-    }
+    }*/
 
 }

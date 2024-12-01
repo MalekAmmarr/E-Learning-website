@@ -1,5 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { User } from './user.schema';
+import { Course } from './course.schema';
 
 @Schema({ timestamps: true })
 export class Note extends Document {
@@ -7,10 +9,10 @@ export class Note extends Document {
   noteId: string; // Unique identifier for the note or thread
 
   @Prop({ required: true })
-  userId: string; // ID of the user who created the note or thread
+  studentId: string; // Reference to the student's (MongoDB's auto-generated _id)
 
-  @Prop()
-  courseId?: string; // Optional reference to the associated course
+  @Prop({required: true })
+  courseId: string;
 
   @Prop({ required: true })
   content: string; // Content of the note or thread
