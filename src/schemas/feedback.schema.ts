@@ -1,5 +1,6 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { Course } from './course.schema';
 
 @Schema({ timestamps: true })
 export class Feedback extends Document {
@@ -7,10 +8,10 @@ export class Feedback extends Document {
   feedbackId: string;
 
   @Prop({ required: true })
-  userId: string;
+  studentemail: string;
 
-  @Prop()
-  courseId?: string;
+  @Prop({required: true })
+  courseId: string;
 
   @Prop({ required: true })
   content: string;

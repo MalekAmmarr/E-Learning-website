@@ -14,7 +14,7 @@ export class EnrollementService {
     @InjectModel(Course.name,'eLearningDB' ) private readonly courseModel: Model<Course>,
   ) {}
 
-  async enrollStudentInCourse(studentId: string, courseId: string): Promise<Notification> {
+ /* async enrollStudentInCourse(studentId: string, courseId: string): Promise<Notification> {
     const session = await this.enrollementModel.db.startSession();
     session.startTransaction();
     try {
@@ -74,6 +74,6 @@ export class EnrollementService {
       console.error('Error during enrollment:', error);
       throw new Error(`Enrollment failed: ${error.message}`);
     }
-  }
+  }*/
   
 }

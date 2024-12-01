@@ -3,13 +3,14 @@ import { NoteController } from './note.controller';
 import { NoteService } from './note.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Note, NoteSchema } from 'src/schemas/note.schema';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature(
       [{ name: Note.name, schema: NoteSchema }],
       'eLearningDB',
-    ),
+    ),UsersModule
   ],
   controllers: [NoteController],
   providers: [NoteService],
