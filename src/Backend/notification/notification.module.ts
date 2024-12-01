@@ -13,5 +13,6 @@ import { Notification, NotificationSchema } from 'src/schemas/notification.schem
   ],
   controllers: [NotificationController],
   providers: [NotificationService],
+  exports: [NotificationService]
 })
 export class NotificationModule {}
