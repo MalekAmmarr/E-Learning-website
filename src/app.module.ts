@@ -24,13 +24,13 @@ import { EnrollementModule } from './Backend/enrollement/enrollement.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
-      'mongodb://Behz_92:Behz_9204@intifadaa-shard-00-00.69zq2.mongodb.net:27017,intifadaa-shard-00-01.69zq2.mongodb.net:27017,intifadaa-shard-00-02.69zq2.mongodb.net:27017/E_Learning_Platform?replicaSet=atlas-lhst4z-shard-0&ssl=true&authSource=admin',
+      'mongodb://localhost:27017/E_Learning_Platform',
       {
         connectionName: 'eLearningDB', // For eLearning database
       },
     ),
     MongooseModule.forRoot(
-      'mongodb://Behz_92:Behz_9204@intifadaa-shard-00-00.69zq2.mongodb.net:27017,intifadaa-shard-00-01.69zq2.mongodb.net:27017,intifadaa-shard-00-02.69zq2.mongodb.net:27017/data_management?replicaSet=atlas-lhst4z-shard-0&ssl=true&authSource=admin',
+      'mongodb://localhost:27017/data_management',
       {
         connectionName: 'dataManagementDB', // For data management database
       },

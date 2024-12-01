@@ -8,6 +8,8 @@ import {
   IsPositive,
 } from 'class-validator';
 
+
+// Define the DTO for creating a User
 // Define the DTO for creating a User
 export class CreateUserDto {
   @IsString()
@@ -16,12 +18,15 @@ export class CreateUserDto {
   @IsString()
   age: string; // Age is required and should be a string (or number if preferred)
 
+
+
   @IsEmail()
   email: string;
 
   @IsString()
   passwordHash: string;
 
+  @IsOptional() // Role is optional in the DTO since it's default in the schema
   @IsOptional() // Role is optional in the DTO since it's default in the schema
   @IsEnum(['student', 'instructor', 'admin'])
   role?: string; // Default is 'student' in the schema

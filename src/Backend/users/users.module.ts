@@ -14,5 +14,6 @@ import { AuthenticationLogModule } from '../authentication-log/authentication-lo
   ],
   controllers: [UsersController],
   providers: [UsersService],
+  exports: [MongooseModule,UsersService],
 })
 export class UsersModule {}

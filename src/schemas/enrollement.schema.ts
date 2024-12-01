@@ -1,10 +1,11 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { User } from './user.schema';
 
 @Schema({ timestamps: true })
-export class Enrollment extends Document {
-  @Prop({ required: true })
-  studentId: string; // Reference to the student
+export class Enrollement extends Document {
+  @Prop({ required: true, type: Types.ObjectId, ref: User.name })
+  studentId: Types.ObjectId; // Reference to the student's userId
 
   @Prop({ required: true })
   courseId: string; // Reference to the course
@@ -16,4 +17,4 @@ export class Enrollment extends Document {
   isDropped: boolean; // Indicates if the student was dropped due to absenteeism
 }
 
-export const EnrollmentSchema = SchemaFactory.createForClass(Enrollment);
+export const EnrollementSchema = SchemaFactory.createForClass(Enrollement);

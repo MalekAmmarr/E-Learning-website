@@ -1,5 +1,6 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
+import { User } from './user.schema';
 
 @Schema({ timestamps: true })
 export class Course extends Document {
@@ -9,8 +10,9 @@ export class Course extends Document {
   @Prop({ required: true })
   title: string;
 
-  @Prop({ required: true })
-  instructorId: string; // Reference to the instructor's userId
+  // instructorId will store the ObjectId of a User (MongoDB's auto-generated _id)
+ @Prop({ required: true, type: Types.ObjectId, ref: User.name })
+ instructorId: Types.ObjectId; // Reference to the instructor's _id (User's ObjectId)
 
   @Prop()
   instructorName?: string;
