@@ -1,0 +1,113 @@
+/* Main container */
+body,
+html {
+  margin: 0;
+  padding: 24;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: top;
+  background-color: #f0f0f0; /* Optional: light gray background for contrast */
+}
+/* Main container */
+.students-container {
+  max-width: 1200px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+.title {
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 30px;
+  color: blue;
+}
+
+/* Individual student card */
+.student-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.student-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.profile-img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.student-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Student information */
+.student-info {
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+.student-info p {
+  margin: 5px 0;
+}
+
+/* Action buttons */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.accept-btn,
+.reject-btn {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.accept-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.accept-btn:hover {
+  background-color: #45a049;
+}
+
+.reject-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.reject-btn:hover {
+  background-color: #e53935;
+}
+
+/* Loading and error messages */
+.loading,
+.error {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #ff5722;
+}
