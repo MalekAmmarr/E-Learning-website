@@ -1,5 +1,5 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
-import { CreateNoteDto } from '../dto/create-note.dto';
+import { CreateNoteDto } from '../users/dto/create-note.dto';
 import { NoteService } from './note.service';
 import { Types } from 'mongoose';
 
