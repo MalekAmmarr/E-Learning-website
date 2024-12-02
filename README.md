@@ -41,7 +41,8 @@ $ npm install --save-dev @types/node
 
 ```bash
 # development
-$ npm run start
+$ npm start:Backend
+$ npm run dev:FRONTEND
 
 # watch mode
 $ npm run start:dev
