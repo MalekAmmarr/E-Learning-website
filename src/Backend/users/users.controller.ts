@@ -6,7 +6,7 @@ import {
   Delete,
   Param,
   Body,
-  UseGuards,
+  NotFoundException,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from '../dto/create-user.dto';
@@ -38,5 +38,19 @@ export class UsersController {
     @Body() { email, passwordHash }: { email: string; passwordHash: string },
   ) {
     return await this.userService.login(email, passwordHash);
+  }
+  // Route to get notifications by email
+  @Get('notifications')
+  async getNotifications(@Body() { email }: { email: string }) {
+    // Call the service method to get notifications
+    const result = await this.userService.Notifications(email);
+
+    // If no notifications or error message is returned, throw NotFoundException
+    if (typeof result.Notifications === 'string') {
+      throw new NotFoundException(result.Notifications);
+    }
+
+    // Otherwise return the notifications
+    return result;
   }
 }

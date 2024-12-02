@@ -6,7 +6,7 @@ import {
   Delete,
   Param,
   Body,
-  UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { InstructorService } from './instructor.service';
 import { Instructor } from 'src/schemas/Instructor.schema';
@@ -54,5 +54,30 @@ export class InstructorController {
       }
       throw new Error('An error occurred while fetching users.');
     }
+  }
+  // Endpoint to accept or reject a student's course application
+  @Post('accept-reject-course') // No email parameter in the URL
+  async acceptOrRejectCourse(
+    @Body()
+    body: {
+      email: string;
+      courseName: string;
+      action: 'accept' | 'reject';
+    },
+  ): Promise<Object> {
+    const { email, courseName, action } = body; // Extracting data from the body
+
+    // Validate the action is either 'accept' or 'reject'
+    if (action !== 'accept' && action !== 'reject') {
+      throw new BadRequestException('Action must be "accept" or "reject"');
+    }
+
+    // Call the service method to accept or reject the course
+    const message = await this.instructorService.AcceptOrReject(
+      email,
+      courseName,
+      action,
+    );
+    return { message };
   }
 }

@@ -75,4 +75,19 @@ export class UsersService {
 
     return { accessToken };
   }
+  async Notifications(
+    email: string,
+  ): Promise<{ Notifications: string[] | string }> {
+    const user = await this.userModel.findOne({ email }).exec();
+
+    // Check if user exists and has notifications
+    const notifications = user?.Notifiction || [];
+
+    // If there are no notifications, return a message
+    if (notifications.length === 0) {
+      return { Notifications: 'You currently have no new notifications.' };
+    }
+
+    return { Notifications: notifications };
+  }
 }

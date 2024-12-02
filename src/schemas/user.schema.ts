@@ -27,6 +27,9 @@ export class User extends Document {
 
   @Prop({ default: 0 })
   score: number; // Default score is 0
+
+  @Prop({ type: [String], default: [] })
+  Notifiction: string[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -18,7 +18,7 @@ export class InstructorService {
     @InjectModel(Instructor.name, 'eLearningDB')
     private readonly InstructorModel: Model<Instructor>, // Inject the User model for DB operations
     @InjectModel(User.name, 'eLearningDB')
-    private readonly UserModel: Model<Instructor>, // Inject the User model for DB operations
+    private readonly UserModel: Model<User>, // Inject the User model for DB operations
   ) {}
   // Method to get all users applied to courses taught by an instructor
   async getUsersAppliedToCourses(email: string) {
@@ -100,5 +100,52 @@ export class InstructorService {
     });
 
     return { accessToken };
+  }
+  async AcceptOrReject(
+    email: string,
+    courseName: string,
+    action: 'accept' | 'reject',
+  ): Promise<String> {
+    try {
+      // Find the user by email
+      const user = await this.UserModel.findOne({ email });
+
+      if (!user) {
+        throw new Error(`User with email ${email} not found.`);
+      }
+
+      // Check if the course exists in `appliedCourses`
+      const courseIndex = user.appliedCourses.indexOf(courseName);
+      if (courseIndex === -1) {
+        throw new Error(`Course ${courseName} not found in appliedCourses.`);
+      }
+
+      // Remove the course from `appliedCourses`
+      user.appliedCourses.splice(courseIndex, 1);
+
+      // If accepted, add the course to `acceptedCourses`
+      if (action === 'accept') {
+        if (!user.acceptedCourses.includes(courseName)) {
+          user.acceptedCourses.push(courseName);
+          user.Notifiction
+            .push(`Congratulations! You have been accepted into the course  ${courseName}.
+             We are excited to have you join and look forward to your participation. Please check the course details 
+             in your dashboard for further instructions. Best of luck with your studies!`);
+        }
+      } else {
+        user.Notifiction
+          .push(`Unfortunately, your application for the course ${courseName} has been rejected. 
+          We appreciate your interest and encourage you to apply for other courses in the future. 
+          Feel free to explore more options in your dashboard. Best wishes for your learning journey!`);
+      }
+
+      // Save the updated user document
+      await user.save();
+
+      return `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} course ${courseName} for user ${email}.`;
+    } catch (error) {
+      console.error(`Error in AcceptOrReject: ${error.message}`);
+      throw error;
+    }
   }
 }
