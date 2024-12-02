@@ -8,8 +8,8 @@ import { Model } from 'mongoose';
 import { User } from 'src/schemas/user.schema';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthenticationLogService } from '../authentication-log/authentication-log.service'; // Import AuthenticationLogService
 
 @Injectable()
