@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
-export class Instructor extends Document {
+export class admin extends Document {
   @Prop({ required: true, unique: true }) // Make email unique
   email: string;
 
@@ -11,19 +11,11 @@ export class Instructor extends Document {
   name: string;
 
   @Prop({ required: true })
-  age: string;
-
-  @Prop({ required: true })
   passwordHash: string;
-
-  @Prop({ type: [String], default: [] })
-  Teach_Courses: string[]; // Array of courses the user wants to apply to
-
+  
   // Optional fields
   @Prop({ required: false })
   profilePictureUrl?: string;
 
-  @Prop({ default: 0 })
-  Certificates: string; // Default score is 0
 }
-export const InstructorSchema = SchemaFactory.createForClass(Instructor);
+export const AdminSchema = SchemaFactory.createForClass(admin);

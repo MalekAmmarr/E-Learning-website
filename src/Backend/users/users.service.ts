@@ -8,9 +8,10 @@ import { Model } from 'mongoose';
 import { User } from 'src/schemas/user.schema';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { CreateUserDto } from '../dto/create-user.dto';
-import { UpdateUserDto } from '../dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthenticationLogService } from '../authentication-log/authentication-log.service'; // Import AuthenticationLogService
+import { Logs } from 'src/schemas/logs.schema';
 
 @Injectable()
 export class UsersService {
@@ -19,6 +20,8 @@ export class UsersService {
     @InjectModel(User.name, 'eLearningDB')
     private readonly userModel: Model<User>, // Inject the User model for DB operations
     private readonly authenticationLogService: AuthenticationLogService, // Inject AuthenticationLogService for logging
+    @InjectModel(Logs.name,'eLearningDB')
+    private readonly LogsModel:Model<Logs>
   ) {}
 
   // Register a new user
@@ -49,11 +52,15 @@ export class UsersService {
   async login(
     email: string,
     passwordHash: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string ; log:string}> {
+    let log = "failed"
     const user = await this.userModel.findOne({ email }).exec();
     if (!user) {
-      throw new NotFoundException('User not found');
+      const accessToken="Invalid Credentials"
+       return {accessToken ,log  }
+      //throw new NotFoundException('Instrutor not found');
     }
+    console.log(user);
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       console.error('JWT_SECRET is missing!');
@@ -64,15 +71,32 @@ export class UsersService {
       user.passwordHash,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException('Invalid credentials');
+      const accessToken="Invalid Credentials"
+       return {accessToken ,log }
     }
+    log = "pass";
 
     // Create and return JWT token
     const payload = { name: user.name, email: user.email };
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
+    
+    return { accessToken, log };
+  }
+  async Notifications(
+    email: string,
+  ): Promise<{ Notifications: string[] | string }> {
+    const user = await this.userModel.findOne({ email }).exec();
 
-    return { accessToken };
+    // Check if user exists and has notifications
+    const notifications = user?.Notifiction || [];
+
+    // If there are no notifications, return a message
+    if (notifications.length === 0) {
+      return { Notifications: 'You currently have no new notifications.' };
+    }
+
+    return { Notifications: notifications };
   }
 }

@@ -30,13 +30,19 @@
 
 ```bash
 $ npm install
+$ npm install --save @nestjs/mongoose mongoose
+$ npm install --save-dev @types/mongoose
+$ npm install --save next react react-dom
+$ npm install --save-dev @types/react @types/react-dom @types/next
+$ npm install --save-dev @types/node
 ```
 
 ## Compile and run the project
 
 ```bash
 # development
-$ npm run start
+$ npm start:Backend
+$ npm run dev:FRONTEND
 
 # watch mode
 $ npm run start:dev

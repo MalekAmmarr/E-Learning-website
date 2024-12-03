@@ -10,15 +10,20 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { CreateInstructorDto } from './create-Ins.dto';
 import { User } from 'src/schemas/user.schema';
+import { LogsService } from '../logs/logs.service';
+import { LogsController } from '../logs/logs.controller';
+import { Logs } from 'src/schemas/logs.schema';
 
 @Injectable()
 export class InstructorService {
   // Inject UserModel and AuthenticationLogService into the constructor
   constructor(
+    @InjectModel(Logs.name, 'eLearningDB')
+    private readonly LogsModel: Model<Logs>, // Inject the Logs for DB operations
     @InjectModel(Instructor.name, 'eLearningDB')
     private readonly InstructorModel: Model<Instructor>, // Inject the User model for DB operations
     @InjectModel(User.name, 'eLearningDB')
-    private readonly UserModel: Model<Instructor>, // Inject the User model for DB operations
+    private readonly UserModel: Model<User>, // Inject the User model for DB operations
   ) {}
   // Method to get all users applied to courses taught by an instructor
   async getUsersAppliedToCourses(email: string) {
@@ -74,10 +79,13 @@ export class InstructorService {
   async login(
     email: string,
     passwordHash: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string ; log:string}> {
+    let log = "failed"
     const Instructor = await this.InstructorModel.findOne({ email }).exec();
     if (!Instructor) {
-      throw new NotFoundException('Instrutor not found');
+      const accessToken="Invalid Credentials"
+       return {accessToken ,log  }
+      //throw new NotFoundException('Instrutor not found');
     }
     console.log(Instructor);
     const jwtSecret = process.env.JWT_SECRET;
@@ -90,15 +98,64 @@ export class InstructorService {
       Instructor.passwordHash,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException('Invalid credentials');
+      const accessToken="Invalid Credentials"
+       return {accessToken ,log }
     }
+    log = "pass";
 
     // Create and return JWT token
     const payload = { name: Instructor.name, email: Instructor.email };
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
+    
+    return { accessToken, log };
+  }
+  async AcceptOrReject(
+    email: string,
+    courseName: string,
+    action: 'accept' | 'reject',
+  ): Promise<String> {
+    try {
+      // Find the user by email
+      const user = await this.UserModel.findOne({ email });
 
-    return { accessToken };
+      if (!user) {
+        throw new Error(`User with email ${email} not found.`);
+      }
+
+      // Check if the course exists in `appliedCourses`
+      const courseIndex = user.appliedCourses.indexOf(courseName);
+      if (courseIndex === -1) {
+        throw new Error(`Course ${courseName} not found in appliedCourses.`);
+      }
+
+      // Remove the course from `appliedCourses`
+      user.appliedCourses.splice(courseIndex, 1);
+
+      // If accepted, add the course to `acceptedCourses`
+      if (action === 'accept') {
+        if (!user.acceptedCourses.includes(courseName)) {
+          user.acceptedCourses.push(courseName);
+          user.Notifiction
+            .push(`Congratulations! You have been accepted into the course  ${courseName}.
+             We are excited to have you join and look forward to your participation. Please check the course details 
+             in your dashboard for further instructions. Best of luck with your studies!`);
+        }
+      } else {
+        user.Notifiction
+          .push(`Unfortunately, your application for the course ${courseName} has been rejected. 
+          We appreciate your interest and encourage you to apply for other courses in the future. 
+          Feel free to explore more options in your dashboard. Best wishes for your learning journey!`);
+      }
+
+      // Save the updated user document
+      await user.save();
+
+      return `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} course ${courseName} for user ${email}.`;
+    } catch (error) {
+      console.error(`Error in AcceptOrReject: ${error.message}`);
+      throw error;
+    }
   }
 }
