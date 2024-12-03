@@ -32,8 +32,10 @@ export class Course extends Document {
   @Prop({ required: true })
   totalClasses: number; // Total number of classes in the course
 
-  @Prop({ required: true })
-  createdBy: string;
+
+
+  @Prop({ type: [String], default: [] })
+  courseContent: string[]; // Array of PDF URLs/paths
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);

@@ -3,7 +3,6 @@ import { AdminsService } from './admins.service';
 import { AdminsController } from './admins.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Instructor, InstructorSchema } from 'src/schemas/Instructor.schema';
-import { AuthenticationLogModule } from '../authentication-log/authentication-log.module';
 import { UserSchema } from 'src/schemas/user.schema';
 import { User } from 'src/schemas/User.schema';
 import { admin, AdminSchema } from 'src/schemas/admin.schema';
@@ -26,7 +25,7 @@ import { LogsService } from '../logs/logs.service';
     ],
     'eLearningDB',
   ),
-  AuthenticationLogModule,LogsModule
+  LogsModule
 ],
   controllers: [AdminsController],
   providers: [AdminsService, CoursesService,LogsService],

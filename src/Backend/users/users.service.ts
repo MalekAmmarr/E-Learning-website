@@ -10,7 +10,6 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { AuthenticationLogService } from '../authentication-log/authentication-log.service'; // Import AuthenticationLogService
 import { Logs } from 'src/schemas/logs.schema';
 
 @Injectable()
@@ -19,7 +18,6 @@ export class UsersService {
   constructor(
     @InjectModel(User.name, 'eLearningDB')
     private readonly userModel: Model<User>, // Inject the User model for DB operations
-    private readonly authenticationLogService: AuthenticationLogService, // Inject AuthenticationLogService for logging
     @InjectModel(Logs.name,'eLearningDB')
     private readonly LogsModel:Model<Logs>
   ) {}
