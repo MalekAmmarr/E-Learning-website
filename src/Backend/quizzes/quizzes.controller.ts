@@ -1,9 +1,11 @@
-import { Body, Controller, Post, Get, Param, Query, NotFoundException } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Query, NotFoundException, Put } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Quiz } from 'src/schemas/quiz.schema';
 import { User } from 'src/schemas/user.schema';
 import { QuizzesService } from './quizzes.service';
+import { CreateQuizDto } from './dto/create-quiz.dto';
+import { UpdateQuizDto } from './dto/update-quiz.dto';
 
 @Controller('quizzes')
 export class QuizzesController {
@@ -11,42 +13,19 @@ export class QuizzesController {
     private readonly quizService: QuizzesService,
   ) {}
 
- /* @Post(':quizId/start')
-async startQuiz(
-  @Param('quizId') quizId: string,
-  @Body('studentId') studentId: Types.ObjectId,
-) {
-  await this.quizService.startQuiz(quizId, studentId);
-  return { message: 'Quiz started' };
-}
+  // Route to create a new quiz
+  @Post()
+  async createQuiz(@Body() createQuizDto: CreateQuizDto): Promise<Quiz> {
+    return this.quizService.createQuiz(createQuizDto);
+  }
 
-
-@Get(':quizId/next')
-async getNextQuestion(
-  @Param('quizId') quizId: string,
-  @Query('studentId') studentId: Types.ObjectId,
-) {
-  const nextQuestion = await this.quizService.getNextQuestion(quizId, studentId);
-  return nextQuestion;
-}
-
-
-@Post(':quizId/answer')
-async submitAnswer(
-  @Param('quizId') quizId: string,
-  @Body() body: { studentId: Types.ObjectId; questionId: string; answer: string },
-) {
-  const isCorrect = await this.quizService.submitAnswer(body.studentId, body.questionId, body.answer);
-  return { isCorrect };
-}
-
-@Get(':quizId/results')
-async getResults(
-  @Param('quizId') quizId: string,
-  @Query('studentId') studentId: Types.ObjectId,
-) {
-  const results = await this.quizService.getResults(quizId, studentId);
-  return results;
-}*/
+  // Route to update an existing quiz
+  @Put(':quizId')
+  async updateQuiz(
+    @Param('quizId') quizId: string,
+    @Body() updateQuizDto: UpdateQuizDto
+  ): Promise<Quiz> {
+    return this.quizService.updateQuiz(quizId, updateQuizDto);
+  }
 
 }
