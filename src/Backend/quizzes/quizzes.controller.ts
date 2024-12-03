@@ -28,4 +28,35 @@ export class QuizzesController {
     return this.quizService.updateQuiz(quizId, updateQuizDto);
   }
 
+
+   // Start the quiz for a student
+   @Post('start/:quizId/:courseTitle')
+   async startQuiz(
+     @Param('quizId') quizId: string,
+     @Param('courseTitle') courseTitle: string,
+     @Body('email') email: string
+   ) {
+     return this.quizService.startQuiz(email, quizId, courseTitle);
+   }
+ 
+   // Submit answers from the student
+   @Post('submit/:quizId')
+   async submitAnswers(
+     @Param('quizId') quizId: string,
+     @Body('email') email: string,
+     @Body('answers') answers: string[]
+   ) {
+     return this.quizService.submitAnswers(email, quizId, answers);
+   }
+ 
+   // Grade a quiz for a student
+   @Post('grade/:quizId/:studentEmail')
+   async gradeQuiz(
+     @Param('quizId') quizId: string,
+     @Param('studentEmail') studentEmail: string,
+     @Body('instructorEmail') instructorEmail: string
+   ) {
+     return this.quizService.gradeQuiz(instructorEmail, quizId, studentEmail);
+   }
+
 }
