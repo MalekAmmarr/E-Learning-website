@@ -1,15 +1,17 @@
-import { Controller, Post, Body, BadRequestException,Get,Patch } from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException,Get,Patch,Delete} from '@nestjs/common';
 import { AdminsService } from './admins.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { CoursesService } from '../courses/courses.service';
 import { Course,CourseSchema } from 'src/schemas/course.schema';
+import { LogsService } from '../logs/logs.service';
 
 
 @Controller('admins')
 export class AdminsController {
   constructor(
     private readonly adminsService: AdminsService,
-    private readonly coursesService: CoursesService // Inject CoursesService here
+    private readonly coursesService: CoursesService,
+    private readonly logsService:LogsService // Inject CoursesService here
 ) {}
     @Post('register')
     async register(@Body() createAdminDto: CreateAdminDto) {
@@ -26,9 +28,11 @@ export class AdminsController {
     }
 
     @Post('login')
-    async login(@Body() loginData: { email: string, passwordHash: string }) {
-      const { email, passwordHash } = loginData;
-      return await this.adminsService.login(email, passwordHash);
+    async login(@Body() { email, passwordHash }: { email: string; passwordHash: string }) {
+     
+    const login = await this.adminsService.login(email, passwordHash);
+    const Logs = await this.logsService.create(email,login.log)
+    return login
     }
 
 
@@ -68,4 +72,20 @@ async archiveCourse(@Body() body: { courseId: string }) {
     throw new BadRequestException('Course archiving failed');
   }
 }
+
+@Delete('deleteCourse')
+async deleteCourse(@Body() body: { courseId: string }) {
+  const { courseId } = body;
+  try {
+    const deletedCourse = await this.coursesService.DeleteCourse(courseId);
+    return {
+      message: 'Course deleted successfully',
+      deletedCourse,
+    };
+  } catch (error) {
+    console.error('Error during course deletion:', error);
+    throw new BadRequestException('Course deletion failed');
+  }
+}
+
 }

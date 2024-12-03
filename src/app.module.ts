@@ -18,6 +18,7 @@ import { BackupModule } from './Backend/backup/backup.module';
 import { ChathistoryModule } from './Backend/chathistory/chathistory.module';
 import { InstructorModule } from 'src/Backend/instructor/instructor.module';
 import { AdminsModule } from './Backend/admins/admins.module';
+import { LogsModule } from './Backend/logs/logs.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { AdminsModule } from './Backend/admins/admins.module';
     CertificateModule,
     BackupModule,
     ChathistoryModule,
+    LogsModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
       signOptions: { expiresIn: '1h' }, // Token expiration time

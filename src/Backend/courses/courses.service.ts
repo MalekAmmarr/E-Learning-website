@@ -76,5 +76,20 @@ async ArchiveCourse(courseId:string): Promise<Course>
 }
 
 //Delete outdated Course 
+async DeleteCourse(courseId: string): Promise<Course> {
+  try {
+    const deletedCourse = await this.courseModel.findOneAndDelete({ courseId: courseId });
+
+    if (!deletedCourse) {
+      throw new Error("Course not found");
+    }
+
+    return deletedCourse;
+  } catch (error) {
+    console.error('Error deleting course:', error); // Log the error for debugging
+    throw new Error('Error deleting course');
+  }
+}
+
 
 }

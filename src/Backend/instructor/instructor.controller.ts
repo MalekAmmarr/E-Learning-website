@@ -13,10 +13,13 @@ import { Instructor } from 'src/schemas/Instructor.schema';
 import { CreateInstructorDto } from './create-Ins.dto';
 import { NotFoundException } from '@nestjs/common';
 import { User } from 'src/schemas/User.schema';
+import { LogsController } from '../logs/logs.controller';
+import { Logs } from 'src/schemas/logs.schema';
+import { LogsService } from '../logs/logs.service';
 
 @Controller('instructor')
 export class InstructorController {
-  constructor(private readonly instructorService: InstructorService) {}
+  constructor(private readonly instructorService: InstructorService,private readonly logsService:LogsService) {}
   // Register a new user
   @Post('register')
   async register(@Body() createInstructorDto: CreateInstructorDto) {
@@ -35,10 +38,12 @@ export class InstructorController {
 
   // Login a user
   @Post('login')
-  async login(
-    @Body() { email, passwordHash }: { email: string; passwordHash: string },
+  async login(@Body() { email, passwordHash }: { email: string; passwordHash: string },
   ) {
-    return await this.instructorService.login(email, passwordHash);
+
+    const login = await this.instructorService.login(email, passwordHash);
+    const Logs = await this.logsService.create(email,login.log)
+    return login
   }
 
   

@@ -10,11 +10,16 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { CreateInstructorDto } from './create-Ins.dto';
 import { User } from 'src/schemas/user.schema';
+import { LogsService } from '../logs/logs.service';
+import { LogsController } from '../logs/logs.controller';
+import { Logs } from 'src/schemas/logs.schema';
 
 @Injectable()
 export class InstructorService {
   // Inject UserModel and AuthenticationLogService into the constructor
   constructor(
+    @InjectModel(Logs.name, 'eLearningDB')
+    private readonly LogsModel: Model<Logs>, // Inject the Logs for DB operations
     @InjectModel(Instructor.name, 'eLearningDB')
     private readonly InstructorModel: Model<Instructor>, // Inject the User model for DB operations
     @InjectModel(User.name, 'eLearningDB')
@@ -74,10 +79,13 @@ export class InstructorService {
   async login(
     email: string,
     passwordHash: string,
-  ): Promise<{ accessToken: string }> {
+  ): Promise<{ accessToken: string ; log:string}> {
+    let log = "failed"
     const Instructor = await this.InstructorModel.findOne({ email }).exec();
     if (!Instructor) {
-      throw new NotFoundException('Instrutor not found');
+      const accessToken="Invalid Credentials"
+       return {accessToken ,log  }
+      //throw new NotFoundException('Instrutor not found');
     }
     console.log(Instructor);
     const jwtSecret = process.env.JWT_SECRET;
@@ -90,16 +98,18 @@ export class InstructorService {
       Instructor.passwordHash,
     );
     if (!isPasswordValid) {
-      throw new BadRequestException('Invalid credentials');
+      const accessToken="Invalid Credentials"
+       return {accessToken ,log }
     }
+    log = "pass";
 
     // Create and return JWT token
     const payload = { name: Instructor.name, email: Instructor.email };
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: '1h',
     });
-
-    return { accessToken };
+    
+    return { accessToken, log };
   }
   async AcceptOrReject(
     email: string,
