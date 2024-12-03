@@ -17,6 +17,7 @@ import { CertificateModule } from './Backend/certificate/certificate.module';
 import { BackupModule } from './Backend/backup/backup.module';
 import { ChathistoryModule } from './Backend/chathistory/chathistory.module';
 import { InstructorModule } from 'src/Backend/instructor/instructor.module';
+import { AdminsModule } from './Backend/admins/admins.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { InstructorModule } from 'src/Backend/instructor/instructor.module';
       signOptions: { expiresIn: '1h' }, // Token expiration time
     }),
     InstructorModule,
+    AdminsModule
   ],
   controllers: [AppController],
   providers: [AppService],
