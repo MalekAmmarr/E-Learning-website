@@ -40,6 +40,8 @@ export class InstructorController {
   ) {
     return await this.instructorService.login(email, passwordHash);
   }
+
+  
   // Get users applied to courses taught by an instructor
   @Get('applied-users/:email')
   async getUsersAppliedToCourses(@Param('email') instructorEmail: string) {
