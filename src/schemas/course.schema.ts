@@ -1,7 +1,9 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 import { User } from './user.schema';
 import { Instructor } from './instructor.schema';
+import { Note } from './note.schema';
+
 
 @Schema({ timestamps: true })
 export class Course extends Document {
@@ -32,10 +34,13 @@ export class Course extends Document {
   @Prop({ required: true })
   totalClasses: number; // Total number of classes in the course
 
-
-
   @Prop({ type: [String], default: [] })
   courseContent: string[]; // Array of PDF URLs/paths
+
+  // Add a reference to the Note schema using ObjectId
+  @Prop({ type: [String], default: [] })
+  notes: string[];
+
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
