@@ -18,6 +18,7 @@ import { ChathistoryModule } from './Backend/chathistory/chathistory.module';
 import { InstructorModule } from 'src/Backend/instructor/instructor.module';
 import { AdminsModule } from './Backend/admins/admins.module';
 import { LogsModule } from './Backend/logs/logs.module';
+import { ProgressModule } from './Backend/progress/progress.module';
 
 @Module({
   imports: [
@@ -51,7 +52,8 @@ import { LogsModule } from './Backend/logs/logs.module';
       signOptions: { expiresIn: '1h' }, // Token expiration time
     }),
     InstructorModule,
-    AdminsModule
+    AdminsModule,
+    ProgressModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,28 +1,28 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
 import { Document } from 'mongoose';
+import { User } from './user.schema';
+import { Course } from './course.schema';
 
 @Schema({ timestamps: true })
 export class Progress extends Document {
   @Prop({ required: true })
-  studentId: string; // Reference to the student
+  studentEmail: string;
 
   @Prop({ required: true })
-  courseId: string; // Reference to the course
-
-  @Prop({ default: 0 })
-  attendanceCount: number; // Number of classes attended by the student
-
-  @Prop({ type: [Date], default: [] })
-  attendanceDates: Date[]; // Dates of attendance
+  Coursetitle: string;
 
   @Prop({ required: true, default: 0 })
-  completionPercentage: number; // Progress percentage for the course
+  score: number; // User's score in this course
 
-  @Prop()
-  lastAccessed: Date; // The last time the student accessed the course
+  @Prop({ required: true, default: 0 })
+  completionRate: number; // Completion rate of the course (0-100)
 
-  @Prop({ default: true })
-  isPresent?: boolean; // Optional field for real-time attendance tracking
+  @Prop({ type: Date, required: false })
+  lastAccessed: Date; // Last date the user accessed the course
+
+  @Prop({ type: [{ Coursetitle: String, completedLectures: Number }], default: [] })
+  completedLectures: { Coursetitle: string; completedLectures: number }[]; // Track completed lectures per course
 }
 
 export const ProgressSchema = SchemaFactory.createForClass(Progress);
