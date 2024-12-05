@@ -91,5 +91,9 @@ async DeleteCourse(courseId: string): Promise<Course> {
   }
 }
 
+async getCourseByTitle(courseTitle: string): Promise<Course> {
+  return await this.courseModel.findOne({ title: courseTitle });
+}
+
 
 }

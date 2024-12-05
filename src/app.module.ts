@@ -18,7 +18,7 @@ import { ChathistoryModule } from './Backend/chathistory/chathistory.module';
 import { InstructorModule } from 'src/Backend/instructor/instructor.module';
 import { AdminsModule } from './Backend/admins/admins.module';
 import { LogsModule } from './Backend/logs/logs.module';
-import { ProgressModule } from './progress/progress.module';
+import { ProgressModule } from './Backend/progress/progress.module';
 
 @Module({
   imports: [

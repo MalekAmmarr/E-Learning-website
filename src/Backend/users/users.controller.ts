@@ -56,4 +56,19 @@ export class UsersController {
     // Otherwise return the notifications
     return result;
   }
+
+  @Put(':studentEmail/courses/:courseTitle/lectures/:lectureIndex')
+  async updateLectureCompletion(
+    @Param('studentEmail') studentEmail: string,
+    @Param('courseTitle') courseTitle: string,
+    @Param('lectureIndex') lectureIndex: number, // lecture index that the student opened
+  ) {
+    const result = await this.userService.updateCompletedLecture(
+      studentEmail,
+      courseTitle,
+      lectureIndex,
+    );
+    return result;
+  }
+
 }

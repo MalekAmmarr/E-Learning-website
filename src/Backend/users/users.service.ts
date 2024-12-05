@@ -11,6 +11,8 @@ import * as jwt from 'jsonwebtoken';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Logs } from 'src/schemas/logs.schema';
+import { Progress } from 'src/schemas/progress.schema';
+import { CoursesService } from '../courses/courses.service';
 
 @Injectable()
 export class UsersService {
@@ -19,7 +21,10 @@ export class UsersService {
     @InjectModel(User.name, 'eLearningDB')
     private readonly userModel: Model<User>, // Inject the User model for DB operations
     @InjectModel(Logs.name,'eLearningDB')
-    private readonly LogsModel:Model<Logs>
+    private readonly LogsModel:Model<Logs>,
+    @InjectModel(Progress.name,'eLearningDB')
+    private readonly progressModel:Model<Progress>,
+    private courseService: CoursesService
   ) {}
 
   // Register a new user
@@ -97,4 +102,65 @@ export class UsersService {
 
     return { Notifications: notifications };
   }
+
+
+  async updateCompletedLecture(
+    studentEmail: string,
+    courseTitle: string,
+    lectureIndex: number, // Lecture index that the student opened
+  ) {
+    // Step 1: Get the course details to know the total lectures
+    const course = await this.courseService.getCourseByTitle(courseTitle);
+    if (!course) {
+      throw new Error(`Course with title ${courseTitle} not found`);
+    }
+
+    const totalLectures = course.courseContent.length;
+
+    // Step 2: Find the student's progress
+    let progress = await this.progressModel.findOne({ studentEmail, Coursetitle: courseTitle });
+
+    if (!progress) {
+      // If the progress record does not exist, create a new one
+      progress = new this.progressModel({
+        studentEmail,
+        Coursetitle: courseTitle,
+        score: 0,
+        completionRate: 0,
+        completedLectures: [],
+      });
+    }
+
+    // Step 3: Update the completed lectures
+    const existingLecture = progress.completedLectures.find(
+      (lecture) => lecture.Coursetitle === courseTitle,
+    );
+
+    if (!existingLecture) {
+      // If this course does not exist in the completedLectures array, add it
+      progress.completedLectures.push({ Coursetitle: courseTitle, completedLectures: 0 });
+    }
+
+    // Increment the completedLectures count
+    const lecture = progress.completedLectures.find(
+      (lecture) => lecture.Coursetitle === courseTitle,
+    );
+    if (lecture) {
+      lecture.completedLectures += 1;
+    }
+
+    // Step 4: Calculate completionRate
+    const completionRate = (lecture.completedLectures / totalLectures) * 100;
+
+    // Step 5: Update the progress document
+    progress.completionRate = completionRate;
+    await progress.save();
+
+    return {
+      message: 'Lecture completion updated successfully',
+      progress,
+    };
+  }
+
+
 }
