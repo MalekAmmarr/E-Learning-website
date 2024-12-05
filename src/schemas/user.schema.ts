@@ -1,6 +1,7 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Document } from 'mongoose';
+import { Progress } from './progress.schema';
 
 @Schema({ timestamps: true })
 export class User extends Document {
@@ -30,6 +31,9 @@ export class User extends Document {
 
   @Prop({ type: [String], default: [] })
   Notifiction: string[];
+
+  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Progress', default: [] })
+  progress: Progress[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
