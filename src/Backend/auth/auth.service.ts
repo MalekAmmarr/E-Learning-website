@@ -7,6 +7,7 @@ import { admin } from 'src/schemas/admin.schema';
 import { User } from 'src/schemas/user.schema';
 import { Instructor } from 'src/schemas/instructor.schema';
 import { Logs } from 'src/schemas/logs.schema';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
@@ -16,9 +17,11 @@ export class AuthService {
     @InjectModel(User.name, 'eLearningDB') private readonly userModel: Model<User>,
     @InjectModel(Logs.name,'eLearningDB') private readonly LogsModel:Model<Logs>,
     @InjectModel(Instructor.name, 'eLearningDB') private readonly instructorModel: Model<Instructor>,
+    // private jwtService:JwtService,
   ) {}
 
   async registerUser(createDto: any, role: 'admin' | 'student' | 'instructor') {
+
     try {
         if (!createDto.passwordHash) {
             throw new Error('Password is required');
@@ -33,6 +36,11 @@ export class AuthService {
       else if (role === 'student') model = this.userModel;
       else if (role === 'instructor') model = this.instructorModel;
       else throw new BadRequestException('Invalid role specified');
+
+      // const emailInIse = await this.model.findOne({ email: createDto.email,});
+      // if(emailInIse){
+      //   throw new BadRequestException("Email already in Use");
+      // }
 
       // Create and save the user
       const user = new model({

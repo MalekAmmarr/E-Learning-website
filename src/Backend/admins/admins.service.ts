@@ -40,6 +40,7 @@ export class AdminsService {
   async loginAdmin(email: string, password: string) {
     return await this.authService.login(email, password, 'admin');
   } 
+  
 }
 
 

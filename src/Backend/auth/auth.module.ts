@@ -10,6 +10,7 @@ import { admin, AdminSchema } from 'src/schemas/admin.schema';
 import { Instructor, InstructorSchema } from 'src/schemas/instructor.schema';
 import { InstructorModule } from '../instructor/instructor.module';
 import { AdminsModule } from '../admins/admins.module';
+import { AuthorizationGuard } from './guards/authorization.guard';
 
 @Module({
   imports: [
@@ -26,12 +27,12 @@ import { AdminsModule } from '../admins/admins.module';
     forwardRef(() => UsersModule),
     forwardRef(() => InstructorModule),    PassportModule,
     JwtModule.register({
-      secret: 'yourSecretKey', // Replace with an environment variable
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '1h' }, // Set token expiration
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
-  exports: [AuthService],
+  providers: [AuthService, AuthorizationGuard],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

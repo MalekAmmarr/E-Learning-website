@@ -51,6 +51,7 @@ import { AuthModule } from './Backend/auth/auth.module';
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
       signOptions: { expiresIn: '1h' }, // Token expiration time
+      global: true,
     }),
     InstructorModule,
     AdminsModule,
