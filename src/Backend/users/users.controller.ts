@@ -7,12 +7,15 @@ import {
   Param,
   Body,
   NotFoundException,
+  Query,
+  Res,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from 'src/schemas/user.schema';
 import { LogsService } from '../logs/logs.service';
+import { Response } from 'express';
 
 
 @Controller('users')
@@ -58,18 +61,24 @@ export class UsersController {
     return result;
   }
 
-  @Put(':studentEmail/courses/:courseTitle/lectures/:lectureIndex')
-  async updateLectureCompletion(
-    @Param('studentEmail') studentEmail: string,
-    @Param('courseTitle') courseTitle: string,
-    @Param('lectureIndex') lectureIndex: number, // lecture index that the student opened
-  ) {
-    const result = await this.userService.updateCompletedLecture(
-      studentEmail,
-      courseTitle,
-      lectureIndex,
-    );
-    return result;
+  // Endpoint for a student to download a PDF and update their progress
+  @Get('download-pdf')
+  async downloadPDF(
+    @Query('userEmail') userEmail: string,
+    @Query('Coursetitle') Coursetitle: string,
+    @Query('pdfUrl') pdfUrl: string,
+    @Res() res: Response
+  ): Promise<any> {
+    try {
+      // Let the user download the PDF and update progress
+      const result = await this.userService.downloadPDFAndUpdateProgress(userEmail, Coursetitle, pdfUrl);
+      
+      // Assuming pdfUrl is a valid link to the PDF, you could serve the file directly:
+      res.download(pdfUrl); // Uncomment if you want to serve the file
+      res.json(result);  // Respond with success message and download link
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
   }
 
 }

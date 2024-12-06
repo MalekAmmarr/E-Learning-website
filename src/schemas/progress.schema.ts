@@ -21,8 +21,8 @@ export class Progress extends Document {
   @Prop({ type: Date, required: false })
   lastAccessed: Date; // Last date the user accessed the course
 
-  @Prop({ type: [{ Coursetitle: String, completedLectures: Number }], default: [] })
-  completedLectures: { Coursetitle: string; completedLectures: number }[]; // Track completed lectures per course
+ @Prop({ type: [{ Coursetitle: String, completedLectures: Number, pdfUrl: String }], default: [] })
+ completedLectures: { Coursetitle: string; completedLectures: number; pdfUrl: string }[]; // Track completed lectures per course
 }
 
 export const ProgressSchema = SchemaFactory.createForClass(Progress);

@@ -20,6 +20,8 @@ import { AdminsModule } from './Backend/admins/admins.module';
 import { LogsModule } from './Backend/logs/logs.module';
 import { ProgressModule } from './Backend/progress/progress.module';
 import { AuthModule } from './Backend/auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -34,7 +36,10 @@ import { AuthModule } from './Backend/auth/auth.module';
       {
         connectionName: 'dataManagementDB', // For data management database
       },
-    ),
+    ),ServeStaticModule.forRoot({
+      rootPath: join('D:/GIU 5th semester/Human Computer Interaction/uploads'), // Folder where PDFs are stored
+      serveRoot: '/files', // URL path prefix for accessing the PDFs
+    }),
     UsersModule,
     CoursesModule,
     ModulesModule,
