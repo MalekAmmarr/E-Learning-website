@@ -8,11 +8,12 @@ import { Model } from 'mongoose';
 import { Instructor } from 'src/schemas/Instructor.schema';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { CreateInstructorDto } from './create-Ins.dto';
+import { CreateInstructorDto } from './dto/create-Ins.dto';
 import { User } from 'src/schemas/user.schema';
 import { Course } from 'src/schemas/course.schema';
 import { CreateCourseDto } from '../courses/dto/create-course.dto';
 import { UpdateCourseDto } from '../courses/dto/update-course.dto';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class InstructorService {
@@ -24,7 +25,20 @@ export class InstructorService {
     private readonly UserModel: Model<User>, // Inject the User model for DB operations
     @InjectModel(Course.name, 'eLearningDB') 
     private courseModel: Model<Course>,
+    private readonly authService: AuthService, // Inject AuthService
+
   ) {}
+
+  // Register a new Instructor
+  async registerInstructor(createInstructorDto: CreateInstructorDto) {
+    return await this.authService.registerUser(createInstructorDto, 'instructor');
+  }
+
+  // Login Intructor
+  async loginInstructor(email: string, password: string) {
+    return await this.authService.login(email, password, 'instructor');
+  }
+
   // Method to get all users applied to courses taught by an instructor
   async getUsersAppliedToCourses(email: string) {
     // Find the instructor by ID
@@ -49,63 +63,6 @@ export class InstructorService {
     return users;
   }
 
-  // Register a new user
-  async create(createInstructorDto: CreateInstructorDto): Promise<Instructor> {
-    try {
-      if (!createInstructorDto.passwordHash) {
-        throw new Error('Password is required');
-      }
-
-      // Hash the user's password
-      const hashedPassword = await bcrypt.hash(
-        createInstructorDto.passwordHash,
-        10,
-      ); // Hash the plain password
-
-      // Create a new user document
-      const user = new this.InstructorModel({
-        ...createInstructorDto,
-        passwordHash: hashedPassword, // Store the hashed password in 'passwordHash'
-      });
-
-      // Save the user to the database
-      return await user.save();
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw new Error('Instructor registration failed');
-    }
-  }
-  // Login a user
-  async login(
-    email: string,
-    passwordHash: string,
-  ): Promise<{ accessToken: string }> {
-    const Instructor = await this.InstructorModel.findOne({ email }).exec();
-    if (!Instructor) {
-      throw new NotFoundException('Instrutor not found');
-    }
-    console.log(Instructor);
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      console.error('JWT_SECRET is missing!');
-    }
-    // Compare the password
-    const isPasswordValid = await bcrypt.compare(
-      passwordHash,
-      Instructor.passwordHash,
-    );
-    if (!isPasswordValid) {
-      throw new BadRequestException('Invalid credentials');
-    }
-
-    // Create and return JWT token
-    const payload = { name: Instructor.name, email: Instructor.email };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
-
-    return { accessToken };
-  }
   async AcceptOrReject(
     email: string,
     courseName: string,

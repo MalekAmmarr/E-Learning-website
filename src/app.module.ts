@@ -19,6 +19,7 @@ import { InstructorModule } from 'src/Backend/instructor/instructor.module';
 import { AdminsModule } from './Backend/admins/admins.module';
 import { LogsModule } from './Backend/logs/logs.module';
 import { ProgressModule } from './Backend/progress/progress.module';
+import { AuthModule } from './Backend/auth/auth.module';
 
 @Module({
   imports: [
@@ -53,7 +54,8 @@ import { ProgressModule } from './Backend/progress/progress.module';
     }),
     InstructorModule,
     AdminsModule,
-    ProgressModule
+    ProgressModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -23,7 +23,7 @@ export class UsersController {
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
     try {
-      const user = await this.userService.create(createUserDto);
+      const user = await this.userService.registerUser(createUserDto);
       return {
         message: 'User registered successfully',
         user,
@@ -38,10 +38,11 @@ export class UsersController {
   @Post('login')
     async login(@Body() { email, passwordHash }: { email: string; passwordHash: string }) {
      
-    const login = await this.userService.login(email, passwordHash);
+    const login = await this.userService.loginUser(email, passwordHash);
     const Logs = await this.logsService.create(email,login.log)
     return login
     }
+    
   // Route to get notifications by email
   @Get('notifications')
   async getNotifications(@Body() { email }: { email: string }) {

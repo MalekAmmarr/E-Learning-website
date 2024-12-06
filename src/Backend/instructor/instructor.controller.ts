@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { InstructorService } from './instructor.service';
 import { Instructor } from 'src/schemas/Instructor.schema';
-import { CreateInstructorDto } from './create-Ins.dto';
+import { CreateInstructorDto } from './dto/create-Ins.dto';
 import { NotFoundException } from '@nestjs/common';
 import { User } from 'src/schemas/User.schema';
 import { Course } from 'src/schemas/course.schema';
@@ -23,12 +23,13 @@ import { DeleteContentDto } from '../courses/dto/delete-content.dto';
 @Controller('instructor')
 export class InstructorController {
   constructor(private readonly instructorService: InstructorService) {}
+  
   // Register a new user
   @Post('register')
   async register(@Body() createInstructorDto: CreateInstructorDto) {
     try {
       const Instructor =
-        await this.instructorService.create(createInstructorDto);
+        await this.instructorService.registerInstructor(createInstructorDto);
       return {
         message: 'Instructor registered successfully',
         Instructor,
@@ -44,7 +45,7 @@ export class InstructorController {
   async login(
     @Body() { email, passwordHash }: { email: string; passwordHash: string },
   ) {
-    return await this.instructorService.login(email, passwordHash);
+    return await this.instructorService.loginInstructor(email, passwordHash);
   }
   // Get users applied to courses taught by an instructor
   @Get('applied-users/:email')
@@ -113,9 +114,6 @@ export class InstructorController {
     );
     return updatedCourse;
   }
-
-
-  
 
   @Put(':instructorEmail/addcontent/:courseTitle')
   async addCourseContent(

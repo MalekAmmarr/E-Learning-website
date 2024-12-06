@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AdminsService } from './admins.service';
 import { AdminsController } from './admins.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -11,6 +11,7 @@ import { CourseSchema , Course} from 'src/schemas/course.schema';
 import { Logs,LogsSchema } from 'src/schemas/logs.schema';
 import { LogsModule } from '../logs/logs.module';
 import { LogsService } from '../logs/logs.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -25,7 +26,10 @@ import { LogsService } from '../logs/logs.service';
     ],
     'eLearningDB',
   ),
-  LogsModule
+  LogsModule,
+  forwardRef(() => AuthModule), // Import AuthModule for authentication services
+
+
 ],
   controllers: [AdminsController],
   providers: [AdminsService, CoursesService,LogsService],

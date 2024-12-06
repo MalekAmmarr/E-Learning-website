@@ -13,6 +13,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Logs } from 'src/schemas/logs.schema';
 import { Progress } from 'src/schemas/progress.schema';
 import { CoursesService } from '../courses/courses.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UsersService {
@@ -24,69 +25,21 @@ export class UsersService {
     private readonly LogsModel:Model<Logs>,
     @InjectModel(Progress.name,'eLearningDB')
     private readonly progressModel:Model<Progress>,
-    private courseService: CoursesService
+    private courseService: CoursesService,
+    private readonly authService: AuthService, // Inject AuthService
+
   ) {}
 
-  // Register a new user
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    try {
-      if (!createUserDto.passwordHash) {
-        throw new Error('Password is required');
-      }
-
-      // Hash the user's password
-      const hashedPassword = await bcrypt.hash(createUserDto.passwordHash, 10); // Hash the plain password
-
-      // Create a new user document
-      const user = new this.userModel({
-        ...createUserDto,
-        passwordHash: hashedPassword, // Store the hashed password in 'passwordHash'
-      });
-
-      // Save the user to the database
-      return await user.save();
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw new Error('User registration failed');
-    }
+  // Register a new Student
+  async registerUser(createUserDto: CreateUserDto) {
+    return await this.authService.registerUser(createUserDto, 'student');
   }
 
-  // Login a user
-  async login(
-    email: string,
-    passwordHash: string,
-  ): Promise<{ accessToken: string ; log:string}> {
-    let log = "failed"
-    const user = await this.userModel.findOne({ email }).exec();
-    if (!user) {
-      const accessToken="Invalid Credentials"
-       return {accessToken ,log  }
-      //throw new NotFoundException('Instrutor not found');
-    }
-    console.log(user);
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      console.error('JWT_SECRET is missing!');
-    }
-    // Compare the password
-    const isPasswordValid = await bcrypt.compare(
-      passwordHash,
-      user.passwordHash,
-    );
-    if (!isPasswordValid) {
-      const accessToken="Invalid Credentials"
-       return {accessToken ,log }
-    }
-    log = "pass";
-
-    // Create and return JWT token
-    const payload = { name: user.name, email: user.email };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
-    
-    return { accessToken, log };
+  // Login Student
+  async loginUser(email: string, password: string) {
+    return await this.authService.login(email, password, 'student');
   }
+
   async Notifications(
     email: string,
   ): Promise<{ Notifications: string[] | string }> {
