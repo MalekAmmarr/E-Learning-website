@@ -16,7 +16,7 @@ export class CoursesService {
     return this.courseModel.find({
       $or: [
         { title: { $regex: regex } },
-        { instructormail: { $regex: regex } },
+        { instructorName: { $regex: regex } },
       ],
     }).exec();
   }
