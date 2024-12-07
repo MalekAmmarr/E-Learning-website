@@ -22,6 +22,7 @@ import { ProgressModule } from './Backend/progress/progress.module';
 import { AuthModule } from './Backend/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -61,7 +62,8 @@ import { join } from 'path';
     InstructorModule,
     AdminsModule,
     ProgressModule,
-    AuthModule
+    AuthModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [AppService],
