@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Get, Param, Query, NotFoundException, Put } from '@nestjs/common';
+import { Body, Controller, Post, Get, Param, Query, NotFoundException, Put, Patch } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Quiz } from 'src/schemas/quiz.schema';
@@ -49,14 +49,15 @@ export class QuizzesController {
      return this.quizService.submitAnswers(email, quizId, answers);
    }
  
-   // Grade a quiz for a student
-   @Post('grade/:quizId/:studentEmail')
-   async gradeQuiz(
-     @Param('quizId') quizId: string,
-     @Param('studentEmail') studentEmail: string,
-     @Body('instructorEmail') instructorEmail: string
-   ) {
-     return this.quizService.gradeQuiz(instructorEmail, quizId, studentEmail);
-   }
+   // Endpoint to grade a quiz and update user score
+  @Patch(':quizId/grade')
+  async gradeQuiz(
+    @Param('quizId') quizId: string,
+    @Body('studentEmail') studentEmail: string,
+    @Body('studentAnswers') studentAnswers: string[],
+    @Body('feedback') feedback: string[],
+  ) {
+    return this.quizService.gradeQuiz(quizId, studentEmail, studentAnswers, feedback);
+  }
 
 }

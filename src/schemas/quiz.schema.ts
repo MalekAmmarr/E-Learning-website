@@ -23,11 +23,12 @@ export class Quiz extends Document {
   @Prop({ type: [String], default: [] })
   studentAnswers: string[];  // Answers provided by the student
 
-  @Prop({ default: 0 })
-  studentGrade: number;  // Grade assigned to the student after evaluation
 
   @Prop({ default: false })
   isGraded: boolean;  // Whether the quiz has been graded by the instructor
+
+  
+
 }
 
 export const QuizSchema = SchemaFactory.createForClass(Quiz);

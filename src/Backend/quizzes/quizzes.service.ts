@@ -72,45 +72,57 @@ async startQuiz(userEmail: string, quizId: string, courseTitle: string): Promise
 }
 
 
-// Grade Quiz (for the instructor)
-  async gradeQuiz(instructorEmail: string, quizId: string, studentEmail: string): Promise<void> {
-    // Check if the instructor is the one who created the quiz
-    const quiz = await this.quizModel
-      .findOne({ quizId, instructorEmail })
-      .exec();
-
-    if (!quiz) {
-      throw new Error('Quiz not found or you are not the creator');
-    }
-
-    // Fetch the student by email
-    const user = await this.userModel.findOne({ email: studentEmail }).exec();
-
-    if (!user) {
-      throw new Error('Student not found');
-    }
-
-    // Check if the student's answers exist
-    if (quiz.studentAnswers.length === 0) {
-      throw new Error('Student has not submitted answers');
-    }
-
-    // Grade the answers (assuming a simple score calculation based on correct answers)
-    let score = 0;
-    quiz.questions.forEach((question, index) => {
-      if (quiz.studentAnswers[index] === question.correctAnswer) {
-        score += 1; // You can adjust the scoring logic as needed
-      }
-    });
-
-    // Save the grade to the quiz (optional)
-    quiz.isGraded = true;
-    quiz.studentGrade = score;
-    await quiz.save();
-
-    // Save the grade to the student's record (in the User schema)
-    user.score = score;
-    await user.save();
+// Find quiz by quizId
+async findQuizById(quizId: string): Promise<Quiz> {
+  const quiz = await this.quizModel.findOne({ quizId });
+  if (!quiz) {
+    throw new NotFoundException(`Quiz with ID ${quizId} not found`);
   }
+  return quiz;
+}
+async gradeQuiz(
+  quizId: string,
+  studentEmail: string,
+  studentAnswers: string[],
+  feedback: string[],
+): Promise<Quiz> {
+  const quiz = await this.findQuizById(quizId);
+
+  if (quiz.isGraded) {
+    throw new Error('Quiz has already been graded.');
+  }
+
+  // Fetch the user
+  const user = await this.userModel.findOne({ email: studentEmail });
+  if (!user) {
+    throw new NotFoundException(`User with email ${studentEmail} not found`);
+  }
+
+  // Calculate grade
+  let grade = 0;
+  const feedbackArray = quiz.questions.map((question, index) => {
+    const isCorrect = question.correctAnswer === studentAnswers[index];
+    if (isCorrect) grade += 1;
+
+    return {
+      question: question.question,
+      feedback: feedback[index] || (isCorrect ? 'Correct' : 'Incorrect'),
+    };
+  });
+
+  const calculatedScore = (grade / quiz.questions.length);
+
+  // Update quiz
+  quiz.isGraded = true;
+  await quiz.save();
+
+  // Update user feedback and score
+  user.feedback.push({ quizId, feedback: feedbackArray });
+  user.score += calculatedScore; // Add quiz grade to user's score
+  await user.save();
+
+  return quiz;
+}
+
   
 }
