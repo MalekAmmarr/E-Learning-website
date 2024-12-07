@@ -1,21 +1,12 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  NotFoundException,
-  Query,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, Query, Res, UseGuards, } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from 'src/schemas/user.schema';
 import { LogsService } from '../logs/logs.service';
 import { Response } from 'express';
+import { AuthorizationGuard } from '../auth/guards/authorization.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 
 @Controller('users')
@@ -47,7 +38,9 @@ export class UsersController {
     }
     
   // Route to get notifications by email
+  @UseGuards(AuthorizationGuard)
   @Get('notifications')
+  @Roles('student')
   async getNotifications(@Body() { email }: { email: string }) {
     // Call the service method to get notifications
     const result = await this.userService.Notifications(email);
@@ -62,7 +55,9 @@ export class UsersController {
   }
 
   // Endpoint for a student to download a PDF and update their progress
+  @UseGuards(AuthorizationGuard)
   @Get('download-pdf')
+  @Roles('student')
   async downloadPDF(
     @Query('userEmail') userEmail: string,
     @Query('Coursetitle') Coursetitle: string,

@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { LogsService } from './logs.service';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 
-
+@UseGuards(AuthorizationGuard)
+@Roles('admin') 
 @Controller('logs')
+
 export class LogsController {
   constructor(private readonly logsService: LogsService) {}
 
