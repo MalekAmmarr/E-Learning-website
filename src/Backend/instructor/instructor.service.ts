@@ -23,11 +23,11 @@ export class InstructorService {
     private readonly InstructorModel: Model<Instructor>, // Inject the User model for DB operations
     @InjectModel(User.name, 'eLearningDB')
     private readonly UserModel: Model<User>, // Inject the User model for DB operations
-    @InjectModel(Course.name, 'eLearningDB') 
+    @InjectModel(Course.name, 'eLearningDB')
     private courseModel: Model<Course>,
     private readonly authService: AuthService, // Inject AuthService
 
-  ) {}
+  ) { }
 
   // Register a new Instructor
   async registerInstructor(createInstructorDto: CreateInstructorDto) {
@@ -111,7 +111,7 @@ export class InstructorService {
     }
   }
 
- // Method to create a course by the instructor
+  // Method to create a course by the instructor
   async createCourse(createCourseDto: CreateCourseDto, instructorEmail: string): Promise<Course> {
     // Step 1: Find the instructor by their email (instructorEmail is obtained from JWT token)
     const instructor = await this.InstructorModel.findOne({ email: instructorEmail });
@@ -172,7 +172,7 @@ export class InstructorService {
   async addCourseContent(instructorEmail: string, courseTitle: string, newContent: string[]): Promise<Course> {
     // Find the course by title and instructor email
     const course = await this.courseModel.findOne({ title: courseTitle, instructormail: instructorEmail });
-    
+
     if (!course) {
       throw new NotFoundException('Course not found or you are not the instructor of this course');
     }
@@ -206,9 +206,9 @@ export class InstructorService {
 
     // Update the course content (replace it with the new content)
     await this.courseModel.updateOne(
-  { title: courseTitle, instructormail: instructorEmail },
-  { $push: { courseContent: { $each: newContent } } }
-);
+      { title: courseTitle, instructormail: instructorEmail },
+      { $push: { courseContent: { $each: newContent } } }
+    );
 
 
     // Save the updated course

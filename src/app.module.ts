@@ -36,6 +36,7 @@ import { join } from 'path';
       {
         connectionName: 'dataManagementDB', // For data management database
       },
+
     ),
     ServeStaticModule.forRoot({
       rootPath: join('C:', 'Users', 'Omar Hossam', 'Downloads'), // Folder where PDFs are stored
@@ -56,7 +57,7 @@ import { join } from 'path';
     LogsModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
-      signOptions: { expiresIn: '1h' }, // Token expiration time
+      signOptions: { expiresIn: '24h' }, // Token expiration time
       global: true,
     }),
     InstructorModule,
@@ -67,4 +68,4 @@ import { join } from 'path';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

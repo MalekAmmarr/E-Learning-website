@@ -9,6 +9,7 @@ import {
   BadRequestException,
   UseGuards,
 } from '@nestjs/common';
+
 import { InstructorService } from './instructor.service';
 import { Instructor } from 'src/schemas/Instructor.schema';
 import { CreateInstructorDto } from './dto/create-Ins.dto';
@@ -22,10 +23,21 @@ import { EditContentDto } from '../courses/dto/edit-content.dto';
 import { DeleteContentDto } from '../courses/dto/delete-content.dto';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { LogsService } from '../logs/logs.service';
+import { get } from 'mongoose';
+import { FeedbackService } from '../feedback/feedback.service';
+import { Feedback } from 'src/schemas/feedback.schema';
+
 
 @Controller('instructor')
 export class InstructorController {
-  constructor(private readonly instructorService: InstructorService) {}
+
+  constructor(
+    private readonly instructorService: InstructorService,
+    private readonly logsService: LogsService,
+    private readonly feedbackService: FeedbackService
+  ) { }
+
 
   // Register a new user
   @Post('register')
@@ -48,7 +60,9 @@ export class InstructorController {
   async login(
     @Body() { email, passwordHash }: { email: string; passwordHash: string },
   ) {
-    return await this.instructorService.loginInstructor(email, passwordHash);
+    const login = await this.instructorService.loginInstructor(email, passwordHash);
+    const Logs = await this.logsService.create(email, login.log, 'instructor')
+    return login;
   }
 
   // Get users applied to courses taught by an instructor
@@ -96,13 +110,18 @@ export class InstructorController {
     return { message };
   }
 
+
+
+
   // Endpoint to create a course
   @UseGuards(AuthorizationGuard)
   @Post(':email/create-course')
   @Roles('instructor')
   async createCourse(
-    @Param('email') email: string, // Instructor email in the URL param
-    @Body() createCourseDto: CreateCourseDto, // Course data in the request body
+
+    @Param('email') email: string,  // Instructor email in the URL param
+    @Body() createCourseDto: CreateCourseDto,  // Course data in the request body
+
   ): Promise<Course> {
     // Call the service method to create the course
     return this.instructorService.createCourse(createCourseDto, email);
@@ -140,6 +159,7 @@ export class InstructorController {
     );
   }
 
+
   // Edit course content (replace the current content with new content)
   @UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/courses/:courseTitle/editcontent')
@@ -171,4 +191,5 @@ export class InstructorController {
       deleteContentDto.contentToDelete,
     );
   }
+
 }

@@ -1,4 +1,5 @@
 import {
+
   Controller,
   Get,
   Post,
@@ -11,6 +12,7 @@ import {
   Res,
   UseGuards,
   BadRequestException,
+
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,13 +22,20 @@ import { LogsService } from '../logs/logs.service';
 import { Response } from 'express';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { FeedbackService } from '../feedback/feedback.service';
+import { CreateFeedbackDto } from '../feedback/dto/create-feedback.dto';
+import { Feedback } from 'src/schemas/feedback.schema';
+
 
 @Controller('users')
 export class UsersController {
+
   constructor(
     private readonly userService: UsersService,
     private readonly logsService: LogsService,
+    private readonly feedbackService: FeedbackService,
   ) {}
+
 
   // Register a new user
   @Post('register')
@@ -45,12 +54,13 @@ export class UsersController {
 
   // Login a user
   @Post('login')
-  async login(
-    @Body() { email, passwordHash }: { email: string; passwordHash: string },
-  ) {
+
+  async login(@Body() { email, passwordHash }: { email: string; passwordHash: string }) {
+
     const login = await this.userService.loginUser(email, passwordHash);
-    const Logs = await this.logsService.create(email, login.log);
-    return login;
+    const Logs = await this.logsService.create(email, login.log, 'student')
+    return login
+
   }
 
   // Route to get notifications by email
@@ -85,11 +95,13 @@ export class UsersController {
   ): Promise<any> {
     try {
       // Let the user download the PDF and update progress
+
       const result = await this.userService.downloadPDFAndUpdateProgress(
         userEmail,
         Coursetitle,
         pdfUrl,
       );
+
 
       // Assuming pdfUrl is a valid link to the PDF, you could serve the file directly:
       res.download(pdfUrl); // Uncomment if you want to serve the file
@@ -98,6 +110,7 @@ export class UsersController {
       res.status(400).json({ message: error.message });
     }
   }
+
 
   @UseGuards(AuthorizationGuard)
   @Get('content')
@@ -116,4 +129,8 @@ export class UsersController {
       throw new BadRequestException(error.message);
     }
   }
+
 }
+
+
+

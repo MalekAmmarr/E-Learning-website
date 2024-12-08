@@ -14,6 +14,7 @@ import { Logs } from 'src/schemas/logs.schema';
 import { Progress } from 'src/schemas/progress.schema';
 import { AuthService } from '../auth/auth.service';
 import { Course } from 'src/schemas/course.schema';
+import { FeedbackService } from '../feedback/feedback.service';
 
 @Injectable()
 export class UsersService {
@@ -28,7 +29,9 @@ export class UsersService {
     @InjectModel(Progress.name, 'eLearningDB')
     private readonly progressModel: Model<Progress>,
     private readonly authService: AuthService, // Inject AuthService
+
   ) {}
+
 
   // Register a new Student
   async registerUser(createUserDto: CreateUserDto) {
@@ -56,12 +59,14 @@ export class UsersService {
     return { Notifications: notifications };
   }
 
+
   // Method to allow a student to download a PDF and update their progress
   async downloadPDFAndUpdateProgress(
     userEmail: string,
     Coursetitle: string,
     pdfUrl: string,
   ): Promise<any> {
+
     // Find the user
     const user = await this.userModel.findOne({ email: userEmail });
     if (!user) {
@@ -100,6 +105,7 @@ export class UsersService {
     }
 
     // Check if the lecture is already marked as completed (by its PDF URL or some other unique identifier)
+
     const existingLecture = progress.completedLectures.find(
       (lecture) => lecture.pdfUrl === pdfUrl,
     );
@@ -113,6 +119,7 @@ export class UsersService {
       pdfUrl,
       completedLectures: 1,
     });
+
 
     // Calculate the new completion rate
     const completedLecturesCount = progress.completedLectures.length;
@@ -131,6 +138,7 @@ export class UsersService {
     const downloadLink = `${baseUrl}/files/${pdfUrl}`;
 
     return {
+
       message: 'PDF download link generated successfully',
       downloadLink,
     };
@@ -138,6 +146,7 @@ export class UsersService {
   async getCourse(courseTitle: string): Promise<{ content: string[] }> {
     // Find the course document by title
     const course = await this.courseModel.findOne({ title: courseTitle });
+
 
     // Handle case where the course is not found
     if (!course) {
