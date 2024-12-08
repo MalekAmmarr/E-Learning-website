@@ -1,9 +1,10 @@
-import { Body, Controller, Post, BadRequestException, UseGuards, Get, Delete } from '@nestjs/common';
+import { Body, Controller, Post, BadRequestException, UseGuards, Get, Delete, Request } from '@nestjs/common';
 import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { FeedbackService } from './feedback.service';
 import { FeedbackSchema, Feedback } from 'src/schemas/feedback.schema';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+
 
 @Controller('feedback')
 export class FeedbackController {
@@ -68,5 +69,28 @@ export class FeedbackController {
 
         return await this.feedbackService.deleteFeedbacksByEmail(studentemail); // Call the service function
     }
+
+    @UseGuards(AuthorizationGuard)
+    @Post('createfeedback')
+    @Roles('student')
+    async createFeedback(
+        @Body() createFeedbackDto: CreateFeedbackDto,
+        @Request() req, // Access the request object to get user data
+    ): Promise<Feedback> {
+        const studentemail = req.user.email;
+
+        // Add the email to the feedback data
+        const feedbackData = { ...createFeedbackDto, studentemail };
+
+        // Pass the modified data to the service
+        return await this.feedbackService.create(feedbackData);
+    } catch(error) {
+        // Handle unique constraint or validation errors
+        const errorMessage = error.message || 'An unexpected error occurred';
+
+        // Throw a BadRequestException with the error message
+        throw new BadRequestException(errorMessage);
+    }
+
 }
 
