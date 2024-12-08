@@ -25,7 +25,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Handle a client joining a room
     @SubscribeMessage('joinRoom')
-    handleJoinRoom(@MessageBody() room: string, @ConnectedSocket() client: Socket): void {
+    handleJoinRoom(@MessageBody() room: string, @ConnectedSocket() client: Socket) {
         client.join(room); // The client joins0 the specified room
         console.log(`Client ${client.id} joined room ${room}`);
         this.server.to(room).emit('systemMessage', `User ${client.id} has joined the room.`);
@@ -35,7 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Handle a client leaving a room
     @SubscribeMessage('leaveRoom')
-    handleLeaveRoom(@MessageBody() room: string, @ConnectedSocket() client: Socket): void {
+    handleLeaveRoom(@MessageBody() room: string, @ConnectedSocket() client: Socket) {
         client.leave(room); // The client leaves the specified room
         console.log(`Client ${client.id} left room ${room}`);
         this.server.to(room).emit('systemMessage', `User ${client.id} has left the room.`);
@@ -54,14 +54,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Handle new message (fallback or general usage)
     @SubscribeMessage('newMessage')
-    handleNewMessage(@MessageBody() message: any, @ConnectedSocket() client: Socket): void {
+    handleNewMessage(@MessageBody() message: any, @ConnectedSocket() client: Socket) {
         console.log(`Message from ${client.id}:`, message);
 
         // Emit a reply to the client
-        client.emit('Reply', 'Ahla mesa aalek ya Geee');
+        client.emit('Reply', 'Ahla mesa aalek');
 
         // Emit to all connected clients
-        this.server.emit('Reply', 'Hello everyone!');
+        this.server.emit('Reply', 'Mesa aal kol');
     }
 }
     

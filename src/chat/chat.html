@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Chat Room</h1>
+  <input id="room" placeholder="Enter room name" />
+  <input id="username" placeholder="Enter your username" />
+  <button onclick="joinRoom()">Join Room</button>
+  <button onclick="leaveRoom()">Leave Room</button>
+
+  <h2>Messages</h2>
+  <div id="messages"></div>
+  <input id="message" placeholder="Enter your message" />
+  <button onclick="sendMessage()">Send</button>
+
+  <script>
+    const socket = io('http://localhost:3002');
+    let currentRoom = '';
+    let username = '';
+
+    function joinRoom() {
+      currentRoom = document.getElementById('room').value;
+      username = document.getElementById('username').value;
+      socket.emit('joinRoom', currentRoom);
+      socket.on('roomMessage', (data) => {
+        const messages = document.getElementById('messages');
+        messages.innerHTML += `<p><strong>${data.sender}:</strong> ${data.message}</p>`;
+      });
+      socket.on('systemMessage', (message) => {
+        const messages = document.getElementById('messages');
+        messages.innerHTML += `<p><em>${message}</em></p>`;
+      });
+    }
+
+    function leaveRoom() {
+      socket.emit('leaveRoom', currentRoom);
+      currentRoom = '';
+    }
+
+    function sendMessage() {
+      const message = document.getElementById('message').value;
+      socket.emit('sendMessageToRoom', { room: currentRoom, message });
+    }
+  </script>
+</body>
+</html>
