@@ -311,4 +311,25 @@ export class AdminsController {
     }
 
   }
+
+  @UseGuards(AuthorizationGuard)
+  @Delete('delete-allfeedbacks')
+  @Roles('admin')
+  async deleteAllFeedbacks(): Promise<{ message: string }> {
+    return await this.feedbackService.deleteAllFeedbacks(); // Call the service function
+  }
+
+  @UseGuards(AuthorizationGuard)
+  @Delete('delete-feedback-by-email')
+  @Roles('admin')
+  async deleteFeedbacksByEmail(@Body() body: { studentemail: string }): Promise<{ message: string }> {
+    const { studentemail } = body;
+
+    if (!studentemail) {
+      return { message: 'Student email is required' }; // Validate email input
+    }
+
+    return await this.feedbackService.deleteFeedbacksByEmail(studentemail); // Call the service function
+  }
 }
+

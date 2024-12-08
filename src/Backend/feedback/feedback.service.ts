@@ -24,4 +24,19 @@ export class FeedbackService {
   async findByEmail(studentemail: string): Promise<Feedback[]> {
     return this.feedbackModel.find({ studentemail }).exec();
   }
+
+
+  async deleteAllFeedbacks(): Promise<{ message: string }> {
+    await this.feedbackModel.deleteMany({}); // Deletes all feedbacks in the collection
+    return { message: 'All feedbacks deleted successfully' };
+  }
+  async deleteFeedbacksByEmail(studentemail: string): Promise<{ message: string }> {
+    const result = await this.feedbackModel.deleteMany({ studentemail });
+
+    if (result.deletedCount === 0) {
+      return { message: `No feedbacks found for the user with email: ${studentemail}` };
+    }
+
+    return { message: `${result.deletedCount} feedback(s) deleted for ${studentemail}` };
+  }
 }
