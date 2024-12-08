@@ -148,5 +148,28 @@ async editAnnouncement(@Body() body: { title: string; content: string }) {
   }
 }
 
+@UseGuards(AuthorizationGuard)
+@Delete('deleteAnnouncement')
+@Roles('admin')
+async deleteAnnouncement(@Body() body: { title: string }) {
+  const { title } = body;
+
+  try {
+    const deletedAnnouncement = await this.adminsService.deleteAnnouncementByTitle(title);
+
+    if (!deletedAnnouncement) {
+      throw new BadRequestException('Announcement with the specified title does not exist');
+    }
+
+    return {
+      message: 'Announcement deleted successfully',
+      deletedAnnouncement,
+    };
+  } catch (error) {
+    console.error('Error during announcement deletion:', error);
+    throw new BadRequestException('Failed to delete announcement');
+  }
+}
+
 
 }

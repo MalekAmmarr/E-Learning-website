@@ -60,6 +60,11 @@ export class AdminsService {
       { new: true } // Return the updated document
     );
   }
+
+  async deleteAnnouncementByTitle(title: string) {
+    return await this.AnnouncementModel.findOneAndDelete({ title });
+  }
+  
   
   
 }
