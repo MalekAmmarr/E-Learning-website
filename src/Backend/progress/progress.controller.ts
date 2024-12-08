@@ -1,5 +1,7 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { ProgressService } from './progress.service';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 
 @Controller('progress')
 export class ProgressController {
@@ -7,7 +9,9 @@ export class ProgressController {
     constructor(private readonly progressService: ProgressService) {}
 
     // Endpoint for an instructor to get a student's progress by email
+    @UseGuards(AuthorizationGuard)
     @Get(':instructorEmail/:studentEmail')
+    @Roles('instructor', 'student') 
     async getStudentProgress(
       @Param('instructorEmail') instructorEmail: string,
       @Param('studentEmail') studentEmail: string

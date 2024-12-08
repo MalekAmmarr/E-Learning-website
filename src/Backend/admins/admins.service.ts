@@ -10,72 +10,64 @@ import { Instructor } from 'src/schemas/instructor.schema';
 import { decrypt } from 'dotenv';
 import { Course } from 'src/schemas/course.schema';
 import { Logs } from 'src/schemas/logs.schema';
+import { AuthService } from '../auth/auth.service';
+import { Announcement } from 'src/schemas/announcement.schema';
 
 @Injectable()
 export class AdminsService {
 
   // Inject UserModel and AuthenticationLogService into the constructor
   constructor(
-    @InjectModel(Course.name, 'eLearningDB')
-    private readonly courseModel: Model<Course>,
-    @InjectModel(admin.name, 'eLearningDB')
-    private readonly adminModel: Model<admin>,
+    @InjectModel(Announcement.name,'eLearningDB')
+    private readonly AnnouncementModel : Model<Announcement>,
+    @InjectModel(Course.name,'eLearningDB')
+    private readonly courseModel : Model<Course>, // Inject the admin model for DB operations
+    @InjectModel(admin.name,'eLearningDB')
+    private readonly adminModel : Model<admin>, // Inject the admin model for DB operations
     @InjectModel(Instructor.name, 'eLearningDB')
-    private readonly InstructorModel: Model<Instructor>,
+    private readonly InstructorModel: Model<Instructor>, // Inject the Instructor model for DB operations
     @InjectModel(User.name, 'eLearningDB')
-    private readonly UserModel: Model<User>,
-    @InjectModel(Logs.name, 'eLearningDB')
-    private readonly logsModel: Model<Logs>,
+    private readonly UserModel: Model<User>, // Inject the User model for DB operations
+    @InjectModel(Logs.name,'eLearningDB')
+    private readonly logsModel:Model<Logs>,
+    private readonly authService: AuthService, // Inject AuthService
+
   ) {}
 
-  async create(createAdminDto: CreateAdminDto): Promise<admin> {
-    try {
-      if (!createAdminDto.passwordHash) {
-        throw new Error('Password is required');
-      }
-      const hashedPassword = await bcrypt.hash(createAdminDto.passwordHash, 10);
-
-      const admin = new this.adminModel({
-        ...createAdminDto,
-        passwordHash: hashedPassword,
-      });
-
-      return await admin.save();
-    } catch (error) {
-      console.error('Error creating admin:', error);
-      throw new Error('Admin registration failed');
-    }
+  // Register a new Admin
+  async registerAdmin(createAdminDto: CreateAdminDto) {
+    return await this.authService.registerUser(createAdminDto, 'admin');
   }
 
-  async login(email: string, passwordHash: string): Promise<{ accessToken: string; log: string }> {
-    let log = 'failed';
-    const admin = await this.adminModel.findOne({ email }).exec();
-    if (!admin) {
-      const accessToken = 'Invalid Credentials';
-      return { accessToken, log };
-    }
-    console.log(admin);
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      console.error('JWT_SECRET is missing!');
-    }
-    const isPasswordValid = await bcrypt.compare(passwordHash, admin.passwordHash);
-    if (!isPasswordValid) {
-      const accessToken = 'Invalid Credentials';
-      return { accessToken, log };
-    }
-    log = 'pass';
+  // Login Admin
+  async loginAdmin(email: string, password: string) {
+    return await this.authService.login(email, password, 'admin');
+  } 
 
-    // Create and return JWT token
-    const payload = { name: admin.name, email: admin.email };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
-
-    return { accessToken, log };
+  async createAnnouncement(createAnnouncementDto: any): Promise<Announcement> {
+    const newAnnouncement = new this.AnnouncementModel(createAnnouncementDto);
+    return newAnnouncement.save();
   }
 
-  // **Step 2 Features**
+  async getAllAnnouncements() {
+    return await this.AnnouncementModel.find(); // Retrieves all announcements
+  }
+
+  async updateAnnouncementByTitle(title: string, updates: Record<string, any>) {
+    return await this.AnnouncementModel.findOneAndUpdate(
+      { title }, // Search condition
+      updates,   // Updates to apply
+      { new: true } // Return the updated document
+    );
+  }
+
+  async deleteAnnouncementByTitle(title: string) {
+    return await this.AnnouncementModel.findOneAndDelete({ title });
+  }
+  
+  
+  
+// *Step 2 Features*
 
   // Get all students
   //Fetches a list of all students in the database.
@@ -184,6 +176,11 @@ export class AdminsService {
     } catch (error) {
       console.error('Error fetching logs:', error);
       throw new Error('Failed to fetch logs');
-    }
-  }
+    }
+  }
 }
+
+
+
+
+

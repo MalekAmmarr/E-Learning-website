@@ -34,6 +34,20 @@ export class User extends Document {
 
   @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Progress', default: [] })
   progress: Progress[];
+
+  @Prop({ 
+    type: [{ 
+      quizId: String, 
+      feedback: [{ question: String, feedback: String }] 
+    }], 
+    default: [] 
+  })
+  feedback: Array<{
+    quizId: string;
+    feedback: Array<{ question: string; feedback: string }>;
+  }>;
+
 }
+  
 
 export const UserSchema = SchemaFactory.createForClass(User);

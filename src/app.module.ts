@@ -19,6 +19,9 @@ import { InstructorModule } from 'src/Backend/instructor/instructor.module';
 import { AdminsModule } from './Backend/admins/admins.module';
 import { LogsModule } from './Backend/logs/logs.module';
 import { ProgressModule } from './Backend/progress/progress.module';
+import { AuthModule } from './Backend/auth/auth.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -33,7 +36,10 @@ import { ProgressModule } from './Backend/progress/progress.module';
       {
         connectionName: 'dataManagementDB', // For data management database
       },
-    ),
+    ), ServeStaticModule.forRoot({
+      rootPath: join('D:/GIU 5th semester/Human Computer Interaction/uploads'), // Folder where PDFs are stored
+      serveRoot: '/files', // URL path prefix for accessing the PDFs
+    }),
     UsersModule,
     CoursesModule,
     ModulesModule,
@@ -49,13 +55,15 @@ import { ProgressModule } from './Backend/progress/progress.module';
     LogsModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
-      signOptions: { expiresIn: '1h' }, // Token expiration time
+      signOptions: { expiresIn: '24h' }, // Token expiration time
+      global: true,
     }),
     InstructorModule,
     AdminsModule,
-    ProgressModule
+    ProgressModule,
+    AuthModule
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

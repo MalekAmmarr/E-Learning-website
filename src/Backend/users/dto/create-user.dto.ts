@@ -18,8 +18,6 @@ export class CreateUserDto {
   @IsString()
   age: string; // Age is required and should be a string (or number if preferred)
 
-
-
   @IsEmail()
   email: string;
 

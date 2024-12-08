@@ -12,7 +12,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Logs } from 'src/schemas/logs.schema';
 import { Progress } from 'src/schemas/progress.schema';
-import { CoursesService } from '../courses/courses.service';
+import { AuthService } from '../auth/auth.service';
+import { Course } from 'src/schemas/course.schema';
+import { FeedbackService } from '../feedback/feedback.service';
 
 @Injectable()
 export class UsersService {
@@ -20,73 +22,26 @@ export class UsersService {
   constructor(
     @InjectModel(User.name, 'eLearningDB')
     private readonly userModel: Model<User>, // Inject the User model for DB operations
-    @InjectModel(Logs.name,'eLearningDB')
-    private readonly LogsModel:Model<Logs>,
-    @InjectModel(Progress.name,'eLearningDB')
-    private readonly progressModel:Model<Progress>,
-    private courseService: CoursesService
-  ) {}
+    @InjectModel(Logs.name, 'eLearningDB')
+    private readonly LogsModel: Model<Logs>,
+    @InjectModel(Course.name, 'eLearningDB')
+    private readonly courseModel: Model<Course>,
+    @InjectModel(Progress.name, 'eLearningDB')
+    private readonly progressModel: Model<Progress>,
+    private readonly authService: AuthService, // Inject AuthService
 
-  // Register a new user
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    try {
-      if (!createUserDto.passwordHash) {
-        throw new Error('Password is required');
-      }
+  ) { }
 
-      // Hash the user's password
-      const hashedPassword = await bcrypt.hash(createUserDto.passwordHash, 10); // Hash the plain password
-
-      // Create a new user document
-      const user = new this.userModel({
-        ...createUserDto,
-        passwordHash: hashedPassword, // Store the hashed password in 'passwordHash'
-      });
-
-      // Save the user to the database
-      return await user.save();
-    } catch (error) {
-      console.error('Error creating user:', error);
-      throw new Error('User registration failed');
-    }
+  // Register a new Student
+  async registerUser(createUserDto: CreateUserDto) {
+    return await this.authService.registerUser(createUserDto, 'student');
   }
 
-  // Login a user
-  async login(
-    email: string,
-    passwordHash: string,
-  ): Promise<{ accessToken: string ; log:string}> {
-    let log = "failed"
-    const user = await this.userModel.findOne({ email }).exec();
-    if (!user) {
-      const accessToken="Invalid Credentials"
-       return {accessToken ,log  }
-      //throw new NotFoundException('Instrutor not found');
-    }
-    console.log(user);
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      console.error('JWT_SECRET is missing!');
-    }
-    // Compare the password
-    const isPasswordValid = await bcrypt.compare(
-      passwordHash,
-      user.passwordHash,
-    );
-    if (!isPasswordValid) {
-      const accessToken="Invalid Credentials"
-       return {accessToken ,log }
-    }
-    log = "pass";
-
-    // Create and return JWT token
-    const payload = { name: user.name, email: user.email };
-    const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
-    
-    return { accessToken, log };
+  // Login Student
+  async loginUser(email: string, password: string) {
+    return await this.authService.login(email, password, 'student');
   }
+
   async Notifications(
     email: string,
   ): Promise<{ Notifications: string[] | string }> {
@@ -104,63 +59,69 @@ export class UsersService {
   }
 
 
-  async updateCompletedLecture(
-    studentEmail: string,
-    courseTitle: string,
-    lectureIndex: number, // Lecture index that the student opened
-  ) {
-    // Step 1: Get the course details to know the total lectures
-    const course = await this.courseService.getCourseByTitle(courseTitle);
-    if (!course) {
-      throw new Error(`Course with title ${courseTitle} not found`);
+  // Method to allow a student to download a PDF and update their progress
+  async downloadPDFAndUpdateProgress(userEmail: string, Coursetitle: string, pdfUrl: string): Promise<any> {
+    // Find the user
+    const user = await this.userModel.findOne({ email: userEmail });
+    if (!user) {
+      throw new Error('Student not found');
     }
 
-    const totalLectures = course.courseContent.length;
+    // Find the course
+    const course = await this.courseModel.findOne({ title: Coursetitle });
+    if (!course) {
+      throw new Error('Course not found');
+    }
 
-    // Step 2: Find the student's progress
-    let progress = await this.progressModel.findOne({ studentEmail, Coursetitle: courseTitle });
+    // Check if the course is in the user's accepted courses
+    if (!user.acceptedCourses.includes(Coursetitle)) {
+      throw new Error('Student has not been accepted in this course');
+    }
 
+    // Find the progress for the user in this course
+    let progress = await this.progressModel.findOne({ studentEmail: userEmail, Coursetitle: course.title });
     if (!progress) {
-      // If the progress record does not exist, create a new one
       progress = new this.progressModel({
-        studentEmail,
-        Coursetitle: courseTitle,
+        studentEmail: userEmail,
+        Coursetitle: course.title,
         score: 0,
         completionRate: 0,
         completedLectures: [],
       });
     }
 
-    // Step 3: Update the completed lectures
-    const existingLecture = progress.completedLectures.find(
-      (lecture) => lecture.Coursetitle === courseTitle,
-    );
-
-    if (!existingLecture) {
-      // If this course does not exist in the completedLectures array, add it
-      progress.completedLectures.push({ Coursetitle: courseTitle, completedLectures: 0 });
+    // Check if the pdfUrl exists in the courseContent array
+    if (!course.courseContent.includes(pdfUrl)) {
+      throw new Error('The provided PDF URL is not part of the course content');
     }
 
-    // Increment the completedLectures count
-    const lecture = progress.completedLectures.find(
-      (lecture) => lecture.Coursetitle === courseTitle,
-    );
-    if (lecture) {
-      lecture.completedLectures += 1;
+    // Check if the lecture is already marked as completed (by its PDF URL or some other unique identifier)
+    const existingLecture = progress.completedLectures.find((lecture) => lecture.pdfUrl === pdfUrl);
+    if (existingLecture) {
+      return { message: "Lecture already downloaded, no changes made." };
     }
 
-    // Step 4: Calculate completionRate
-    const completionRate = (lecture.completedLectures / totalLectures) * 100;
+    // Add the completed lecture to the progress (assuming the PDF corresponds to a completed lecture)
+    progress.completedLectures.push({ Coursetitle: course.title, pdfUrl, completedLectures: 1 });
 
-    // Step 5: Update the progress document
+    // Calculate the new completion rate
+    const completedLecturesCount = progress.completedLectures.length;
+    const completionRate = (completedLecturesCount / course.courseContent.length) * 100;
+
+    // Update the progress document with the new completion rate
     progress.completionRate = completionRate;
     await progress.save();
 
+    // Return the URL of the PDF for the student to download (or just a success message)
+    const baseUrl = process.env.NODE_ENV === 'production' ? 'https://yourdomain.com' : 'http://localhost:3000';
+    const downloadLink = `${baseUrl}/files/${pdfUrl}`;
+
     return {
-      message: 'Lecture completion updated successfully',
-      progress,
+      message: "PDF download link generated successfully",
+      downloadLink
     };
   }
+
 
 
 }

@@ -1,6 +1,8 @@
 import { Controller, Get, Post, Param, Delete } from '@nestjs/common';
 import { BackupService } from './backup.service';
 import { Backup } from 'src/schemas/backup.schema';
+import { AuthorizationGuard } from '../auth/guards/authorization.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('backups')
 export class BackupController {

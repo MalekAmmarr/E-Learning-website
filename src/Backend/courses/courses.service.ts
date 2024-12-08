@@ -10,14 +10,15 @@ export class CoursesService {
     private readonly courseModel: Model<Course>,
   ) {}
 
-  async searchCourses(query: string) {
+   // Method to search for courses by title or instructor's email
+   async searchCourses(query: string): Promise<Course[]> {
+    const regex = new RegExp(query, 'i'); // Case-insensitive search
     return this.courseModel.find({
       $or: [
-        { title: { $regex: query, $options: 'i' } }, // Search by course title
-        { category: { $regex: query, $options: 'i' } }, // Search by category/topic
-        { instructorName: { $regex: query, $options: 'i' } }, // Search by instructor name
+        { title: { $regex: regex } },
+        { instructorName: { $regex: regex } },
       ],
-    });
+    }).exec();
   }
 
 
