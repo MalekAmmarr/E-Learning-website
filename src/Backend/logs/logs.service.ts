@@ -10,13 +10,13 @@ export class LogsService {
   constructor(
     @InjectModel(Logs.name, 'eLearningDB')
     private readonly LogsModel: Model<Logs>, // Inject the User model for DB operations
-  ){}
+  ) { }
 
- async create(email:string,pass:string): Promise<Logs> {
-    try{
+  async create(email: string, pass: string, role: string): Promise<Logs> {
+    try {
 
       const log = new this.LogsModel({
-        email,pass
+        email, pass, role
       })
 
       // Save the user to the database
@@ -28,9 +28,8 @@ export class LogsService {
     }
   }
 
-  async getLogs()
-  {
-    try{
+  async getLogs() {
+    try {
       const logs = await this.LogsModel.find();
       return logs;
     }
@@ -39,9 +38,9 @@ export class LogsService {
       throw new Error('Error fetching logs');
     }
   }
-  
 
-  }
 
-  
+}
+
+
 

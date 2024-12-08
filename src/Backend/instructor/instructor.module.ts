@@ -7,6 +7,11 @@ import { UserSchema } from 'src/schemas/user.schema';
 import { User } from 'src/schemas/User.schema';
 import { Course, CourseSchema } from 'src/schemas/course.schema';
 import { AuthModule } from '../auth/auth.module';
+import { LogsService } from '../logs/logs.service';
+import { Logs, LogsSchema } from 'src/schemas/logs.schema';
+import { LogsModule } from '../logs/logs.module';
+import { Feedback, FeedbackSchema } from 'src/schemas/feedback.schema';
+import { FeedbackService } from '../feedback/feedback.service';
 
 @Module({
   imports: [
@@ -14,13 +19,15 @@ import { AuthModule } from '../auth/auth.module';
       [
         { name: Instructor.name, schema: InstructorSchema },
         { name: User.name, schema: UserSchema },
-        { name: Course.name, schema: CourseSchema}
+        { name: Course.name, schema: CourseSchema },
+        { name: Logs.name, schema: LogsSchema },
+        { name: Feedback.name, schema: FeedbackSchema }
       ],
       'eLearningDB',
     ),
     forwardRef(() => AuthModule), // Import AuthModule for authentication services
   ],
   controllers: [InstructorController],
-  providers: [InstructorService],
+  providers: [InstructorService, LogsService, FeedbackService],
 })
-export class InstructorModule {}
+export class InstructorModule { }
