@@ -201,13 +201,18 @@ export class InstructorController {
     }
 
   }
+
+
+  @UseGuards(AuthorizationGuard)
   @Delete('delete-allfeedbacks')
+  @Roles('instructor')
   async deleteAllFeedbacks(): Promise<{ message: string }> {
     return await this.feedbackService.deleteAllFeedbacks(); // Call the service function
   }
 
-  // Endpoint to delete feedbacks by studentemail
+  @UseGuards(AuthorizationGuard)
   @Delete('delete-feedback-by-email')
+  @Roles('instructor')
   async deleteFeedbacksByEmail(@Body() body: { studentemail: string }): Promise<{ message: string }> {
     const { studentemail } = body;
 

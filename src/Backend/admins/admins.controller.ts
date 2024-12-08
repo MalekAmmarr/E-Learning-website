@@ -311,13 +311,17 @@ export class AdminsController {
     }
 
   }
+
+  @UseGuards(AuthorizationGuard)
   @Delete('delete-allfeedbacks')
+  @Roles('admin')
   async deleteAllFeedbacks(): Promise<{ message: string }> {
     return await this.feedbackService.deleteAllFeedbacks(); // Call the service function
   }
 
-  // Endpoint to delete feedbacks by studentemail
+  @UseGuards(AuthorizationGuard)
   @Delete('delete-feedback-by-email')
+  @Roles('admin')
   async deleteFeedbacksByEmail(@Body() body: { studentemail: string }): Promise<{ message: string }> {
     const { studentemail } = body;
 
