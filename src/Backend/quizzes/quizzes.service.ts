@@ -102,7 +102,7 @@ export class QuizzesService {
   async gradeQuiz(
     quizId: string,
     studentEmail: string,
-    studentAnswers: string[],
+
     feedback: string[],
   ): Promise<Quiz> {
     const quiz = await this.findQuizById(quizId);
@@ -116,11 +116,14 @@ export class QuizzesService {
     if (!user) {
       throw new NotFoundException(`User with email ${studentEmail} not found`);
     }
-
+    const studentEntry = quiz.studentAnswers.find(
+      (entry) => entry[1] === studentEmail,
+    );
+    const Answers = studentEntry.slice(0, -1);
     // Calculate grade
     let grade = 0;
     const feedbackArray = quiz.questions.map((question, index) => {
-      const isCorrect = question.correctAnswer === studentAnswers[index];
+      const isCorrect = question.correctAnswer === Answers[index];
       if (isCorrect) grade += 1;
 
       return {
@@ -132,11 +135,14 @@ export class QuizzesService {
     const calculatedScore = grade / quiz.questions.length;
 
     // Update quiz
-    quiz.isGraded = true;
     await quiz.save();
 
     // Update user feedback and score
-    user.feedback.push({ quizId, feedback: feedbackArray });
+    user.feedback.push({
+      quizId,
+      courseTitle: quiz.courseTitle,
+      feedback: feedbackArray,
+    });
     user.score += calculatedScore; // Add quiz grade to user's score
     await user.save();
 

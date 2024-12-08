@@ -88,19 +88,13 @@ export class QuizzesController {
 
   // Endpoint to grade a quiz and update user score
   @UseGuards(AuthorizationGuard)
-  @Patch(':quizId/grade')
+  @Patch('grade')
   @Roles('student')
   async gradeQuiz(
-    @Param('quizId') quizId: string,
+    @Body('quizId') quizId: string,
     @Body('studentEmail') studentEmail: string,
-    @Body('studentAnswers') studentAnswers: string[],
     @Body('feedback') feedback: string[],
   ) {
-    return this.quizService.gradeQuiz(
-      quizId,
-      studentEmail,
-      studentAnswers,
-      feedback,
-    );
+    return this.quizService.gradeQuiz(quizId, studentEmail, feedback);
   }
 }

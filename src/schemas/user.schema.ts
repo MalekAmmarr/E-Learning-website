@@ -33,7 +33,11 @@ export class User extends Document {
   @Prop({ type: [String], default: [] })
   Notifiction: string[];
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Progress', default: [] })
+  @Prop({
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: 'Progress',
+    default: [],
+  })
   progress: Progress[];
 
   @Prop({
@@ -47,12 +51,14 @@ export class User extends Document {
   })
   feedback: Array<{
     quizId: string;
+    courseTitle: string;
     feedback: Array<{ question: string; feedback: string }>;
   }>;
-
+  
   // Notes tied to specific courses
   @Prop({ type: [String], default: [] })
   Notes: string[];
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
