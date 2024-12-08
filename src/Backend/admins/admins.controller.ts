@@ -155,7 +155,7 @@ async deleteStudentByEmail(@Param('email') email: string) {
     @Body() updates: Record<string, any>,
   ) {
     try {
-      const updatedInstructor = await this.adminsService.updateInstructor(email, updates);
+      const updatedInstructor = await this.adminsService.updateInstructor(email, updates) ;
       return {
         message: 'Instructor updated successfully',
         updatedInstructor,
