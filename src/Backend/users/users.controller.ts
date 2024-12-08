@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, Query, Res, UseGuards, } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  NotFoundException,
+  Query,
+  Res,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,10 +21,12 @@ import { Response } from 'express';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
-
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UsersService, private readonly logsService:LogsService ) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly logsService: LogsService,
+  ) {}
 
   // Register a new user
   @Post('register')
@@ -30,13 +45,14 @@ export class UsersController {
 
   // Login a user
   @Post('login')
-    async login(@Body() { email, passwordHash }: { email: string; passwordHash: string }) {
-     
+  async login(
+    @Body() { email, passwordHash }: { email: string; passwordHash: string },
+  ) {
     const login = await this.userService.loginUser(email, passwordHash);
-    const Logs = await this.logsService.create(email,login.log)
-    return login
-    }
-    
+    const Logs = await this.logsService.create(email, login.log);
+    return login;
+  }
+
   // Route to get notifications by email
   @UseGuards(AuthorizationGuard)
   @Get('notifications')
@@ -59,21 +75,45 @@ export class UsersController {
   @Get('download-pdf')
   @Roles('student')
   async downloadPDF(
-    @Query('userEmail') userEmail: string,
-    @Query('Coursetitle') Coursetitle: string,
-    @Query('pdfUrl') pdfUrl: string,
-    @Res() res: Response
+    @Body()
+    {
+      userEmail,
+      Coursetitle,
+      pdfUrl,
+    }: { userEmail: string; Coursetitle: string; pdfUrl: string },
+    @Res() res: Response,
   ): Promise<any> {
     try {
       // Let the user download the PDF and update progress
-      const result = await this.userService.downloadPDFAndUpdateProgress(userEmail, Coursetitle, pdfUrl);
-      
+      const result = await this.userService.downloadPDFAndUpdateProgress(
+        userEmail,
+        Coursetitle,
+        pdfUrl,
+      );
+
       // Assuming pdfUrl is a valid link to the PDF, you could serve the file directly:
       res.download(pdfUrl); // Uncomment if you want to serve the file
-      res.json(result);  // Respond with success message and download link
+      res.json(result); // Respond with success message and download link
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
   }
 
+  @UseGuards(AuthorizationGuard)
+  @Get('content')
+  @Roles('student')
+  async getCourseContent(
+    @Body() { courseTitle }: { courseTitle: string },
+  ): Promise<any> {
+    if (!courseTitle) {
+      throw new BadRequestException('Course title is required');
+    }
+
+    try {
+      const result = await this.userService.getCourse(courseTitle);
+      return result;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 }
