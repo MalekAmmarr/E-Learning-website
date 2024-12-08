@@ -5,6 +5,8 @@ import { CoursesService } from '../courses/courses.service';
 import { LogsService } from '../logs/logs.service';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Announcement } from 'src/schemas/announcement.schema';
+
 
 
 @Controller('admins')
@@ -44,8 +46,8 @@ export class AdminsController {
   }
 
   @UseGuards(AuthorizationGuard)
-  @Roles('admin')
   @Patch('updateCourse')
+  @Roles('admin')
   async updateCourse(@Body() updateData: { courseId: string; updates: Record<string, any> },
   ) {
   const { courseId, updates } = updateData;
@@ -62,8 +64,8 @@ export class AdminsController {
     }
 
   @UseGuards(AuthorizationGuard)
-  @Roles('admin')
   @Patch('archiveCourse')
+  @Roles('admin')
   async archiveCourse(@Body() body: { courseId: string }) {
     const { courseId } = body;
     try {
@@ -79,8 +81,8 @@ export class AdminsController {
   }
 
   @UseGuards(AuthorizationGuard)
-  @Roles('admin')
   @Delete('deleteCourse')
+  @Roles('admin')
   async deleteCourse(@Body() body: { courseId: string }) {
     const { courseId } = body;
     try {
@@ -94,5 +96,57 @@ export class AdminsController {
       throw new BadRequestException('Course deletion failed');
     }
   }
+
+@Get('getAnnouncement')
+async getAllAnnouncements() {
+  return await this.adminsService.getAllAnnouncements();
+}
+
+@UseGuards(AuthorizationGuard)
+@Post('createAnnouncement')
+@Roles('admin')
+async createAnnouncement(@Body() body: { title: string; content: string }) {
+  const { title, content } = body;
+
+  try {
+    const announcement = await this.adminsService.createAnnouncement({
+      title,
+      content,
+    });
+
+    return {
+      message: 'Announcement created successfully',
+      announcement,
+    };
+  } catch (error) {
+    console.error('Error during announcement creation:', error);
+    throw new BadRequestException('Failed to create announcement');
+  }
+}
+
+@UseGuards(AuthorizationGuard)
+@Patch('editAnnouncement')
+@Roles('admin')
+async editAnnouncement(@Body() body: { title: string; content: string }) {
+  const { title, content } = body;
+
+  try {
+    // Search for the announcement by title and update the content
+    const updatedAnnouncement = await this.adminsService.updateAnnouncementByTitle(title, { content });
+
+    if (!updatedAnnouncement) {
+      throw new BadRequestException('Announcement with the specified title does not exist');
+    }
+
+    return {
+      message: 'Announcement updated successfully',
+      updatedAnnouncement,
+    };
+  } catch (error) {
+    console.error('Error during announcement update:', error);
+    throw new BadRequestException('Failed to update announcement');
+  }
+}
+
 
 }

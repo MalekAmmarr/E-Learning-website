@@ -12,6 +12,7 @@ import { Logs,LogsSchema } from 'src/schemas/logs.schema';
 import { LogsModule } from '../logs/logs.module';
 import { LogsService } from '../logs/logs.service';
 import { AuthModule } from '../auth/auth.module';
+import { Announcement,AnnouncementSchema } from 'src/schemas/announcement.schema';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { AuthModule } from '../auth/auth.module';
       { name: Instructor.name, schema: InstructorSchema },
       { name: User.name, schema: UserSchema },
       {name:Course.name , schema:CourseSchema},
-      {name:Logs.name,schema:LogsSchema}
+      {name:Logs.name,schema:LogsSchema},
+      {name:Announcement.name,schema:AnnouncementSchema}
     ],
     'eLearningDB',
   ),

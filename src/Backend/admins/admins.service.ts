@@ -11,12 +11,15 @@ import { decrypt } from 'dotenv';
 import { Course } from 'src/schemas/course.schema';
 import { Logs } from 'src/schemas/logs.schema';
 import { AuthService } from '../auth/auth.service';
+import { Announcement } from 'src/schemas/announcement.schema';
 
 @Injectable()
 export class AdminsService {
 
   // Inject UserModel and AuthenticationLogService into the constructor
   constructor(
+    @InjectModel(Announcement.name,'eLearningDB')
+    private readonly AnnouncementModel : Model<Announcement>,
     @InjectModel(Course.name,'eLearningDB')
     private readonly courseModel : Model<Course>, // Inject the admin model for DB operations
     @InjectModel(admin.name,'eLearningDB')
@@ -40,6 +43,24 @@ export class AdminsService {
   async loginAdmin(email: string, password: string) {
     return await this.authService.login(email, password, 'admin');
   } 
+
+  async createAnnouncement(createAnnouncementDto: any): Promise<Announcement> {
+    const newAnnouncement = new this.AnnouncementModel(createAnnouncementDto);
+    return newAnnouncement.save();
+  }
+
+  async getAllAnnouncements() {
+    return await this.AnnouncementModel.find(); // Retrieves all announcements
+  }
+
+  async updateAnnouncementByTitle(title: string, updates: Record<string, any>) {
+    return await this.AnnouncementModel.findOneAndUpdate(
+      { title }, // Search condition
+      updates,   // Updates to apply
+      { new: true } // Return the updated document
+    );
+  }
+  
   
 }
 
