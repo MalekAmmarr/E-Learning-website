@@ -1,4 +1,7 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, NotFoundException, Query, Res, UseGuards, } from '@nestjs/common';
+import {
+  Controller, Get, Post, Put, Delete, Param,
+  Body, NotFoundException, Query, Res, UseGuards, BadRequestException, Request
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -7,11 +10,19 @@ import { LogsService } from '../logs/logs.service';
 import { Response } from 'express';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { FeedbackService } from '../feedback/feedback.service';
+import { CreateFeedbackDto } from '../feedback/dto/create-feedback.dto';
+import { Feedback } from 'src/schemas/feedback.schema';
+
 
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly userService: UsersService, private readonly logsService:LogsService ) {}
+  constructor(private readonly userService: UsersService,
+    private readonly logsService: LogsService,
+    private readonly feedbackService: FeedbackService
+
+  ) { }
 
   // Register a new user
   @Post('register')
@@ -30,13 +41,13 @@ export class UsersController {
 
   // Login a user
   @Post('login')
-    async login(@Body() { email, passwordHash }: { email: string; passwordHash: string }) {
-     
+  async login(@Body() { email, passwordHash }: { email: string; passwordHash: string }) {
+
     const login = await this.userService.loginUser(email, passwordHash);
-    const Logs = await this.logsService.create(email,login.log)
+    const Logs = await this.logsService.create(email, login.log, 'student')
     return login
-    }
-    
+  }
+
   // Route to get notifications by email
   @UseGuards(AuthorizationGuard)
   @Get('notifications')
@@ -67,7 +78,7 @@ export class UsersController {
     try {
       // Let the user download the PDF and update progress
       const result = await this.userService.downloadPDFAndUpdateProgress(userEmail, Coursetitle, pdfUrl);
-      
+
       // Assuming pdfUrl is a valid link to the PDF, you could serve the file directly:
       res.download(pdfUrl); // Uncomment if you want to serve the file
       res.json(result);  // Respond with success message and download link
@@ -76,4 +87,29 @@ export class UsersController {
     }
   }
 
+  @UseGuards(AuthorizationGuard)
+  @Post('createfeedback')
+  @Roles('student')
+  async createFeedback(
+    @Body() createFeedbackDto: CreateFeedbackDto,
+    @Request() req, // Access the request object to get user data
+  ): Promise<Feedback> {
+    const studentemail = req.user.email;
+
+    // Add the email to the feedback data
+    const feedbackData = { ...createFeedbackDto, studentemail };
+
+    // Pass the modified data to the service
+    return await this.feedbackService.create(feedbackData);
+  } catch(error) {
+    // Handle unique constraint or validation errors
+    const errorMessage = error.message || 'An unexpected error occurred';
+
+    // Throw a BadRequestException with the error message
+    throw new BadRequestException(errorMessage);
+  }
+
 }
+
+
+

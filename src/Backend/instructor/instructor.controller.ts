@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, BadRequestException, UseGuards,} from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, BadRequestException, UseGuards, } from '@nestjs/common';
 import { InstructorService } from './instructor.service';
 import { Instructor } from 'src/schemas/Instructor.schema';
 import { CreateInstructorDto } from './dto/create-Ins.dto';
@@ -12,11 +12,20 @@ import { EditContentDto } from '../courses/dto/edit-content.dto';
 import { DeleteContentDto } from '../courses/dto/delete-content.dto';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { LogsService } from '../logs/logs.service';
+import { get } from 'mongoose';
+import { FeedbackService } from '../feedback/feedback.service';
+import { Feedback } from 'src/schemas/feedback.schema';
+
 
 @Controller('instructor')
 export class InstructorController {
-  constructor(private readonly instructorService: InstructorService) {}
-  
+  constructor(
+    private readonly instructorService: InstructorService,
+    private readonly logsService: LogsService,
+    private readonly feedbackService: FeedbackService
+  ) { }
+
   // Register a new user
   @Post('register')
   async register(@Body() createInstructorDto: CreateInstructorDto) {
@@ -38,13 +47,15 @@ export class InstructorController {
   async login(
     @Body() { email, passwordHash }: { email: string; passwordHash: string },
   ) {
-    return await this.instructorService.loginInstructor(email, passwordHash);
+    const login = await this.instructorService.loginInstructor(email, passwordHash);
+    const Logs = await this.logsService.create(email, login.log, 'instructor')
+    return login;
   }
 
   // Get users applied to courses taught by an instructor
   @UseGuards(AuthorizationGuard)
   @Get('applied-users/:email')
-  @Roles('instructor') 
+  @Roles('instructor')
   async getUsersAppliedToCourses(@Param('email') instructorEmail: string) {
     try {
       return await this.instructorService.getUsersAppliedToCourses(
@@ -61,7 +72,7 @@ export class InstructorController {
   // Endpoint to accept or reject a student's course application
   @UseGuards(AuthorizationGuard)
   @Post('accept-reject-course') // No email parameter in the URL
-  @Roles('instructor') 
+  @Roles('instructor')
   async acceptOrRejectCourse(
     @Body()
     body: {
@@ -87,23 +98,23 @@ export class InstructorController {
   }
 
 
- // Endpoint to create a course
- @UseGuards(AuthorizationGuard)
- @Post(':email/create-course')
- @Roles('instructor') 
- async createCourse(
-   @Param('email') email: string,  // Instructor email in the URL param
-   @Body() createCourseDto: CreateCourseDto,  // Course data in the request body
- ): Promise<Course> {
-   // Call the service method to create the course
-   return this.instructorService.createCourse(createCourseDto, email);
- }
+  // Endpoint to create a course
+  @UseGuards(AuthorizationGuard)
+  @Post(':email/create-course')
+  @Roles('instructor')
+  async createCourse(
+    @Param('email') email: string,  // Instructor email in the URL param
+    @Body() createCourseDto: CreateCourseDto,  // Course data in the request body
+  ): Promise<Course> {
+    // Call the service method to create the course
+    return this.instructorService.createCourse(createCourseDto, email);
+  }
 
 
   // Update a course except for the courseContent field, linked by instructor email and course title
   @UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/courses/:courseTitle')
-  @Roles('instructor') 
+  @Roles('instructor')
   async updateCourse(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -119,7 +130,7 @@ export class InstructorController {
 
   @UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/addcontent/:courseTitle')
-  @Roles('instructor') 
+  @Roles('instructor')
   async addCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -128,11 +139,11 @@ export class InstructorController {
     return await this.instructorService.addCourseContent(instructorEmail, courseTitle, addContentDto.newContent);
   }
 
-  
+
   // Edit course content (replace the current content with new content)
   @UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/courses/:courseTitle/editcontent')
-  @Roles('instructor') 
+  @Roles('instructor')
   async editCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -144,13 +155,51 @@ export class InstructorController {
   // Delete specific content from course content array
   @UseGuards(AuthorizationGuard)
   @Delete(':instructorEmail/courses/:courseTitle/deletecontent')
-  @Roles('instructor') 
+  @Roles('instructor')
   async deleteCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
     @Body() deleteContentDto: DeleteContentDto,  // DTO for content to delete
   ) {
     return await this.instructorService.deleteCourseContent(instructorEmail, courseTitle, deleteContentDto.contentToDelete);
+  }
+
+  @UseGuards(AuthorizationGuard)
+  @Post('by-email')
+  @Roles('instructor')
+  async getFeedbacksByEmail(@Body() body: { studentemail: string }): Promise<Feedback[] | { message: string }> {
+    const { studentemail } = body;
+    if (!studentemail) {
+      return { message: 'Student email is required' };
+    }
+    try {
+      const feedbacks = await this.feedbackService.findByEmail(studentemail);
+      if (feedbacks.length === 0) {
+        console.log('No feedbacks by this user');
+        return { message: 'No feedbacks found for this user' };
+      }
+      return feedbacks;
+    } catch (error) {
+
+      return { message: `Error: ${error.message}` };
+    }
+  }
+
+  @UseGuards(AuthorizationGuard)
+  @Get('allfeedbacks')
+  @Roles('instructor')
+  async getAllFeedbacks(): Promise<Feedback[] | { message: string }> {
+    try {
+      const feedbacks = await this.feedbackService.findAll();
+      if (feedbacks.length === 0) {
+        console.log('No feedbacks by ');
+        return { message: 'No feedbacks found' };
+      }
+      return feedbacks
+    } catch (error) {
+      return { message: `Error: ${error.message}` };
+    }
+
   }
 
 }
