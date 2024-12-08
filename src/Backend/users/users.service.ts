@@ -30,7 +30,8 @@ export class UsersService {
     private readonly progressModel: Model<Progress>,
     private readonly authService: AuthService, // Inject AuthService
 
-  ) { }
+  ) {}
+
 
   // Register a new Student
   async registerUser(createUserDto: CreateUserDto) {
@@ -60,7 +61,12 @@ export class UsersService {
 
 
   // Method to allow a student to download a PDF and update their progress
-  async downloadPDFAndUpdateProgress(userEmail: string, Coursetitle: string, pdfUrl: string): Promise<any> {
+  async downloadPDFAndUpdateProgress(
+    userEmail: string,
+    Coursetitle: string,
+    pdfUrl: string,
+  ): Promise<any> {
+
     // Find the user
     const user = await this.userModel.findOne({ email: userEmail });
     if (!user) {
@@ -79,7 +85,10 @@ export class UsersService {
     }
 
     // Find the progress for the user in this course
-    let progress = await this.progressModel.findOne({ studentEmail: userEmail, Coursetitle: course.title });
+    let progress = await this.progressModel.findOne({
+      studentEmail: userEmail,
+      Coursetitle: course.title,
+    });
     if (!progress) {
       progress = new this.progressModel({
         studentEmail: userEmail,
@@ -96,32 +105,58 @@ export class UsersService {
     }
 
     // Check if the lecture is already marked as completed (by its PDF URL or some other unique identifier)
-    const existingLecture = progress.completedLectures.find((lecture) => lecture.pdfUrl === pdfUrl);
-    if (existingLecture) {
-      return { message: "Lecture already downloaded, no changes made." };
-    }
+
+    const existingLecture = progress.completedLectures.find(
+      (lecture) => lecture.pdfUrl === pdfUrl,
+    );
+    // if (existingLecture) {
+    //   return { message: 'Lecture already downloaded, no changes made.' };
+    // }
 
     // Add the completed lecture to the progress (assuming the PDF corresponds to a completed lecture)
-    progress.completedLectures.push({ Coursetitle: course.title, pdfUrl, completedLectures: 1 });
+    progress.completedLectures.push({
+      Coursetitle: course.title,
+      pdfUrl,
+      completedLectures: 1,
+    });
+
 
     // Calculate the new completion rate
     const completedLecturesCount = progress.completedLectures.length;
-    const completionRate = (completedLecturesCount / course.courseContent.length) * 100;
+    const completionRate =
+      (completedLecturesCount / course.courseContent.length) * 100;
 
     // Update the progress document with the new completion rate
     progress.completionRate = completionRate;
     await progress.save();
 
     // Return the URL of the PDF for the student to download (or just a success message)
-    const baseUrl = process.env.NODE_ENV === 'production' ? 'https://yourdomain.com' : 'http://localhost:3000';
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://yourdomain.com'
+        : 'http://localhost:3000';
     const downloadLink = `${baseUrl}/files/${pdfUrl}`;
 
     return {
-      message: "PDF download link generated successfully",
-      downloadLink
+
+      message: 'PDF download link generated successfully',
+      downloadLink,
     };
   }
+  async getCourse(courseTitle: string): Promise<{ content: string[] }> {
+    // Find the course document by title
+    const course = await this.courseModel.findOne({ title: courseTitle });
 
 
+    // Handle case where the course is not found
+    if (!course) {
+      throw new Error(`Course with title ${courseTitle} not found.`);
+    }
 
+    // Extract the content field
+    const content = course.courseContent;
+
+    // Return the content in the expected format
+    return { content };
+  }
 }

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, BadRequestException, UseGuards, } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  BadRequestException,
+  UseGuards,
+} from '@nestjs/common';
+
 import { InstructorService } from './instructor.service';
 import { Instructor } from 'src/schemas/Instructor.schema';
 import { CreateInstructorDto } from './dto/create-Ins.dto';
@@ -20,11 +31,13 @@ import { Feedback } from 'src/schemas/feedback.schema';
 
 @Controller('instructor')
 export class InstructorController {
+
   constructor(
     private readonly instructorService: InstructorService,
     private readonly logsService: LogsService,
     private readonly feedbackService: FeedbackService
   ) { }
+
 
   // Register a new user
   @Post('register')
@@ -98,18 +111,21 @@ export class InstructorController {
   }
 
 
+
+
   // Endpoint to create a course
   @UseGuards(AuthorizationGuard)
   @Post(':email/create-course')
   @Roles('instructor')
   async createCourse(
+
     @Param('email') email: string,  // Instructor email in the URL param
     @Body() createCourseDto: CreateCourseDto,  // Course data in the request body
+
   ): Promise<Course> {
     // Call the service method to create the course
     return this.instructorService.createCourse(createCourseDto, email);
   }
-
 
   // Update a course except for the courseContent field, linked by instructor email and course title
   @UseGuards(AuthorizationGuard)
@@ -134,9 +150,13 @@ export class InstructorController {
   async addCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
-    @Body() addContentDto: AddContentDto,  // Use the DTO here
+    @Body() addContentDto: AddContentDto, // Use the DTO here
   ) {
-    return await this.instructorService.addCourseContent(instructorEmail, courseTitle, addContentDto.newContent);
+    return await this.instructorService.addCourseContent(
+      instructorEmail,
+      courseTitle,
+      addContentDto.newContent,
+    );
   }
 
 
@@ -147,9 +167,13 @@ export class InstructorController {
   async editCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
-    @Body() editContentDto: EditContentDto,  // DTO for new content
+    @Body() editContentDto: EditContentDto, // DTO for new content
   ) {
-    return await this.instructorService.editCourseContent(instructorEmail, courseTitle, editContentDto.newContent);
+    return await this.instructorService.editCourseContent(
+      instructorEmail,
+      courseTitle,
+      editContentDto.newContent,
+    );
   }
 
   // Delete specific content from course content array
@@ -159,13 +183,13 @@ export class InstructorController {
   async deleteCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
-    @Body() deleteContentDto: DeleteContentDto,  // DTO for content to delete
+    @Body() deleteContentDto: DeleteContentDto, // DTO for content to delete
   ) {
-    return await this.instructorService.deleteCourseContent(instructorEmail, courseTitle, deleteContentDto.contentToDelete);
+    return await this.instructorService.deleteCourseContent(
+      instructorEmail,
+      courseTitle,
+      deleteContentDto.contentToDelete,
+    );
   }
 
-
 }
-
-
-
