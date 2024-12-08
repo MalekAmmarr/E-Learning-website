@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete, Param,
-  Body, NotFoundException, Query, Res, UseGuards, BadRequestException, Request
+  Body, NotFoundException, Query, Res, UseGuards, BadRequestException
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -87,27 +87,6 @@ export class UsersController {
     }
   }
 
-  @UseGuards(AuthorizationGuard)
-  @Post('createfeedback')
-  @Roles('student')
-  async createFeedback(
-    @Body() createFeedbackDto: CreateFeedbackDto,
-    @Request() req, // Access the request object to get user data
-  ): Promise<Feedback> {
-    const studentemail = req.user.email;
-
-    // Add the email to the feedback data
-    const feedbackData = { ...createFeedbackDto, studentemail };
-
-    // Pass the modified data to the service
-    return await this.feedbackService.create(feedbackData);
-  } catch(error) {
-    // Handle unique constraint or validation errors
-    const errorMessage = error.message || 'An unexpected error occurred';
-
-    // Throw a BadRequestException with the error message
-    throw new BadRequestException(errorMessage);
-  }
 
 }
 

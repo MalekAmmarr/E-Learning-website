@@ -164,64 +164,7 @@ export class InstructorController {
     return await this.instructorService.deleteCourseContent(instructorEmail, courseTitle, deleteContentDto.contentToDelete);
   }
 
-  @UseGuards(AuthorizationGuard)
-  @Post('by-email')
-  @Roles('instructor')
-  async getFeedbacksByEmail(@Body() body: { studentemail: string }): Promise<Feedback[] | { message: string }> {
-    const { studentemail } = body;
-    if (!studentemail) {
-      return { message: 'Student email is required' };
-    }
-    try {
-      const feedbacks = await this.feedbackService.findByEmail(studentemail);
-      if (feedbacks.length === 0) {
-        console.log('No feedbacks by this user');
-        return { message: 'No feedbacks found for this user' };
-      }
-      return feedbacks;
-    } catch (error) {
 
-      return { message: `Error: ${error.message}` };
-    }
-  }
-
-  @UseGuards(AuthorizationGuard)
-  @Get('allfeedbacks')
-  @Roles('instructor')
-  async getAllFeedbacks(): Promise<Feedback[] | { message: string }> {
-    try {
-      const feedbacks = await this.feedbackService.findAll();
-      if (feedbacks.length === 0) {
-        console.log('No feedbacks by ');
-        return { message: 'No feedbacks found' };
-      }
-      return feedbacks
-    } catch (error) {
-      return { message: `Error: ${error.message}` };
-    }
-
-  }
-
-
-  @UseGuards(AuthorizationGuard)
-  @Delete('delete-allfeedbacks')
-  @Roles('instructor')
-  async deleteAllFeedbacks(): Promise<{ message: string }> {
-    return await this.feedbackService.deleteAllFeedbacks(); // Call the service function
-  }
-
-  @UseGuards(AuthorizationGuard)
-  @Delete('delete-feedback-by-email')
-  @Roles('instructor')
-  async deleteFeedbacksByEmail(@Body() body: { studentemail: string }): Promise<{ message: string }> {
-    const { studentemail } = body;
-
-    if (!studentemail) {
-      return { message: 'Student email is required' }; // Validate email input
-    }
-
-    return await this.feedbackService.deleteFeedbacksByEmail(studentemail); // Call the service function
-  }
 }
 
 
