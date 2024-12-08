@@ -13,6 +13,8 @@ import { Course, CourseSchema } from 'src/schemas/course.schema';
 import { AuthModule } from '../auth/auth.module';
 import { Feedback, FeedbackSchema } from 'src/schemas/feedback.schema';
 import { FeedbackService } from '../feedback/feedback.service';
+import { Note, NoteSchema } from 'src/schemas/note.schema';
+import { NotesService } from '../note/note.service';
 
 @Module({
   imports: [
@@ -22,7 +24,8 @@ import { FeedbackService } from '../feedback/feedback.service';
         { name: Logs.name, schema: LogsSchema },
         { name: Progress.name, schema: ProgressSchema },
         { name: Course.name, schema: CourseSchema },
-        { name: Feedback.name, schema: FeedbackSchema }
+        { name: Feedback.name, schema: FeedbackSchema },
+        {name:Note.name,schema:NoteSchema}
       ],
       'eLearningDB',
     ),
@@ -31,7 +34,7 @@ import { FeedbackService } from '../feedback/feedback.service';
 
   ],
   controllers: [UsersController],
-  providers: [UsersService, LogsService, FeedbackService],
-  exports: [MongooseModule],
+  providers: [UsersService, LogsService, FeedbackService,NotesService],
+  exports: [MongooseModule,UsersService],
 })
 export class UsersModule { }
