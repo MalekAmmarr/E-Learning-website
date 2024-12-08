@@ -35,8 +35,8 @@ import { ChatService } from "./chat.service";
     }
   
     // Join a query room
-    @SubscribeMessage("joinQueryRoom")
-    async handleJoinQueryRoom(
+    @SubscribeMessage("joinRoom")
+    async handleJoinRoom(
       @MessageBody() data:any,
       @ConnectedSocket() client: Socket
     ) {
@@ -59,8 +59,8 @@ import { ChatService } from "./chat.service";
       if (!this.rooms[room]) this.rooms[room] = [];
       if (!this.rooms[room].includes(client.id)) this.rooms[room].push(client.id);
   
-      console.log(`${user} joined query room: ${room}`);
-      this.server.to(room).emit("systemMessage", `${user} has joined the query.`, messages);
+      console.log(`${user} joined room: ${room}`);
+      this.server.to(room).emit("systemMessage", `${user} has joined Room ${room}`);
     }
     catch(error){
       console.log('Error Parsing',error);
@@ -68,38 +68,36 @@ import { ChatService } from "./chat.service";
 
     }
   }
-  
-    // // Join a study group room
-    // @SubscribeMessage("joinGroupRoom")
-    // handleJoinGroupRoom(
-    //   @MessageBody() { room, user }: { room: string; user: string },
-    //   @ConnectedSocket() client: Socket
-    // ): void {
-    //   client.join(room);
-    //   if (!this.rooms[room]) this.rooms[room] = [];
-    //   if (!this.rooms[room].includes(client.id)) this.rooms[room].push(client.id);
-  
-    //   console.log(`${user} joined group room: ${room}`);
-    //   this.server.to(room).emit("systemMessage", `${user} has joined the group.`);
-   // }
-  
     // Send message to a room
     @SubscribeMessage("sendMessage")
     async handleSendMessage(
-      @MessageBody() { room, message }: { room: string;  message: string },
+      @MessageBody() data:any,
       @ConnectedSocket() client: Socket
     ) {
 
+      try{
+        if(typeof data === 'string'){
+          data= JSON.parse(data);
+        }
+
+        const room= data?.room?.trim();
+        const message= data?.message?.trim();
         const user = client.id;
 
-        console.log('Received message data:', { room, message });
-  console.log('User ID:', user);
+        console.log(`Received ${message} from room ${room} `);
+        console.log('User ID:', user);
 
   
       await this.chatService.saveMessage(room, user, message);
 
       console.log(`Message in room ${room} from ${user}: ${message}`);
-      this.server.to(room).emit("chatMessage", { user, message });
+      this.server.to(room).emit("chatMessage", `${user}: ${message}` );
+    }
+    catch(error){
+      console.log('Error Parsing',error);
+      client.emit('error',{message:'failed to send message'});
+
     }
   }
+}
   
