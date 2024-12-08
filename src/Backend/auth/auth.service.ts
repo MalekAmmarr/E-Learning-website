@@ -15,17 +15,17 @@ export class AuthService {
   constructor(
     @InjectModel(admin.name, 'eLearningDB') private readonly adminModel: Model<admin>,
     @InjectModel(User.name, 'eLearningDB') private readonly userModel: Model<User>,
-    @InjectModel(Logs.name,'eLearningDB') private readonly LogsModel:Model<Logs>,
+    @InjectModel(Logs.name, 'eLearningDB') private readonly LogsModel: Model<Logs>,
     @InjectModel(Instructor.name, 'eLearningDB') private readonly instructorModel: Model<Instructor>,
     // private jwtService:JwtService,
-  ) {}
+  ) { }
 
   async registerUser(createDto: any, role: 'admin' | 'student' | 'instructor') {
 
     try {
-        if (!createDto.passwordHash) {
-            throw new Error('Password is required');
-        }
+      if (!createDto.passwordHash) {
+        throw new Error('Password is required');
+      }
 
       // Hash the password
       const hashedPassword = await bcrypt.hash(createDto.passwordHash, 10);
@@ -49,7 +49,7 @@ export class AuthService {
       });
 
       return await user.save();
-      
+
     } catch (error) {
       console.error('Error during registration:', error);
       throw new Error(`${role} registration failed`);
@@ -85,11 +85,11 @@ export class AuthService {
       }
       log = "pass";
 
-      
+
       // Generate JWT token
       const payload = { id: user._id, name: user.name, email: user.email, role };
       const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: '1h',
+        expiresIn: '24h',
       });
 
       return { accessToken, user, log };
