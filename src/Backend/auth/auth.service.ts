@@ -8,6 +8,7 @@ import { User } from 'src/schemas/user.schema';
 import { Instructor } from 'src/schemas/instructor.schema';
 import { Logs } from 'src/schemas/logs.schema';
 import { JwtService } from '@nestjs/jwt';
+import { Note } from 'src/schemas/note.schema';
 
 
 @Injectable()
@@ -17,6 +18,7 @@ export class AuthService {
     @InjectModel(User.name, 'eLearningDB') private readonly userModel: Model<User>,
     @InjectModel(Logs.name, 'eLearningDB') private readonly LogsModel: Model<Logs>,
     @InjectModel(Instructor.name, 'eLearningDB') private readonly instructorModel: Model<Instructor>,
+    @InjectModel(Note.name,'eLearningDB') private readonly NoteModel: Model<Note>
     // private jwtService:JwtService,
   ) { }
 
