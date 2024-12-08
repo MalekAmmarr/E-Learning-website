@@ -67,8 +67,118 @@ export class AdminsService {
   
   
   
-}
+// *Step 2 Features*
 
+  // Get all students
+  //Fetches a list of all students in the database.
+  async getAllStudents(): Promise<User[]> {
+    try {
+      return await this.UserModel.find().exec();
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      throw new Error('Failed to fetch students');
+    }
+  }
+
+  async updateStudentByEmail(email: string, updates: Record<string, any>): Promise<User> {
+    try {
+      console.log(`Updating student with email: ${email}`);
+      console.log('Updates:', updates);
+  
+      const updatedStudent = await this.UserModel.findOneAndUpdate(
+        { email: email },
+        updates,
+        { new: true }
+      );
+  
+      if (!updatedStudent) {
+        console.error('No student found with the provided email.');
+        throw new NotFoundException('Student not found');
+      }
+  
+      console.log('Successfully updated student:', updatedStudent);
+      return updatedStudent;
+    } catch (error) {
+      console.error('Error updating student by email:', error);
+      throw new Error('Failed to update student');
+    }
+  }
+  
+  
+
+  async deleteStudentByEmail(email: string): Promise<User> {
+    try {
+      const deletedStudent = await this.UserModel.findOneAndDelete({ email: email });
+      if (!deletedStudent) {
+        throw new NotFoundException('Student not found');
+      }
+      return deletedStudent;
+    } catch (error) {
+      console.error('Error deleting student by email:', error);
+      throw new Error('Failed to delete student by email');
+    }
+  }
+  
+
+  // Fetches a list of all instructors.
+  async getAllInstructors(): Promise<Instructor[]> {
+    try {
+      return await this.InstructorModel.find().exec();
+    } catch (error) {
+      console.error('Error fetching instructors:', error);
+      throw new Error('Failed to fetch instructors');
+    }
+  }
+
+  // Updates the details of a specific instructor using their id
+  async updateInstructor(email: string, updates: Record<string, any>): Promise<Instructor> {
+    try {
+      console.log(`Updating student with email: ${email}`);
+      console.log('Updates:', updates);
+  
+      const updateInstructor = await this.InstructorModel.findOneAndUpdate(
+        { email: email },
+        updates,
+        { new: true }
+      );
+  
+      if (!updateInstructor) {
+        console.error('No student found with the provided email.');
+        throw new NotFoundException('Student not found');
+      }
+  
+      console.log('Successfully updated student:', updateInstructor);
+      return updateInstructor;
+    } catch (error) {
+      console.error('Error updating student by email:', error);
+      throw new Error('Failed to update student');
+    }
+  }
+
+  // Deletes a specific instructor account by their id.
+  async deleteInstructor(email: string): Promise<Instructor> {
+    try {
+      const deletedInstructor = await this.InstructorModel.findOneAndDelete({email: email});
+      if (!deletedInstructor) {
+        throw new NotFoundException('Instructor not found');
+      }
+      return deletedInstructor;
+    } catch (error) {
+      console.error('Error deleting instructor:', error);
+      throw new Error('Failed to delete instructor');
+    }
+  }
+
+  // Fetches the logs of login attempts or unauthorized access for monitoring purposes.
+  async getLogs(): Promise<Logs[]> {
+    try {
+      return await this.logsModel.find().exec();
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+      throw new Error('Failed to fetch logs');
+    }
+  }
+}
 
 
 

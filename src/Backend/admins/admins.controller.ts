@@ -1,4 +1,4 @@
-import { Controller, Post, Body, BadRequestException,Get,Patch,Delete, UseGuards} from '@nestjs/common';
+import { Controller, Post, Body, BadRequestException,Get,Patch,Delete, UseGuards, Param} from '@nestjs/common';
 import { AdminsService } from './admins.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { CoursesService } from '../courses/courses.service';
@@ -172,4 +172,98 @@ async deleteAnnouncement(@Body() body: { title: string }) {
 }
 
 
+  // *Step 2 Features*
+
+  // Manage student accounts
+  //Calls getAllStudents to retrieve all student accounts.
+  @Get('students')
+  async getStudents() {
+    try {
+      return await this.adminsService.getAllStudents();
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      throw new BadRequestException('Failed to fetch students');
+    }
+  }
+//Calls updateStudent to update a specific student's details.
+@Patch('students/updateByEmail/:email')
+async updateStudentByEmail(
+  @Param('email') email: string, // Capture email from route
+  @Body() updates: Record<string, any>, // Capture updates from request body
+) {
+  try {
+    // Call the service method to update the student by email
+    const updatedStudent = await this.adminsService.updateStudentByEmail(email, updates);
+
+    return {
+      message: 'Student updated successfully',
+      updatedStudent,
+    };
+  } catch (error) {
+    console.error('Error updating student:', error); // Log the error for debugging
+    throw new BadRequestException('Failed to update student');
+  }
+}
+
+@Delete('students/deleteByEmail/:email')
+async deleteStudentByEmail(@Param('email') email: string) {
+  try {
+    return await this.adminsService.deleteStudentByEmail(email);
+  } catch (error) {
+    console.error('Error deleting student by email:', error);
+    throw new BadRequestException('Failed to delete student by email');
+  }
+}
+
+
+  // Manage instructor accounts
+  //Calls getAllInstructors to retrieve all instructor accounts.
+  @Get('instructors')
+  async getInstructors() {
+    try {
+      return await this.adminsService.getAllInstructors();
+    } catch (error) {
+      console.error('Error fetching instructors:', error);
+      throw new BadRequestException('Failed to fetch instructors');
+    }
+  }
+//Calls updateInstructor to update a specific instructor's details.
+  @Patch('instructors/:email')
+  async updateInstructor(
+    @Param('email') email: string,
+    @Body() updates: Record<string, any>,
+  ) {
+    try {
+      const updatedInstructor = await this.adminsService.updateInstructor(email, updates) ;
+      return {
+        message: 'Instructor updated successfully',
+        updatedInstructor,
+      };
+    } catch (error) {
+      console.error('Error updating instructor:', error);
+      throw new BadRequestException('Failed to update instructor');
+    }
+  }
+//Calls deleteInstructor to remove a specific instructor account.
+  @Delete('instructors/:email')
+  async deleteInstructor(@Param('email') email: string) {
+    try {
+      return await this.adminsService.deleteInstructor(email);
+    } catch (error) {
+      console.error('Error deleting instructor:', error);
+      throw new BadRequestException('Failed to delete instructor');
+    }
+  }
+
+  // Monitor unauthorized access logs
+  //Calls getLogs to fetch all access or unauthorized login attempt logs.
+  @Get('logs')
+  async getLogs() {
+    try {
+      return await this.logsService.getLogs();
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+      throw new BadRequestException('Failed to fetch logs');
+    }
+  }
 }
