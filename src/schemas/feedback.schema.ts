@@ -4,7 +4,6 @@ import { Course } from './course.schema';
 
 @Schema({ timestamps: true })
 export class Feedback extends Document {
-
   @Prop({ required: true })
   studentemail: string;
 
@@ -12,7 +11,7 @@ export class Feedback extends Document {
   courseId: string;
 
   @Prop({ required: true })
-  content: string;
+  Student_FeedBack_OnCourse: string;
 
   @Prop({ min: 1, max: 5 })
   rating?: number;
