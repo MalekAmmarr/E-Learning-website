@@ -6,11 +6,14 @@ import { Document } from 'mongoose';
 @Schema({ timestamps: true })
 export class Logs extends Document {
 
-@Prop({ required: true})
+  @Prop({ required: true })
   email: string;
 
-@Prop({required:true})
-    pass:string;
+  @Prop({ required: true })
+  pass: string;
+
+  @Prop({ required: true })
+  role: string;
 
 }
 
