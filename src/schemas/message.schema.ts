@@ -1,19 +1,21 @@
-import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { Document } from 'mongoose';
+import { User } from './user.schema';
+import { Course } from './course.schema';
 
 @Schema({ timestamps: true })
-export class ChatMessage extends Document {
-  @Prop({ required: true })
-  room: string;
+export class Message extends Document {
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'Course' })
+  courseId: string; // Reference to the Course
+
+  @Prop({ required: true, type: mongoose.Schema.Types.ObjectId, ref: 'User' })
+  userId: string; // Sender's User ID
 
   @Prop({ required: true })
-  user: string;
+  content: string; // Message content
 
   @Prop({ required: true })
-  message: string;
-
-  @Prop({ required: true })
-  createdAt: Date;
+  senderName: string; // Name of the sender (for display purposes)
 }
 
-export const ChatMessageSchema = SchemaFactory.createForClass(ChatMessage);
+export const MessageSchema = SchemaFactory.createForClass(Message);

@@ -40,6 +40,8 @@ import { ChatModule } from './Backend/chat/chat.module';
       rootPath: join('D:/GIU 5th semester/Human Computer Interaction/uploads'), // Folder where PDFs are stored
       serveRoot: '/files', // URL path prefix for accessing the PDFs
     }),
+
+    
     UsersModule,
     CoursesModule,
     ModulesModule,

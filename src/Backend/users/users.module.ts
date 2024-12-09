@@ -19,7 +19,7 @@ import { AuthModule } from '../auth/auth.module';
         { name: User.name, schema: UserSchema },
         { name:Logs.name,schema:LogsSchema},
         { name: Progress.name, schema: ProgressSchema},
-        { name: Course.name, schema: CourseSchema }
+        { name: Course.name, schema: CourseSchema },
       ],
       'eLearningDB',
     ),

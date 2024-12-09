@@ -121,6 +121,18 @@ export class UsersService {
     };
 }
 
+async findUserById(userId: string): Promise<User> {
+  try {
+    const user = await this.userModel.findOne({ _id: userId }).exec();
+    if (!user) {
+      throw new Error(`User with ID ${userId} not found.`);
+    }
+    return user;
+  } catch (error) {
+    console.error('Error finding user by ID:', error);
+    throw new Error('Error finding user.');
+  }
+}
 
 
 }
