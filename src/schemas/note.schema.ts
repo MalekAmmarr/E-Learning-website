@@ -1,21 +1,23 @@
+// note.schema.ts
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import mongoose from 'mongoose';
 import { Document } from 'mongoose';
-import { User } from './user.schema';
-import { Course } from './course.schema';
+import { Course } from './course.schema'; // Assuming you have a Course schema
 
 @Schema({ timestamps: true })
 export class Note extends Document {
-  @Prop({ required: true })
-  studentEmail: string; // student who take the note
 
+  @Prop ({required:true})
+  studentEmail:string
+  
   @Prop({ required: true })
-  courseTitle: string;  // Associated course titlee
+  content: string; // Content of the note
 
-  @Prop({ required: true })
-  content: string; // The content of the note
+  @Prop({ required:true})
+  courseId: string // Reference to the Course model
 
-  @Prop({ required: true })
-  timestamp: Date; // The timestamp of when the note was created
+  @Prop({ type: Date, default: Date.now })
+  timestamp: Date; // Timestamp for when the note is created or updated
 }
 
 export const NoteSchema = SchemaFactory.createForClass(Note);

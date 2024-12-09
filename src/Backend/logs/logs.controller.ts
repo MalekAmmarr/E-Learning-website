@@ -4,21 +4,20 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 
 @UseGuards(AuthorizationGuard)
-@Roles('admin') 
+@Roles('admin')
 @Controller('logs')
 
 export class LogsController {
-  constructor(private readonly logsService: LogsService) {}
+  constructor(private readonly logsService: LogsService) { }
 
   @Post()
-  async create(@Body() email,log) {
-    return await this.logsService.create(email,log);
+  async create(@Body() email, log, role) {
+    return await this.logsService.create(email, log, role);
   }
 
   @Get('getLogs')
-  async getLogs()
-  {
+  async getLogs() {
     return await this.logsService.getLogs();
   }
- 
+
 }

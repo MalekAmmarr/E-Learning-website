@@ -36,8 +36,10 @@ import { ChatModule } from './Backend/chat/chat.module';
       {
         connectionName: 'dataManagementDB', // For data management database
       },
-    ),ServeStaticModule.forRoot({
-      rootPath: join('D:/GIU 5th semester/Human Computer Interaction/uploads'), // Folder where PDFs are stored
+
+    ),
+    ServeStaticModule.forRoot({
+      rootPath: join('C:', 'Users', 'Omar Hossam', 'Downloads'), // Folder where PDFs are stored
       serveRoot: '/files', // URL path prefix for accessing the PDFs
     }),
 
@@ -56,7 +58,7 @@ import { ChatModule } from './Backend/chat/chat.module';
     LogsModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
-      signOptions: { expiresIn: '1h' }, // Token expiration time
+      signOptions: { expiresIn: '24h' }, // Token expiration time
       global: true,
     }),
     InstructorModule,
@@ -68,4 +70,4 @@ import { ChatModule } from './Backend/chat/chat.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
