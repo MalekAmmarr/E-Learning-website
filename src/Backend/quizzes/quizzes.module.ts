@@ -6,6 +6,7 @@ import { QuizzesService } from './quizzes.service';
 import { User, UserSchema } from 'src/schemas/user.schema';
 import { Course, CourseSchema } from 'src/schemas/course.schema';
 import { Instructor, InstructorSchema } from 'src/schemas/instructor.schema';
+import { Module as CourseModule, ModuleSchema } from 'src/schemas/module.schema';
 
 @Module({
   imports: [
@@ -14,7 +15,9 @@ import { Instructor, InstructorSchema } from 'src/schemas/instructor.schema';
       { name: Quiz.name, schema: QuizSchema },{ name: User.name, schema: UserSchema },
       { name: Instructor.name, schema: InstructorSchema },
       { name: User.name, schema: UserSchema },
-      {name:Course.name , schema:CourseSchema},],
+      {name:Course.name , schema:CourseSchema},
+      {name: CourseModule.name , schema: ModuleSchema},
+    ],
       'eLearningDB',
     ),
   ],

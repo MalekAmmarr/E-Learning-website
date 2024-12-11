@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 
 export class CreateQuizDto {
   @IsNotEmpty()
@@ -18,12 +18,15 @@ export class CreateQuizDto {
   instructorEmail: string; // Instructor's email who created the quiz
 
   @IsNotEmpty()
-  @IsArray()
-  questions: Array<{ question: string; options: string[]; correctAnswer: string }>; // Questions and answers
+  @IsNumber()
+  numberOfQuestions: number; // Number of questions the instructor wants to generate
+
+  @IsNotEmpty()
+  @IsEnum(['MCQ', 'True/False', 'Both'])
+  questionType: string; // Type of questions: MCQ, True/False, or Both
 
   @IsArray()
   studentAnswers?: string[]; // Optional field: student answers (initially empty)
 
-  @IsNotEmpty()
   studentGrade?: number; // Optional: default grade, can be set after quiz is taken
 }

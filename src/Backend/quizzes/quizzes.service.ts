@@ -8,6 +8,7 @@ import { User } from 'src/schemas/user.schema';
 import { CreateQuizDto } from './dto/create-quiz.dto';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { use } from 'passport';
+import { Module as CourseModule } from 'src/schemas/module.schema';
 
 interface Question {
   question: string; // The question text
@@ -22,15 +23,55 @@ export class QuizzesService {
     private readonly quizModel: Model<Quiz>,
     @InjectModel(User.name, 'eLearningDB')
     private readonly userModel: Model<User>,
+    @InjectModel(CourseModule.name, 'eLearningDB') 
+    private readonly moduleModel: Model<CourseModule>,
   ) {}
 
   // Create a new quiz
   async createQuiz(createQuizDto: CreateQuizDto): Promise<Quiz> {
-    // Create a new quiz instance
-    const quiz = new this.quizModel(createQuizDto);
+    // Fetch the module for the course
+    const module = await this.moduleModel.findOne({ courseTitle: createQuizDto.courseTitle });
+    
+    if (!module) {
+      throw new Error('Module not found for the specified course');
+    }
+
+    // Filter questions based on the selected type
+    let filteredQuestions = module.questions.filter(question => {
+      if (createQuizDto.questionType === 'MCQ' && question.questionType === 'MCQ') {
+        return true;
+      } else if (createQuizDto.questionType === 'True/False' && question.questionType === 'True/False') {
+        return true;
+      } else if (createQuizDto.questionType === 'Both') {
+        return true;
+      }
+      return false;
+    });
+
+    // Ensure the number of questions is less than or equal to the available questions
+    if (filteredQuestions.length < createQuizDto.numberOfQuestions) {
+      throw new Error('Not enough questions in the module to create the quiz');
+    }
+
+    // Shuffle and select the requested number of questions randomly
+    const selectedQuestions = this.getRandomQuestions(filteredQuestions, createQuizDto.numberOfQuestions);
+
+    // Create the quiz object with the selected questions
+    const quiz = new this.quizModel({
+      ...createQuizDto,
+      questions: selectedQuestions,
+    });
+
     // Save the quiz to the database
     return await quiz.save();
   }
+
+  // Helper function to shuffle and select random questions
+  private getRandomQuestions(questions: any[], numberOfQuestions: number): any[] {
+    const shuffled = [...questions].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, numberOfQuestions);
+  }
+
 
   // Update an existing quiz
   async updateQuiz(
@@ -40,11 +81,20 @@ export class QuizzesService {
     // Find the quiz by its ID and update it
     const updatedQuiz = await this.quizModel.findOneAndUpdate(
       { quizId }, // Find by quizId
-      { $set: updateQuizDto }, // Update with the new values
-      { new: true }, // Return the updated quiz object
+      {
+        $set: updateQuizDto, // Update the quiz with new values
+      },
+      { new: true, runValidators: true }, // Return the updated quiz object and run validation
     );
+  
+    // If no quiz is found, throw an error
+    if (!updatedQuiz) {
+      throw new NotFoundException(`Quiz with ID ${quizId} not found.`);
+    }
+  
     return updatedQuiz;
   }
+  
 
   // Start Quiz (Fetch the quiz for the student)
   async startQuiz(

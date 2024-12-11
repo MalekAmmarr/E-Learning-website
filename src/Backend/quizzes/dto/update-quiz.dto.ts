@@ -1,4 +1,4 @@
-import { IsArray, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class UpdateQuizDto {
   @IsOptional()
@@ -21,8 +21,6 @@ export class UpdateQuizDto {
   @IsArray()
   studentAnswers?: string[]; // Answers provided by the student
 
-  @IsOptional()
-  studentGrade?: number; // Grade after evaluation
 
   @IsOptional()
   isGraded?: boolean; // Whether the quiz has been graded

@@ -13,5 +13,6 @@ import { ModulesService } from './modules.service';
   ],
   controllers: [ModulesController],
   providers: [ModulesService],
+  exports: [ModulesService]
 })
 export class ModulesModule {}
