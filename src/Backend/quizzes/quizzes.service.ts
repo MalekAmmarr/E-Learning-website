@@ -5,7 +5,6 @@ import { InjectModel } from '@nestjs/mongoose';
 
 import { Model, Types } from 'mongoose';
 import { User } from 'src/schemas/user.schema';
-import { CreateQuizDto } from './dto/create-quiz.dto';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { use } from 'passport';
 import { Module as CourseModule } from 'src/schemas/module.schema';
@@ -115,27 +114,31 @@ export class QuizzesService {
   }
 
 
-  // Update an existing quiz
-  async updateQuiz(
-    quizId: string,
-    updateQuizDto: UpdateQuizDto,
-  ): Promise<Quiz> {
-    // Find the quiz by its ID and update it
-    const updatedQuiz = await this.quizModel.findOneAndUpdate(
-      { quizId }, // Find by quizId
-      {
-        $set: updateQuizDto, // Update the quiz with new values
-      },
-      { new: true, runValidators: true }, // Return the updated quiz object and run validation
-    );
-  
-    // If no quiz is found, throw an error
-    if (!updatedQuiz) {
-      throw new NotFoundException(`Quiz with ID ${quizId} not found.`);
-    }
-  
-    return updatedQuiz;
+ // Method to update the quiz content
+ async updateQuiz(quizId: string, updateData: any) {
+  // Step 1: Find the quiz by quizId
+  const quiz = await this.quizModel.findOne({ quizId }).exec();
+  if (!quiz) {
+    throw new Error(`Quiz with quizId ${quizId} not found`);
   }
+
+  // Step 2: Update the quiz fields (e.g., questions, quiz type, etc.)
+  if (updateData.quizType) {
+    quiz.quizType = updateData.quizType;
+  }
+  if (updateData.questions) {
+    quiz.questions = updateData.questions; // Assuming questions is an array of questions
+  }
+  if (updateData.isGraded !== undefined) {
+    quiz.isGraded = updateData.isGraded;
+  }
+
+  // Step 3: Save the updated quiz
+  await quiz.save();
+
+  // Return the updated quiz
+  return quiz;
+}
   
 
   // Start Quiz (Fetch the quiz for the student)
@@ -143,19 +146,32 @@ export class QuizzesService {
     userEmail: string,
     quizId: string,
     courseTitle: string,
-  ): Promise<Question[]> {
-    // Fetch the quiz for the student based on the course title and quiz ID
-    const quiz = await this.quizModel.findOne({ quizId, courseTitle }).exec();
-
+  ): Promise<any> {  // Return type can be adjusted depending on the structure you want
+    // Fetch the quiz for the student based on the course title and quiz ID, excluding correctAnswer
+    const quiz = await this.quizModel
+      .findOne({ quizId, courseTitle })
+      .select('courseTitle quizId questions')  // Select courseTitle, quizId, and questions only
+      .exec();
+  
     if (!quiz) {
       throw new Error('Quiz not found for this course');
     }
-    let question = quiz.questions;
-
-    return question;
+  
+    // Exclude correctAnswer from each question
+    const questionsWithoutAnswers = quiz.questions.map(question => {
+      // Destructure question and exclude the correctAnswer field
+      const { correctAnswer, ...questionWithoutAnswer } = question;
+      return questionWithoutAnswer;
+    });
+  
+    return {
+      courseTitle: quiz.courseTitle,
+      quizId: quiz.quizId,
+      questions: questionsWithoutAnswers,
+    };
   }
+  
 
-  // Submit answers (for the student)
   async submitAnswers(
     userEmail: string,
     quizId: string,
@@ -163,25 +179,33 @@ export class QuizzesService {
   ): Promise<void> {
     // Fetch the user based on the email
     const user = await this.userModel.findOne({ email: userEmail }).exec();
-
+  
     if (!user) {
       throw new Error('Student not found');
     }
-
+  
     // Fetch the quiz by quizId
     const quiz = await this.quizModel.findOne({ quizId }).exec();
-
+  
     if (!quiz) {
       throw new Error('Quiz not found');
     }
-
-    // Save the student's answers in the quiz
-    answers.push(userEmail);
-
-    if (quiz.studentAnswers.length == 0) quiz.studentAnswers[0] = answers;
-    else quiz.studentAnswers[quiz.studentAnswers.length] = answers;
+  
+    // Check if the student has already submitted answers
+    const existingEntry = quiz.studentAnswers.find(entry => entry.studentEmail === userEmail);
+    
+    if (existingEntry) {
+      // If the student already exists, update their answers
+      existingEntry.answers = answers;
+    } else {
+      // If the student doesn't exist, create a new entry
+      quiz.studentAnswers.push({ studentEmail: userEmail, answers });
+    }
+  
+    // Save the updated quiz
     await quiz.save();
   }
+  
 
   // Find quiz by quizId
   async findQuizById(quizId: string): Promise<Quiz> {
@@ -208,15 +232,22 @@ export class QuizzesService {
       throw new NotFoundException(`User with email ${studentEmail} not found`);
     }
   
+    // Find the student's answers entry in the quiz using their email
     const studentEntry = quiz.studentAnswers.find(
-      (entry) => entry[1] === studentEmail,
+      (entry) => entry.studentEmail === studentEmail,
     );
-    const Answers = studentEntry.slice(0, -1);
+  
+    if (!studentEntry) {
+      throw new Error(`No answers found for student with email: ${studentEmail}`);
+    }
+  
+    // Extract the answers from the studentEntry
+    const answers = studentEntry.answers;
   
     // Calculate grade
     let grade = 0;
     const feedbackArray = quiz.questions.map((question, index) => {
-      const isCorrect = question.correctAnswer === Answers[index];
+      const isCorrect = question.correctAnswer === answers[index];
       if (isCorrect) grade += 1;
   
       return {
@@ -248,7 +279,7 @@ export class QuizzesService {
   
       if (courseScoreIndex !== -1) {
         // Update the score for the specific course
-        user.courseScores[courseScoreIndex].score = calculatedScore;
+        user.courseScores[courseScoreIndex].score += grade;
       } else {
         // If the course doesn't exist in courseScores, add it with the calculated score
         user.courseScores.push({
@@ -259,11 +290,11 @@ export class QuizzesService {
     } else {
       throw new Error(`Student is not accepted into course: ${quiz.courseTitle}`);
     }
-
-     // Update GPA: Calculate average score from all courseScores
+  
+    // Update GPA: Calculate average score from all courseScores
     const totalScore = user.courseScores.reduce((sum, entry) => sum + entry.score, 0);
     const gpa = totalScore / user.courseScores.length;
-
+  
     // Update the user's GPA
     user.GPA = gpa;
   
@@ -272,5 +303,7 @@ export class QuizzesService {
   
     return quiz;
   }
+  
+  
   
 }

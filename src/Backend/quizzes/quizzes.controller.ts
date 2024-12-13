@@ -15,7 +15,6 @@ import { Model, Types } from 'mongoose';
 import { Quiz } from 'src/schemas/quiz.schema';
 import { User } from 'src/schemas/user.schema';
 import { QuizzesService } from './quizzes.service';
-import { CreateQuizDto } from './dto/create-quiz.dto';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -47,12 +46,13 @@ export class QuizzesController {
   @UseGuards(AuthorizationGuard)
   @Put(':quizId')
   @Roles('instructor')
-  async updateQuiz(
-    @Param('quizId') quizId: string,
-    @Body() updateQuizDto: UpdateQuizDto,
-  ): Promise<Quiz> {
-    return this.quizService.updateQuiz(quizId, updateQuizDto);
-  }
+ // Endpoint to update quiz content
+ async updateQuiz(
+   @Param('quizId') quizId: string,
+   @Body() updateData: any,
+ ) {
+   return this.quizService.updateQuiz(quizId, updateData);
+ }
 
   // Start the quiz for a student
   @UseGuards(AuthorizationGuard)
@@ -95,7 +95,7 @@ export class QuizzesController {
   // Endpoint to grade a quiz and update user score
   @UseGuards(AuthorizationGuard)
   @Patch('grade')
-  @Roles('student')
+  @Roles('instructor')
   async gradeQuiz(
     @Body('quizId') quizId: string,
     @Body('studentEmail') studentEmail: string,
