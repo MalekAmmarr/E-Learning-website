@@ -33,8 +33,14 @@ export class QuizzesController {
   @UseGuards(AuthorizationGuard)
   @Post()
   @Roles('instructor')
-  async createQuiz(@Body() createQuizDto: CreateQuizDto): Promise<Quiz> {
-    return this.quizService.createQuiz(createQuizDto);
+  @Post('create')
+  async createQuiz(
+    @Body('instructorEmail') instructorEmail: string,
+    @Body('quizId') quizId: string,
+    @Body('quizType') quizType: string,
+    @Body('numberOfQuestions') numberOfQuestions: number,
+  ) {
+    return this.quizService.createQuiz(instructorEmail, quizId, quizType, numberOfQuestions);
   }
 
   // Route to update an existing quiz

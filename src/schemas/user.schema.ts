@@ -27,8 +27,9 @@ export class User extends Document {
   @Prop({ type: [String], default: [] })
   acceptedCourses: string[]; // Array of courses the user has been accepted into
 
-  @Prop({ default: 0 })
-  score: number; // Default score is 0
+  @Prop({ type: [{ courseTitle: String, score: Number }], default: [] })
+  courseScores: { courseTitle: string; score: number }[]; // Array of objects with course title and score
+
 
   @Prop({ type: [String], default: [] })
   Notifiction: string[];
@@ -59,6 +60,17 @@ export class User extends Document {
   @Prop({ type: [String], default: [] })
   Notes: string[];
 
+  // Virtual field to calculate GPA
+  @Prop({ default: 0 })
+  GPA: number;
+  
+ // Virtual function to calculate the GPA
+ getGPA(): number {
+  if (this.courseScores.length === 0) return 0;
+  const total = this.courseScores.reduce((acc, scoreObj) => acc + scoreObj.score, 0);
+  return total / this.courseScores.length;
+}
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+

@@ -3,8 +3,15 @@ import mongoose, { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Module extends Document {
+  
+  @Prop({ required: true })
+  quizId: string;
+
   @Prop({ required: true })
   courseTitle: string; // Reference to the associated course
+
+  @Prop({ required: true, enum: ['Small', 'Midterm', 'Final'] })
+  quizType: string; // Small, Midterm, or Final quiz
 
   @Prop({ required: true })
   instructorEmail: string; // Instructor who created the question bank
@@ -23,6 +30,7 @@ export class Module extends Document {
         questionType: { type: String, required: true, enum: ['MCQ', 'True/False'] }, // Type of question
         options: { type: [String], required: true }, // Options for the MCQ (for True/False, only two options)
         correctAnswer: { type: String, required: true }, // Correct answer
+        difficulty: { type: String, enum: ['easy', 'medium', 'hard'], required: true }, // Difficulty level of the question
       },
     ],
     default: [],
@@ -32,6 +40,7 @@ export class Module extends Document {
     questionType: 'MCQ' | 'True/False';
     options: string[];
     correctAnswer: string;
+    difficulty: 'easy' | 'medium' | 'hard'; // Difficulty attribute for each question
   }[]; // Embedded array of questions
 }
 

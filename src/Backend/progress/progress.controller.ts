@@ -9,9 +9,9 @@ export class ProgressController {
     constructor(private readonly progressService: ProgressService) {}
 
     // Endpoint for an instructor to get a student's progress by email
-    @UseGuards(AuthorizationGuard)
+   // @UseGuards(AuthorizationGuard)
     @Get(':instructorEmail/:studentEmail')
-    @Roles('instructor', 'student') 
+    //@Roles('instructor', 'student') 
     async getStudentProgress(
       @Param('instructorEmail') instructorEmail: string,
       @Param('studentEmail') studentEmail: string

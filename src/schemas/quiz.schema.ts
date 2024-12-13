@@ -25,6 +25,9 @@ export class Quiz extends Document {
   @Prop({ type: [[String]], default: [] })
   studentAnswers: string[][]; // Answers provided by the student
 
+  @Prop({ type: [{ studentEmail: String, score: Number }], default: [] })
+  studentScores: { studentEmail: string; score: number }[]; // Student scores for the quiz
+
   @Prop({ default: false })
   isGraded: boolean; // Whether the quiz has been graded by the instructor
 }

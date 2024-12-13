@@ -20,7 +20,7 @@ export class ProgressService {
         if (!user) {
           throw new NotFoundException('Student not found');
         }
-    
+      
         // Find all the courses taught by the instructor
         const courses = await this.courseModel
           .find({ instructormail: instructorEmail })
@@ -28,7 +28,7 @@ export class ProgressService {
         if (!courses.length) {
           throw new NotFoundException('No courses found for this instructor');
         }
-    
+      
         // Get the progress of the student in each of these courses
         const progressData = await this.progressModel
           .find({
@@ -39,23 +39,39 @@ export class ProgressService {
         if (!progressData.length) {
           throw new NotFoundException('No progress data found for this student');
         }
-    
-        // Format the data
-        const studentProgress = progressData.map(progress => ({
-          courseTitle: progress.Coursetitle,
-          score: progress.score,
-          completionRate: progress.completionRate,
-          completedLectures: progress.completedLectures,
-        }));
-    
+      
+        // Prepare the student's score data based on accepted courses
+        const studentScores = user.courseScores.reduce((acc, courseScore) => {
+          // If the course is in the accepted courses, store the score
+          if (user.acceptedCourses.includes(courseScore.courseTitle)) {
+            acc[courseScore.courseTitle] = courseScore.score;
+          }
+          return acc;
+        }, {});
+      
+        // Format the progress data and add the score for each course
+        const studentProgress = progressData.map(progress => {
+          const courseTitle = progress.Coursetitle;
+          const score = studentScores[courseTitle] || 0; // Get the score or 0 if no score is found
+      
+          return {
+            courseTitle,
+            score,
+            completionRate: progress.completionRate,
+            completedLectures: progress.completedLectures,
+          };
+        });
+      
         // Prepare the response
         return {
           email: user.email,
           name: user.name,
           age: user.age,
+          GPA: user.GPA,
           profilePictureUrl: user.profilePictureUrl || null,
           acceptedCourses: user.acceptedCourses,
           progress: studentProgress,
         };
       }
+      
 }

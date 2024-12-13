@@ -13,6 +13,7 @@ export class CreateQuizDto {
   @IsString()
   courseTitle: string; // Associated course title
 
+
   @IsNotEmpty()
   @IsString()
   instructorEmail: string; // Instructor's email who created the quiz
@@ -21,12 +22,12 @@ export class CreateQuizDto {
   @IsNumber()
   numberOfQuestions: number; // Number of questions the instructor wants to generate
 
-  @IsNotEmpty()
-  @IsEnum(['MCQ', 'True/False', 'Both'])
-  questionType: string; // Type of questions: MCQ, True/False, or Both
 
   @IsArray()
   studentAnswers?: string[]; // Optional field: student answers (initially empty)
 
-  studentGrade?: number; // Optional: default grade, can be set after quiz is taken
+  @IsNumber()
+  studentScore?: number; // Student's score (for Midterm or Final quiz)
+
+  
 }

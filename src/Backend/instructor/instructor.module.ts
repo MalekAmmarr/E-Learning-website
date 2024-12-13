@@ -12,6 +12,7 @@ import { Logs, LogsSchema } from 'src/schemas/logs.schema';
 import { LogsModule } from '../logs/logs.module';
 import { Feedback, FeedbackSchema } from 'src/schemas/feedback.schema';
 import { FeedbackService } from '../feedback/feedback.service';
+import { Progress, ProgressSchema } from 'src/schemas/progress.schema';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { FeedbackService } from '../feedback/feedback.service';
         { name: User.name, schema: UserSchema },
         { name: Course.name, schema: CourseSchema },
         { name: Logs.name, schema: LogsSchema },
-        { name: Feedback.name, schema: FeedbackSchema }
+        { name: Feedback.name, schema: FeedbackSchema },
+        {name: Progress.name, schema: ProgressSchema}
       ],
       'eLearningDB',
     ),
