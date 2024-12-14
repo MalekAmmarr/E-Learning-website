@@ -78,7 +78,7 @@ export default function Home() {
               <nav className="main-nav">
                 {/* ***** Logo Start ***** */}
                 <a className="logo">
-                  <h1>Scholar</h1>
+                  <h1>Student</h1>
                 </a>
                 {/* ***** Logo End ***** */}
                 {/* ***** Serach Start ***** */}
@@ -137,70 +137,61 @@ export default function Home() {
                     <span className="category">Our Courses</span>
                     <h2>With Scholar Teachers, Everything Is Easier</h2>
                     <p>
-                      Scholar is free CSS template designed by TemplateMo for
-                      online educational related websites. This layout is based
-                      on the famous Bootstrap v5.3.0 framework.
-                    </p>
-                    <div
-                      className="buttons"
-                      onClick={() => handleCourseClick()}
-                    >
-                      <div className="main-button">
-                        <a href="#">Request Demo</a>
-                      </div>
-                      <div
-                        className="icon-button"
-                        onClick={() => handleCourseClick()}
-                      >
-                        <a href="#">
-                          <i className="fa fa-play" /> What's Scholar?
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div
-                  className="item item-2"
-                  onClick={() => handleCourseClick()}
-                >
-                  <div className="header-text">
-                    <span className="category">Best Result</span>
-                    <h2>Get the best result out of your effort</h2>
-                    <p>
-                      You are allowed to use this template for any educational
-                      or commercial purpose. You are not allowed to
-                      re-distribute the template ZIP file on any other website.
+                      We offer a lot of courses in various fields and majors to
+                      help you excel and achieve your goals. Whether you're
+                      looking to advance your career, improve your skills, or
+                      explore a new hobby, Scholar Teachers has something for
+                      everyone.
                     </p>
                     <div className="buttons">
                       <div className="main-button">
-                        <a href="#">Request Demo</a>
+                        <a href="#courses">Take a look on courses</a>
+                      </div>
+                      <div className="icon-button"></div>
+                    </div>
+                  </div>
+                </div>
+                <div className="item item-2">
+                  <div className="header-text">
+                    <span className="category">Team</span>
+                    <h2>We Have the Best Team with the Best Teachers</h2>
+                    <p>
+                      Our team consists of highly qualified and experienced
+                      teachers who are passionate about education and dedicated
+                      to your success. Each instructor brings expertise,
+                      innovation, and a student-centered approach to ensure that
+                      learning is both engaging and effective.
+                    </p>
+                    <div className="buttons">
+                      <div className="main-button">
+                        <a href="#team">Take a Look on our team</a>
                       </div>
                       <div className="icon-button">
-                        <a href="#">
-                          <i className="fa fa-play" /> What's the best result?
+                        <a href="#team">
+                          <i className="fa fa-play" /> why they are the best?
                         </a>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div
-                  className="item item-3"
-                  onClick={() => handleCourseClick()}
-                >
+                <div className="item item-3">
                   <div className="header-text">
                     <span className="category">Online Learning</span>
-                    <h2>Online Learning helps you save the time</h2>
+                    <h2>
+                      Online Learning Helps You Save Time and Achieve More
+                    </h2>
                     <p>
-                      Lorem ipsum dolor sit amet, consectetur adipiscing elit,
-                      sed do eiusmod temporious incididunt ut labore et dolore
-                      magna aliqua suspendisse.
+                      Online learning empowers you to balance education with
+                      your busy schedule. With flexible courses accessible
+                      anytime and anywhere, you can achieve your goals without
+                      sacrificing other priorities.
                     </p>
                     <div className="buttons">
                       <div className="main-button">
-                        <a href="#">Request Demo</a>
+                        <a href="#services">Take a Look on our services</a>
                       </div>
                       <div className="icon-button">
-                        <a href="#">
+                        <a href="#services">
                           <i className="fa fa-play" /> What's Online Course?
                         </a>
                       </div>
@@ -224,13 +215,13 @@ export default function Home() {
                   />
                 </div>
                 <div className="main-content">
-                  <h4>Online Degrees</h4>
+                  <h4>Online Certificates</h4>
                   <p>
-                    Whenever you need free templates in HTML CSS, you just
-                    remember TemplateMo website.
+                    Get your online degres from us now and you will not regret
+                    it. don't waste time
                   </p>
                   <div className="main-button">
-                    <a href="#">Read More</a>
+                    <a href="/login">Start Now</a>
                   </div>
                 </div>
               </div>
@@ -244,13 +235,13 @@ export default function Home() {
                   />
                 </div>
                 <div className="main-content">
-                  <h4>Short Courses</h4>
+                  <h4> Live Chat Support</h4>
                   <p>
-                    You can browse free templates based on different tags such
-                    as digital marketing, etc.
+                    We offer real-time chat support to answer your questions,
+                    and assist you with your learning journey.
                   </p>
                   <div className="main-button">
-                    <a href="#">Read More</a>
+                    <a href="/login">Let's Begin</a>
                   </div>
                 </div>
               </div>
@@ -261,13 +252,13 @@ export default function Home() {
                   <img src="/assets/images/service-03.png" alt="web experts" />
                 </div>
                 <div className="main-content">
-                  <h4>Web Experts</h4>
+                  <h4>Different Events</h4>
                   <p>
-                    You can start learning HTML CSS by modifying free templates
-                    from our website too.
+                    we organize a variety of events designed to inspire,
+                    educate, and connect our community
                   </p>
                   <div className="main-button">
-                    <a href="#">Read More</a>
+                    <a href="/login">join us</a>
                   </div>
                 </div>
               </div>
