@@ -18,6 +18,7 @@ import { Progress, ProgressSchema } from 'src/schemas/progress.schema';
     ),
   ],
   controllers: [ProgressController],
-  providers: [ProgressService]
+  providers: [ProgressService],
+  exports: [ProgressService]
 })
 export class ProgressModule {}

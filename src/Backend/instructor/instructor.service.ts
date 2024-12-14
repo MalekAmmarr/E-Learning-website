@@ -14,6 +14,7 @@ import { Course } from 'src/schemas/course.schema';
 import { CreateCourseDto } from '../courses/dto/create-course.dto';
 import { UpdateCourseDto } from '../courses/dto/update-course.dto';
 import { AuthService } from '../auth/auth.service';
+import { Progress } from 'src/schemas/progress.schema';
 
 @Injectable()
 export class InstructorService {
@@ -25,6 +26,8 @@ export class InstructorService {
     private readonly UserModel: Model<User>, // Inject the User model for DB operations
     @InjectModel(Course.name, 'eLearningDB')
     private courseModel: Model<Course>,
+    @InjectModel(Progress.name, 'eLearningDB')
+    private progressModel: Model<Progress>,
     private readonly authService: AuthService, // Inject AuthService
 
   ) { }
@@ -89,6 +92,7 @@ export class InstructorService {
       if (action === 'accept') {
         if (!user.acceptedCourses.includes(courseName)) {
           user.acceptedCourses.push(courseName);
+          user.courseScores.push({ courseTitle: courseName, score: 0 });
           user.Notifiction
             .push(`Congratulations! You have been accepted into the course  ${courseName}.
              We are excited to have you join and look forward to your participation. Please check the course details 
@@ -246,5 +250,78 @@ export class InstructorService {
     // Save and return the updated course
     return await course.save();
   }
+
+  // Get all students enrolled in a course and their count
+  async getEnrolledStudents(courseTitle: string): Promise<any> {
+    const students = await this.UserModel.find({
+      acceptedCourses: { $in: [courseTitle] },
+    }).exec();
+
+    return {
+      totalCount: students.length, // Number of students
+      students: students.map(student => ({
+        name: student.name,
+        email: student.email,
+        age: student.age,
+        coursescores: student.courseScores,
+        appliedCourses: student.appliedCourses,
+      })),
+    };
+  }
+
+
+  // 2. Get the number of students who have completed the course
+  async getCompletedStudentsCount(courseTitle: string): Promise<number> {
+    const progress = await this.progressModel.find({
+      Coursetitle: courseTitle,
+      completionRate: { $gte: 100 },
+    }).exec();
+    return progress.length;
+  }
+
+  // 3. Get the number of students based on their scores
+  async getStudentsByScore(courseTitle: string): Promise<any> {
+    // Find all students who are accepted into the course
+    const students = await this.UserModel.find({
+      acceptedCourses: { $in: [courseTitle] },
+    }).exec();
+  
+    // Define score categories
+    const scoreCategories = {
+      belowAverage: 0,
+      average: 0,
+      aboveAverage: 0,
+      excellent: 0,
+    };
+  
+    // Get the total number of students in the course
+    const totalStudents = students.length;
+  
+    // Calculate the average score for the course
+    const averageScore = totalStudents
+      ? students.reduce((sum, student) => sum + student.courseScores.find(score => score.courseTitle === courseTitle)?.score, 0) / totalStudents
+      : 0;
+  
+    // Categorize students based on their score in the course
+    students.forEach((student) => {
+      const studentScore = student.courseScores.find(score => score.courseTitle === courseTitle)?.score;
+  
+      if (studentScore !== undefined) {
+        if (studentScore < averageScore) {
+          scoreCategories.belowAverage += 1;
+        } else if (studentScore === averageScore) {
+          scoreCategories.average += 1;
+        } else if (studentScore > averageScore) {
+          scoreCategories.aboveAverage += 1;
+        } else {
+          scoreCategories.excellent += 1;
+        }
+      }
+    });
+  
+    return scoreCategories;
+  }
+  
+
 
 }

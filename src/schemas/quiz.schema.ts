@@ -22,8 +22,12 @@ export class Quiz extends Document {
     correctAnswer: string;
   }>; // Array of questions with options and correct answers
 
-  @Prop({ type: [[String]], default: [] })
-  studentAnswers: string[][]; // Answers provided by the student
+  @Prop({ type: [{ studentEmail: String, answers: [String] }], default: [] })
+  studentAnswers: { studentEmail: string; answers: string[] }[];
+
+
+  @Prop({ type: [{ studentEmail: String, score: Number }], default: [] })
+  studentScores: { studentEmail: string; score: number }[]; // Student scores for the quiz
 
   @Prop({ default: false })
   isGraded: boolean; // Whether the quiz has been graded by the instructor

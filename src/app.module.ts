@@ -14,7 +14,6 @@ import { FeedbackModule } from './Backend/feedback/feedback.module';
 import { JwtModule } from '@nestjs/jwt';
 import { CertificateModule } from './Backend/certificate/certificate.module';
 import { BackupModule } from './Backend/backup/backup.module';
-import { ChathistoryModule } from './Backend/chathistory/chathistory.module';
 import { InstructorModule } from 'src/Backend/instructor/instructor.module';
 import { AdminsModule } from './Backend/admins/admins.module';
 import { LogsModule } from './Backend/logs/logs.module';
@@ -22,6 +21,7 @@ import { ProgressModule } from './Backend/progress/progress.module';
 import { AuthModule } from './Backend/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ChatModule } from './Backend/chat/chat.module';
 
 @Module({
   imports: [
@@ -42,6 +42,8 @@ import { join } from 'path';
       rootPath: join('C:', 'Users', 'Omar Hossam', 'Downloads'), // Folder where PDFs are stored
       serveRoot: '/files', // URL path prefix for accessing the PDFs
     }),
+
+    
     UsersModule,
     CoursesModule,
     ModulesModule,
@@ -53,7 +55,6 @@ import { join } from 'path';
     FeedbackModule,
     CertificateModule,
     BackupModule,
-    ChathistoryModule,
     LogsModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
@@ -64,6 +65,7 @@ import { join } from 'path';
     AdminsModule,
     ProgressModule,
     AuthModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

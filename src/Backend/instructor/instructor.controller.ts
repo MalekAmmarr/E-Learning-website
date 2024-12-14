@@ -192,4 +192,29 @@ export class InstructorController {
     );
   }
 
+
+   // 1. Endpoint to get the number of enrolled students in a course
+   @Get('enrolled-students/:courseTitle')
+   async getEnrolledStudentsCount(
+     @Param('courseTitle') courseTitle: string,
+   ): Promise<number> {
+     return this.instructorService.getEnrolledStudents(courseTitle);
+   }
+ 
+   // 2. Endpoint to get the number of students who completed the course
+   @Get('completed-students/:courseTitle')
+   async getCompletedStudentsCount(
+     @Param('courseTitle') courseTitle: string,
+   ): Promise<number> {
+     return this.instructorService.getCompletedStudentsCount(courseTitle);
+   }
+ 
+   // 3. Endpoint to get the number of students based on their scores
+   @Get('students-score/:courseTitle')
+   async getStudentsByScore(
+     @Param('courseTitle') courseTitle: string,
+   ): Promise<any> {
+     return this.instructorService.getStudentsByScore(courseTitle);
+   }
+
 }
