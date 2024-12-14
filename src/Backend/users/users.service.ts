@@ -160,4 +160,33 @@ export class UsersService {
     return { content };
   }
 
+  async getUserWithProgressByEmail(studentEmail: string): Promise<any> {
+    // Find the user by email
+    const user = await this.userModel
+      .findOne({ email: studentEmail })
+      .populate('progress') // Populate the progress field
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Map the user data with their progress details
+    const result = {
+      email: user.email,
+      name: user.name,
+      age: user.age,
+      profilePictureUrl: user.profilePictureUrl,
+      appliedCourses: user.appliedCourses,
+      acceptedCourses: user.acceptedCourses,
+      GPA: user.GPA, // Calculate GPA using the virtual method
+      notifications: user.Notifiction,
+      feedback: user.feedback,
+      notes: user.Notes,
+      progress: user.progress, // Populated progress details
+    };
+
+    return result;
+  }
+
 }

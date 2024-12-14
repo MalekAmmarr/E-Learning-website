@@ -25,7 +25,7 @@ const Apply_Students: React.FC = () => {
     const fetchStudents = async () => {
       try {
         const response = await fetch(
-          'http://localhost:3000/instructor/applied-users/omar.hossam3@gmail.com',
+          'http://localhost:3000/instructor/applied-users/Behz@gmail.com',
         ); // Replace with your actual API endpoint
         if (!response.ok) {
           throw new Error('Failed to fetch students');

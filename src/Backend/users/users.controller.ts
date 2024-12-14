@@ -130,6 +130,14 @@ export class UsersController {
     }
   }
 
+  
+  @UseGuards(AuthorizationGuard)
+  @Get('with-progress/:email')
+  @Roles('student')
+  async getUserWithProgressByEmail(@Param('email') email: string) {
+    return this.userService.getUserWithProgressByEmail(email);
+
+}
 }
 
 

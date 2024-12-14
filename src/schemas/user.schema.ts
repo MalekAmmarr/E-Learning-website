@@ -65,11 +65,11 @@ export class User extends Document {
   GPA: number;
   
  // Virtual function to calculate the GPA
- getGPA(): number {
+ /*getGPA(): number {
   if (this.courseScores.length === 0) return 0;
   const total = this.courseScores.reduce((acc, scoreObj) => acc + scoreObj.score, 0);
   return total / this.courseScores.length;
-}
+}*/
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

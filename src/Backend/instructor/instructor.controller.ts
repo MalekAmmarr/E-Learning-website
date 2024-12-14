@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  Query,
   BadRequestException,
   UseGuards,
 } from '@nestjs/common';
@@ -194,27 +195,40 @@ export class InstructorController {
 
 
    // 1. Endpoint to get the number of enrolled students in a course
+   @UseGuards(AuthorizationGuard)
    @Get('enrolled-students/:courseTitle')
+   @Roles('instructor')
    async getEnrolledStudentsCount(
      @Param('courseTitle') courseTitle: string,
    ): Promise<number> {
      return this.instructorService.getEnrolledStudents(courseTitle);
    }
  
+   @UseGuards(AuthorizationGuard)
    // 2. Endpoint to get the number of students who completed the course
    @Get('completed-students/:courseTitle')
+   @Roles('instructor')
    async getCompletedStudentsCount(
      @Param('courseTitle') courseTitle: string,
    ): Promise<number> {
      return this.instructorService.getCompletedStudentsCount(courseTitle);
    }
  
+   @UseGuards(AuthorizationGuard)
    // 3. Endpoint to get the number of students based on their scores
    @Get('students-score/:courseTitle')
+   @Roles('instructor')
    async getStudentsByScore(
      @Param('courseTitle') courseTitle: string,
    ): Promise<any> {
      return this.instructorService.getStudentsByScore(courseTitle);
    }
+
+   @UseGuards(AuthorizationGuard)
+   @Get('courses')
+   @Roles('instructor')
+  async getCourses(@Query('email') email: string): Promise<string[]> {
+    return this.instructorService.getCoursesByInstructor(email);
+  }
 
 }

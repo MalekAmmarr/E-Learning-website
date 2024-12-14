@@ -241,7 +241,7 @@ export default function Home() {
                   <h4>Add Content</h4>
                   <p>You can add content to the courses you teach FromHere</p>
                   <div className="main-button">
-                    <a href="#">Add Content</a>
+                  <a href="/Ins_Home/Add_content">Check</a>
                   </div>
                 </div>
               </div>

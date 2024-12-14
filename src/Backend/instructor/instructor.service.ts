@@ -323,5 +323,13 @@ export class InstructorService {
   }
   
 
+   // Method to get all courses taught by an instructor
+   async getCoursesByInstructor(email: string): Promise<string[]> {
+    const instructor = await this.InstructorModel.findOne({ email }).exec();
+    if (!instructor) {
+      throw new NotFoundException(`Instructor with email ${email} not found`);
+    }
+    return instructor.Teach_Courses;
+  }
 
 }
