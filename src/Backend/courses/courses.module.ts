@@ -10,6 +10,7 @@ import { CoursesService } from './courses.service';
       [{ name: Course.name, schema: CourseSchema }],
       'eLearningDB',
     ),
+    
   ],
   controllers: [CoursesController],
   providers: [CoursesService],

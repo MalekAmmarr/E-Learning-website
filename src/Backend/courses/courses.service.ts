@@ -96,5 +96,18 @@ async getCourseByTitle(courseTitle: string): Promise<Course> {
   return await this.courseModel.findOne({ title: courseTitle });
 }
 
+async findCourseById(courseId: string): Promise<Course> {
+  try {
+    const course = await this.courseModel.findOne({courseId:courseId}).exec();
+    if (!course) {
+      throw new Error(`Course with ID ${courseId} not found.`);
+    }
+    return course;
+  } catch (error) {
+    console.error('Error finding course by ID:', error);
+    throw new Error('Error finding course.');
+  }
+}
+
 
 }

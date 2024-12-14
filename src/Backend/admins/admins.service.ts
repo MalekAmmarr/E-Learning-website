@@ -176,8 +176,8 @@ export class AdminsService {
     } catch (error) {
       console.error('Error fetching logs:', error);
       throw new Error('Failed to fetch logs');
-    }
-  }
+    }
+  }
 }
 
 
