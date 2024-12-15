@@ -10,6 +10,9 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
+  const [profilePictureUrl, setprofilePictureUrl] = useState<string | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
@@ -22,6 +25,18 @@ const RegisterPage = () => {
           ? [...prevSelectedCourses, value] // Add course if checked
           : prevSelectedCourses.filter((course) => course !== value), // Remove course if unchecked
     );
+  };
+
+  // Handle image selection
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setprofilePictureUrl(reader.result as string); // Convert image to Base64 URL
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   // Handle form submission
@@ -51,6 +66,7 @@ const RegisterPage = () => {
           email,
           passwordHash: password,
           appliedCourses: selectedCourses,
+          profilePictureUrl, // Send the Base64 URL of the image
         }),
       });
 
@@ -60,7 +76,7 @@ const RegisterPage = () => {
 
       // Clear the error and redirect to home
       setError(null);
-      router.push('/login'); // Redirect to the home page
+      router.push('/login'); // Redirect to the login page
     } catch (err: any) {
       setError(err.message || 'An error occurred');
     }
@@ -127,9 +143,26 @@ const RegisterPage = () => {
         <span>Confirm Password</span>
       </label>
 
+      {/* Profile Picture Upload */}
+      <label className="file-upload">
+        <input type="file" accept="image/*" onChange={handleImageChange} />
+        <span>Upload Profile Picture</span>
+      </label>
+      {profilePictureUrl && (
+        <div className="image-preview">
+          <p>Image Preview:</p>
+          <img
+            src={profilePictureUrl}
+            alt="profilePictureUrl"
+            className="circular-preview"
+          />
+        </div>
+      )}
+
       {/* Course Selection with Checkboxes */}
       <div className="courses">
         <p>Courses to Apply:</p>
+        {/* Course options */}
         <label>
           <input
             type="checkbox"
@@ -140,25 +173,58 @@ const RegisterPage = () => {
           />
           <span>Machine Learning</span>
         </label>
+        {/* Add more courses here */}
         <label>
           <input
             type="checkbox"
             name="course"
-            value="Database Programming"
-            checked={selectedCourses.includes('Database Programming')}
+            value="Data Engineering and visualization"
+            checked={selectedCourses.includes(
+              'Data Engineering and visualization',
+            )}
             onChange={handleCourseChange}
           />
-          <span>Database Programming</span>
+          <span>Data Engineering and visualization</span>
         </label>
         <label>
           <input
             type="checkbox"
             name="course"
-            value="Software Project"
-            checked={selectedCourses.includes('Software Project')}
+            value="Programming 1"
+            checked={selectedCourses.includes('Programming 1')}
             onChange={handleCourseChange}
           />
-          <span>Software Project</span>
+          <span>Programming 1</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            name="course"
+            value="Programming 2"
+            checked={selectedCourses.includes('Programming 2')}
+            onChange={handleCourseChange}
+          />
+          <span>Programming 2</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            name="course"
+            value="English Beginner"
+            checked={selectedCourses.includes('English Beginner')}
+            onChange={handleCourseChange}
+          />
+          <span>English Beginner</span>
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            name="course"
+            value="English Advanced"
+            checked={selectedCourses.includes('English Advanced')}
+            onChange={handleCourseChange}
+          />
+          <span>English Advanced</span>
         </label>
       </div>
 

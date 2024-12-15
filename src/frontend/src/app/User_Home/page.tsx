@@ -7,6 +7,25 @@ import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
+export interface User {
+  email: string;
+  name: string;
+  age: string;
+  passwordHash: string;
+  profilePictureUrl?: string;
+  appliedCourses: string[];
+  acceptedCourses: string[];
+  courseScores: { courseTitle: string; score: number }[];
+  Notifiction: string[];
+  feedback: Array<{
+    quizId: string;
+    courseTitle: string;
+    feedback: Array<{ question: string; feedback: string }>;
+  }>;
+  Notes: string[];
+  GPA: number;
+}
+
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = React.useState('All');
@@ -167,12 +186,34 @@ export default function Home() {
                     <a href="#events">Events</a>
                   </li>
                   <li>
-                    <Link href="/User_Home/Profile">
-                      {userData?.name || 'User'}
-                    </Link>
+                    <Link href="/login">Notification</Link>
                   </li>
                   <li>
-                    <Link href="/login">Notification</Link>
+                    <Link href="/User_Home/Profile">
+                      {userData?.profilePictureUrl ? (
+                        <img
+                          src={userData.profilePictureUrl}
+                          alt="Profile"
+                          style={{
+                            width: '90px',
+                            height: '90px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src={'/assets/images/Default.jpg'}
+                          alt="Profile"
+                          style={{
+                            width: '90px',
+                            height: '90px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      )}
+                    </Link>
                   </li>
                 </ul>
                 <a className="menu-trigger">
@@ -193,14 +234,19 @@ export default function Home() {
                 <div className="item item-1">
                   <div className="header-text">
                     <span className="category">Our Courses</span>
-                    <h2>With Scholar Teachers, Everything Is Easier</h2>
+                    <h2>
+                      Hello, {userData?.name.split(' ')[0]} and welcome to our
+                      Platform!
+                    </h2>
                     <p>
-                      We offer a lot of courses in various fields and majors to
-                      help you excel and achieve your goals. Whether you're
-                      looking to advance your career, improve your skills, or
-                      explore a new hobby, Scholar Teachers has something for
-                      everyone.
+                      We hope that you apply to courses and have a happy
+                      experience here. We are committed to providing you with
+                      the best learning opportunities. Whether you're looking to
+                      improve your skills, explore new areas of interest, or
+                      advance your career, we believe you'll find something that
+                      excites you. Enjoy your journey with us!
                     </p>
+
                     <div className="buttons">
                       <div className="main-button">
                         <a href="#courses">Take a look on courses</a>
@@ -293,13 +339,14 @@ export default function Home() {
                   />
                 </div>
                 <div className="main-content">
-                  <h4> Live Chat Support</h4>
+                  <h4>Start A Group Chat</h4>
                   <p>
-                    We offer real-time chat support to answer your questions,
-                    and assist you with your learning journey.
+                    Connect in real-time with your instructors and peers! Our
+                    chat feature lets you ask questions, collaborate, and share
+                    insights to enhance your learning experience.
                   </p>
                   <div className="main-button">
-                    <a href="/login">Let's Begin</a>
+                    <a href="#!">Start Chat</a>
                   </div>
                 </div>
               </div>
@@ -310,13 +357,13 @@ export default function Home() {
                   <img src="/assets/images/service-03.png" alt="web experts" />
                 </div>
                 <div className="main-content">
-                  <h4>Different Events</h4>
+                  <h4>Your Personal Notes</h4>
                   <p>
-                    we organize a variety of events designed to inspire,
-                    educate, and connect our community
+                    This is your personal space where you can write anything,
+                    keep track of ideas, or jot down important information.
                   </p>
                   <div className="main-button">
-                    <a href="/login">join us</a>
+                    <a href="#!">Add Notes</a>
                   </div>
                 </div>
               </div>
@@ -324,7 +371,7 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <div className="section about-us">
+      {/* <div className="section about-us">
         <div className="container">
           <div className="row">
             <div className="col-lg-6 offset-lg-1">
@@ -457,14 +504,14 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
       <div className="section courses" id="courses">
         <div className="container">
           <div className="row">
             <div className="col-lg-12 text-center">
               <div className="section-heading">
-                <h6>Our Courses</h6>
-                <h2>Available Courses</h2>
+                <h6>Your Courses</h6>
+                <h2>Applied Courses</h2>
               </div>
             </div>
           </div>

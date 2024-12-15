@@ -59,7 +59,7 @@ const Profile = () => {
           borderRadius: '50%', // Make it circular
           backgroundImage: user.profilePictureUrl
             ? `url(${user.profilePictureUrl})`
-            : `url(/assets/images/Hoss.jpeg)`,
+            : `url(/assets/images/Default.jpg)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           display: 'flex',
