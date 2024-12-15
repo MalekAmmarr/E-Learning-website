@@ -67,9 +67,9 @@ export class InstructorController {
   }
 
   // Get users applied to courses taught by an instructor
-  @UseGuards(AuthorizationGuard)
+ // @UseGuards(AuthorizationGuard)
   @Get('applied-users/:email')
-  @Roles('instructor')
+  //@Roles('instructor')
   async getUsersAppliedToCourses(@Param('email') instructorEmail: string) {
     try {
       return await this.instructorService.getUsersAppliedToCourses(
@@ -84,9 +84,9 @@ export class InstructorController {
     }
   }
   // Endpoint to accept or reject a student's course application
-  @UseGuards(AuthorizationGuard)
+  //@UseGuards(AuthorizationGuard)
   @Post('accept-reject-course') // No email parameter in the URL
-  @Roles('instructor')
+ // @Roles('instructor')
   async acceptOrRejectCourse(
     @Body()
     body: {
@@ -115,9 +115,9 @@ export class InstructorController {
 
 
   // Endpoint to create a course
-  @UseGuards(AuthorizationGuard)
+  //@UseGuards(AuthorizationGuard)
   @Post(':email/create-course')
-  @Roles('instructor')
+  //@Roles('instructor')
   async createCourse(
 
     @Param('email') email: string,  // Instructor email in the URL param
@@ -129,9 +129,9 @@ export class InstructorController {
   }
 
   // Update a course except for the courseContent field, linked by instructor email and course title
-  @UseGuards(AuthorizationGuard)
+  //@UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/courses/:courseTitle')
-  @Roles('instructor')
+  //@Roles('instructor')
   async updateCourse(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -145,9 +145,9 @@ export class InstructorController {
     return updatedCourse;
   }
 
-  @UseGuards(AuthorizationGuard)
+  //@UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/addcontent/:courseTitle')
-  @Roles('instructor')
+  //@Roles('instructor')
   async addCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -162,9 +162,9 @@ export class InstructorController {
 
 
   // Edit course content (replace the current content with new content)
-  @UseGuards(AuthorizationGuard)
+  //@UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/courses/:courseTitle/editcontent')
-  @Roles('instructor')
+  //@Roles('instructor')
   async editCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -178,9 +178,9 @@ export class InstructorController {
   }
 
   // Delete specific content from course content array
-  @UseGuards(AuthorizationGuard)
+  //@UseGuards(AuthorizationGuard)
   @Delete(':instructorEmail/courses/:courseTitle/deletecontent')
-  @Roles('instructor')
+  //@Roles('instructor')
   async deleteCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -195,40 +195,49 @@ export class InstructorController {
 
 
    // 1. Endpoint to get the number of enrolled students in a course
-   @UseGuards(AuthorizationGuard)
+   //@UseGuards(AuthorizationGuard)
    @Get('enrolled-students/:courseTitle')
-   @Roles('instructor')
+   //@Roles('instructor')
    async getEnrolledStudentsCount(
      @Param('courseTitle') courseTitle: string,
    ): Promise<number> {
      return this.instructorService.getEnrolledStudents(courseTitle);
    }
  
-   @UseGuards(AuthorizationGuard)
+   //@UseGuards(AuthorizationGuard)
    // 2. Endpoint to get the number of students who completed the course
    @Get('completed-students/:courseTitle')
-   @Roles('instructor')
+  // @Roles('instructor')
    async getCompletedStudentsCount(
      @Param('courseTitle') courseTitle: string,
    ): Promise<number> {
      return this.instructorService.getCompletedStudentsCount(courseTitle);
    }
  
-   @UseGuards(AuthorizationGuard)
+   //@UseGuards(AuthorizationGuard)
    // 3. Endpoint to get the number of students based on their scores
    @Get('students-score/:courseTitle')
-   @Roles('instructor')
+   //@Roles('instructor')
    async getStudentsByScore(
      @Param('courseTitle') courseTitle: string,
    ): Promise<any> {
      return this.instructorService.getStudentsByScore(courseTitle);
    }
 
-   @UseGuards(AuthorizationGuard)
+   //@UseGuards(AuthorizationGuard)
    @Get('courses')
-   @Roles('instructor')
+   //@Roles('instructor')
   async getCourses(@Query('email') email: string): Promise<string[]> {
     return this.instructorService.getCoursesByInstructor(email);
+  }
+
+  @Get('course')
+  async getCourseDetails(@Query('title') title: string) {
+    const course = await this.instructorService.findCourseByTitle(title);
+    if (!course) {
+      throw new NotFoundException(`Course with title "${title}" not found`);
+    }
+    return course;
   }
 
 }

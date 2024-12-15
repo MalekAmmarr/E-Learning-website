@@ -332,4 +332,8 @@ export class InstructorService {
     return instructor.Teach_Courses;
   }
 
+  async findCourseByTitle(title: string): Promise<Course | null> {
+    return this.courseModel.findOne({ title }).exec();
+  }
+
 }
