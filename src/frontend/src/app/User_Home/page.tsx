@@ -10,6 +10,7 @@ import React from 'react';
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = React.useState('All');
+  const [userData, setUserData] = useState<any>(null);
 
   const router = useRouter();
   const courses = [
@@ -63,21 +64,19 @@ export default function Home() {
       : courses.filter((course) => course.category === activeCategory);
 
   useEffect(() => {
-    // Set a timeout to simulate the page loading process and hide the preloader
     setTimeout(() => {
-      setIsLoading(false); // This will hide the preloader after 2 seconds
+      setIsLoading(false);
     }, 1000);
-  }, []); // Empty array to run this effect once after the initial rend
-  // Handle course click
-  const handleCourseClick = () => {
-    const token = sessionStorage.getItem('authToken');
-    if (!token) {
-      router.push('/login'); // Redirect to login if no token exists
+    const accessToken = sessionStorage.getItem('authToken');
+    const user = sessionStorage.getItem('userData');
+    if (user) {
+      if (accessToken) {
+        setUserData(JSON.parse(user));
+      } // Set userData state only if data exists}
     } else {
-      console.log(`Navigating to course details `);
-      // Navigate to the course details page or take another action
+      router.push('/login');
     }
-  };
+  }, []);
 
   return (
     <>
@@ -90,7 +89,7 @@ export default function Home() {
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet"
       />
-      <title>Hossam PLatform</title>
+      <title>Student:{userData?.name}</title>
       {/* Bootstrap core CSS */}
       <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
       {/* Additional CSS Files */}
@@ -103,6 +102,7 @@ export default function Home() {
         href="https://unpkg.com/swiper@7/swiper-bundle.min.css"
       />
       {/*
+      
   
   TemplateMo 586 Scholar
   
@@ -167,7 +167,12 @@ export default function Home() {
                     <a href="#events">Events</a>
                   </li>
                   <li>
-                    <Link href="/login">Login/Register</Link>
+                    <Link href="/User_Home/Profile">
+                      {userData?.name || 'User'}
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/login">Notification</Link>
                   </li>
                 </ul>
                 <a className="menu-trigger">
@@ -258,7 +263,7 @@ export default function Home() {
       </div>
       <div className="services section" id="services">
         <div className="container">
-          <div className="row" onClick={() => handleCourseClick()}>
+          <div className="row">
             <div className="col-lg-4 col-md-6">
               <div className="service-item">
                 <div className="icon">
@@ -782,7 +787,7 @@ export default function Home() {
       </div>
       <div className="section events" id="events">
         <div className="container">
-          <div className="row" onClick={() => handleCourseClick()}>
+          <div className="row">
             <div className="col-lg-12 text-center">
               <div className="section-heading">
                 <h6>Schedule</h6>
