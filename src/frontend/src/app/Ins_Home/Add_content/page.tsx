@@ -1,17 +1,11 @@
 'use client'; // Marks this component as a client component
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import './page.css';
 
-type Course = {
-  name: string;
-  category: string;
-  price: number;
-  instructor: string;
-  image: string;
-};
 
 const AddContent = () => {
-  const [courses, setCourses] = useState<Course[]>([]); // Specify the type for courses
+  const [courseTitles, setCourseTitles] = useState<string[]>([]); // Array of course titles
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -37,8 +31,8 @@ const AddContent = () => {
           throw new Error(`Failed to fetch courses: ${res.statusText}`);
         }
 
-        const data = await res.json();
-        setCourses(data); // Assuming the response is an array of courses
+        const data: string[] = await res.json(); // Assuming the response is an array of strings (course titles)
+        setCourseTitles(data);
         setLoading(false);
       } catch (err: any) {
         setError(err.message || 'An unknown error occurred');
@@ -49,9 +43,13 @@ const AddContent = () => {
     fetchCourses();
   }, [email, token, router]);
 
-  const handleCourseClick = (courseName: string) => {
-    console.log(`Navigating to course: ${courseName}`);
+  const handleCourseClick = (courseTitle: string) => {
+    const encodedTitle = encodeURIComponent(courseTitle);
+    router.push(`/Ins_Home/Add_content/course/${encodedTitle}`);
   };
+  
+  
+  
 
   if (loading) {
     return <div>Loading courses...</div>;
@@ -68,51 +66,19 @@ const AddContent = () => {
           <div className="col-lg-12 text-center">
             <div className="section-heading">
               <h6>Latest Courses</h6>
-              <h2>Latest Courses</h2>
+              <h2>Courses You Teach</h2>
             </div>
           </div>
         </div>
-        <ul className="event_filter">
-          <li>
-            <a className="is_active" href="#!" data-filter="*">
-              Show All
-            </a>
-          </li>
-          <li>
-            <a href="#!" data-filter=".design">
-              Webdesign
-            </a>
-          </li>
-          <li>
-            <a href="#!" data-filter=".development">
-              Development
-            </a>
-          </li>
-          <li>
-            <a href="#!" data-filter=".wordpress">
-              Wordpress
-            </a>
-          </li>
-        </ul>
-        <div className="row event_box">
-          {courses.map((course, index) => (
-            <div key={index} className={`col-lg-4 col-md-6 align-self-center mb-30 event_outer ${course.category.toLowerCase()}`}>
-              <div className="events_item" onClick={() => handleCourseClick(course.name)}>
-                <div className="thumb">
-                  <a href="#">
-                    <img src={course.image} alt={course.name} />
-                  </a>
-                  <span className="category">{course.category}</span>
-                  <span className="price">
-                    <h6>
-                      <em>$</em>{course.price}
-                    </h6>
-                  </span>
-                </div>
-                <div className="down-content">
-                  <span className="author">{course.instructor}</span>
-                  <h4>{course.name}</h4>
-                </div>
+        <div className="row">
+          {courseTitles.map((title, index) => (
+            <div
+              key={index}
+              className="col-lg-4 col-md-6 align-self-center mb-30"
+              onClick={() => handleCourseClick(title)}
+            >
+              <div className="course-card">
+                <h4>{title}</h4>
               </div>
             </div>
           ))}
