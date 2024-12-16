@@ -29,12 +29,14 @@ export class InstructorService {
     @InjectModel(Progress.name, 'eLearningDB')
     private progressModel: Model<Progress>,
     private readonly authService: AuthService, // Inject AuthService
-
-  ) { }
+  ) {}
 
   // Register a new Instructor
   async registerInstructor(createInstructorDto: CreateInstructorDto) {
-    return await this.authService.registerUser(createInstructorDto, 'instructor');
+    return await this.authService.registerUser(
+      createInstructorDto,
+      'instructor',
+    );
   }
 
   // Login Intructor
@@ -70,7 +72,7 @@ export class InstructorService {
     email: string,
     courseName: string,
     action: 'accept' | 'reject',
-  ): Promise<String> {
+  ): Promise<{ user: User; message: string }> {
     try {
       // Find the user by email
       const user = await this.UserModel.findOne({ email });
@@ -93,22 +95,25 @@ export class InstructorService {
         if (!user.acceptedCourses.includes(courseName)) {
           user.acceptedCourses.push(courseName);
           user.courseScores.push({ courseTitle: courseName, score: 0 });
-          user.Notifiction
-            .push(`Congratulations! You have been accepted into the course  ${courseName}.
+          user.Notifiction.push(
+            `Congratulations! You have been accepted into the course ${courseName}.
              We are excited to have you join and look forward to your participation. Please check the course details 
-             in your dashboard for further instructions. Best of luck with your studies!`);
+             in your dashboard for further instructions. Best of luck with your studies!`,
+          );
         }
       } else {
-        user.Notifiction
-          .push(`Unfortunately, your application for the course ${courseName} has been rejected. 
-          We appreciate your interest and encourage you to apply for other courses in the future. 
-          Feel free to explore more options in your dashboard. Best wishes for your learning journey!`);
+        user.Notifiction.push(
+          `Unfortunately, your application for the course ${courseName} has been rejected. 
+           We appreciate your interest and encourage you to apply for other courses in the future. 
+           Feel free to explore more options in your dashboard. Best wishes for your learning journey!`,
+        );
       }
 
       // Save the updated user document
       await user.save();
 
-      return `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} course ${courseName} for user ${email}.`;
+      const message = `Successfully ${action === 'accept' ? 'accepted' : 'rejected'} course ${courseName} for user ${email}.`;
+      return { user, message };
     } catch (error) {
       console.error(`Error in AcceptOrReject: ${error.message}`);
       throw error;
@@ -116,9 +121,14 @@ export class InstructorService {
   }
 
   // Method to create a course by the instructor
-  async createCourse(createCourseDto: CreateCourseDto, instructorEmail: string): Promise<Course> {
+  async createCourse(
+    createCourseDto: CreateCourseDto,
+    instructorEmail: string,
+  ): Promise<Course> {
     // Step 1: Find the instructor by their email (instructorEmail is obtained from JWT token)
-    const instructor = await this.InstructorModel.findOne({ email: instructorEmail });
+    const instructor = await this.InstructorModel.findOne({
+      email: instructorEmail,
+    });
 
     if (!instructor) {
       throw new Error('Instructor not found');
@@ -126,9 +136,9 @@ export class InstructorService {
 
     // Step 2: Create the course with instructor's email and data
     const newCourse = new this.courseModel({
-      ...createCourseDto,  // All course data except instructor email
+      ...createCourseDto, // All course data except instructor email
       instructormail: instructor.email, // Link course to instructor via email
-      instructorName: instructor.name,  // Optional: Add instructor's name to course
+      instructorName: instructor.name, // Optional: Add instructor's name to course
     });
 
     // Step 3: Save the course to the database
@@ -136,26 +146,34 @@ export class InstructorService {
 
     // Step 4: Add the new course to the instructor's Teach_Courses array
     instructor.Teach_Courses.push(savedCourse.title); // You can use the course title or ID here
-    await instructor.save();  // Save the updated instructor document
+    await instructor.save(); // Save the updated instructor document
 
     return savedCourse;
   }
 
-
-
-
   // Method to update a course, excluding the courseContent array
-  async updateCourse(instructorEmail: string, courseTitle: string, updateCourseDto: UpdateCourseDto) {
+  async updateCourse(
+    instructorEmail: string,
+    courseTitle: string,
+    updateCourseDto: UpdateCourseDto,
+  ) {
     // Check if the instructor exists
-    const instructor = await this.InstructorModel.findOne({ email: instructorEmail });
+    const instructor = await this.InstructorModel.findOne({
+      email: instructorEmail,
+    });
     if (!instructor) {
       throw new NotFoundException('Instructor not found');
     }
 
     // Check if the course exists and belongs to the instructor (by email)
-    const course = await this.courseModel.findOne({ title: courseTitle, instructormail: instructorEmail });
+    const course = await this.courseModel.findOne({
+      title: courseTitle,
+      instructormail: instructorEmail,
+    });
     if (!course) {
-      throw new NotFoundException('Course not found or you are not the instructor of this course');
+      throw new NotFoundException(
+        'Course not found or you are not the instructor of this course',
+      );
     }
 
     // Prepare the update object by excluding courseContent
@@ -171,14 +189,21 @@ export class InstructorService {
     return updatedCourse;
   }
 
-
-
-  async addCourseContent(instructorEmail: string, courseTitle: string, newContent: string[]): Promise<Course> {
+  async addCourseContent(
+    instructorEmail: string,
+    courseTitle: string,
+    newContent: string[],
+  ): Promise<Course> {
     // Find the course by title and instructor email
-    const course = await this.courseModel.findOne({ title: courseTitle, instructormail: instructorEmail });
+    const course = await this.courseModel.findOne({
+      title: courseTitle,
+      instructormail: instructorEmail,
+    });
 
     if (!course) {
-      throw new NotFoundException('Course not found or you are not the instructor of this course');
+      throw new NotFoundException(
+        'Course not found or you are not the instructor of this course',
+      );
     }
 
     // Ensure newContent is an array before updating
@@ -193,27 +218,36 @@ export class InstructorService {
     return await course.save();
   }
 
-
   // Method to update the course content
-  async updateCourseContent(instructorEmail: string, courseTitle: string, newContent: string[]): Promise<Course> {
+  async updateCourseContent(
+    instructorEmail: string,
+    courseTitle: string,
+    newContent: string[],
+  ): Promise<Course> {
     // Find the instructor
-    const instructor = await this.InstructorModel.findOne({ email: instructorEmail });
+    const instructor = await this.InstructorModel.findOne({
+      email: instructorEmail,
+    });
     if (!instructor) {
       throw new NotFoundException('Instructor not found');
     }
 
     // Find the course by title and instructor email
-    const course = await this.courseModel.findOne({ title: courseTitle, instructormail: instructorEmail });
+    const course = await this.courseModel.findOne({
+      title: courseTitle,
+      instructormail: instructorEmail,
+    });
     if (!course) {
-      throw new NotFoundException('Course not found or you are not the instructor of this course');
+      throw new NotFoundException(
+        'Course not found or you are not the instructor of this course',
+      );
     }
 
     // Update the course content (replace it with the new content)
     await this.courseModel.updateOne(
       { title: courseTitle, instructormail: instructorEmail },
-      { $push: { courseContent: { $each: newContent } } }
+      { $push: { courseContent: { $each: newContent } } },
     );
-
 
     // Save the updated course
     const updatedCourse = await course.save();
@@ -222,11 +256,20 @@ export class InstructorService {
   }
 
   // Edit course content: Replace the current content with new content
-  async editCourseContent(instructorEmail: string, courseTitle: string, newContent: string[]): Promise<Course> {
-    const course = await this.courseModel.findOne({ title: courseTitle, instructormail: instructorEmail });
+  async editCourseContent(
+    instructorEmail: string,
+    courseTitle: string,
+    newContent: string[],
+  ): Promise<Course> {
+    const course = await this.courseModel.findOne({
+      title: courseTitle,
+      instructormail: instructorEmail,
+    });
 
     if (!course) {
-      throw new NotFoundException('Course not found or you are not the instructor of this course');
+      throw new NotFoundException(
+        'Course not found or you are not the instructor of this course',
+      );
     }
 
     // Replace the current content with the new content
@@ -237,15 +280,26 @@ export class InstructorService {
   }
 
   // Delete specific content from course content array
-  async deleteCourseContent(instructorEmail: string, courseTitle: string, contentToDelete: string[]): Promise<Course> {
-    const course = await this.courseModel.findOne({ title: courseTitle, instructormail: instructorEmail });
+  async deleteCourseContent(
+    instructorEmail: string,
+    courseTitle: string,
+    contentToDelete: string[],
+  ): Promise<Course> {
+    const course = await this.courseModel.findOne({
+      title: courseTitle,
+      instructormail: instructorEmail,
+    });
 
     if (!course) {
-      throw new NotFoundException('Course not found or you are not the instructor of this course');
+      throw new NotFoundException(
+        'Course not found or you are not the instructor of this course',
+      );
     }
 
     // Remove the specified content from the courseContent array
-    course.courseContent = course.courseContent.filter(content => !contentToDelete.includes(content));
+    course.courseContent = course.courseContent.filter(
+      (content) => !contentToDelete.includes(content),
+    );
 
     // Save and return the updated course
     return await course.save();
@@ -259,7 +313,7 @@ export class InstructorService {
 
     return {
       totalCount: students.length, // Number of students
-      students: students.map(student => ({
+      students: students.map((student) => ({
         name: student.name,
         email: student.email,
         age: student.age,
@@ -269,13 +323,14 @@ export class InstructorService {
     };
   }
 
-
   // 2. Get the number of students who have completed the course
   async getCompletedStudentsCount(courseTitle: string): Promise<number> {
-    const progress = await this.progressModel.find({
-      Coursetitle: courseTitle,
-      completionRate: { $gte: 100 },
-    }).exec();
+    const progress = await this.progressModel
+      .find({
+        Coursetitle: courseTitle,
+        completionRate: { $gte: 100 },
+      })
+      .exec();
     return progress.length;
   }
 
@@ -285,7 +340,7 @@ export class InstructorService {
     const students = await this.UserModel.find({
       acceptedCourses: { $in: [courseTitle] },
     }).exec();
-  
+
     // Define score categories
     const scoreCategories = {
       belowAverage: 0,
@@ -293,19 +348,28 @@ export class InstructorService {
       aboveAverage: 0,
       excellent: 0,
     };
-  
+
     // Get the total number of students in the course
     const totalStudents = students.length;
-  
+
     // Calculate the average score for the course
     const averageScore = totalStudents
-      ? students.reduce((sum, student) => sum + student.courseScores.find(score => score.courseTitle === courseTitle)?.score, 0) / totalStudents
+      ? students.reduce(
+          (sum, student) =>
+            sum +
+            student.courseScores.find(
+              (score) => score.courseTitle === courseTitle,
+            )?.score,
+          0,
+        ) / totalStudents
       : 0;
-  
+
     // Categorize students based on their score in the course
     students.forEach((student) => {
-      const studentScore = student.courseScores.find(score => score.courseTitle === courseTitle)?.score;
-  
+      const studentScore = student.courseScores.find(
+        (score) => score.courseTitle === courseTitle,
+      )?.score;
+
       if (studentScore !== undefined) {
         if (studentScore < averageScore) {
           scoreCategories.belowAverage += 1;
@@ -318,13 +382,12 @@ export class InstructorService {
         }
       }
     });
-  
+
     return scoreCategories;
   }
-  
 
-   // Method to get all courses taught by an instructor
-   async getCoursesByInstructor(email: string): Promise<string[]> {
+  // Method to get all courses taught by an instructor
+  async getCoursesByInstructor(email: string): Promise<string[]> {
     const instructor = await this.InstructorModel.findOne({ email }).exec();
     if (!instructor) {
       throw new NotFoundException(`Instructor with email ${email} not found`);
@@ -335,5 +398,4 @@ export class InstructorService {
   async findCourseByTitle(title: string): Promise<Course | null> {
     return this.courseModel.findOne({ title }).exec();
   }
-
 }

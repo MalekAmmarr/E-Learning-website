@@ -7,29 +7,19 @@ import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 
-export interface User {
-  email: string;
+interface Course {
   name: string;
-  age: string;
-  passwordHash: string;
-  profilePictureUrl?: string;
-  appliedCourses: string[];
-  acceptedCourses: string[];
-  courseScores: { courseTitle: string; score: number }[];
-  Notifiction: string[];
-  feedback: Array<{
-    quizId: string;
-    courseTitle: string;
-    feedback: Array<{ question: string; feedback: string }>;
-  }>;
-  Notes: string[];
-  GPA: number;
+  category: string;
+  price: number;
+  image: string;
+  intructor_name: string;
 }
-
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = React.useState('All');
   const [userData, setUserData] = useState<any>(null);
+  const [appliedCourses, setAppliedCourses] = useState<Course[]>([]);
+  const [acceptedCourses, setAcceptedCourses] = useState<Course[]>([]);
 
   const router = useRouter();
   const courses = [
@@ -41,7 +31,7 @@ export default function Home() {
       intructor_name: 'Prof.Omar Hossam',
     },
     {
-      name: 'Data Engineering and Visualization',
+      name: 'Data Engineering and visualization',
       category: 'Data Science',
       price: 340,
       image: '/assets/images/Visualization.jpg',
@@ -77,25 +67,48 @@ export default function Home() {
     },
   ];
   // Filter courses based on the active category
-  const filteredCourses =
+  const filteredAppliedCourses =
     activeCategory === 'All'
-      ? courses
-      : courses.filter((course) => course.category === activeCategory);
+      ? appliedCourses
+      : appliedCourses.filter(
+          (appliedCourses) => appliedCourses.category === activeCategory,
+        );
+  // Filter courses based on the active category
+  const filteredAcceptedCourses =
+    activeCategory === 'All'
+      ? acceptedCourses
+      : acceptedCourses.filter(
+          (acceptedCourses) => acceptedCourses.category === activeCategory,
+        );
 
   useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    const accessToken = sessionStorage.getItem('authToken');
-    const user = sessionStorage.getItem('userData');
+    const accessToken = localStorage.getItem('authToken');
+    const user = localStorage.getItem('userData');
     if (user) {
       if (accessToken) {
-        setUserData(JSON.parse(user));
+        const parsedUser = JSON.parse(user);
+        setUserData(parsedUser);
+
+        // Filter applied and accepted courses based on user data
+        const userAppliedCourses = courses.filter((course) =>
+          parsedUser?.appliedCourses.includes(course.name),
+        );
+        const userAcceptedCourses = courses.filter((course) =>
+          parsedUser?.acceptedCourses.includes(course.name),
+        );
+
+        setAppliedCourses(userAppliedCourses);
+        setAcceptedCourses(userAcceptedCourses);
       } // Set userData state only if data exists}
     } else {
       router.push('/login');
     }
   }, []);
+  console.log(appliedCourses);
+  console.log(acceptedCourses);
 
   return (
     <>
@@ -107,6 +120,10 @@ export default function Home() {
       <link
         href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap"
         rel="stylesheet"
+      />
+      <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
       />
       <title>Student:{userData?.name}</title>
       {/* Bootstrap core CSS */}
@@ -180,13 +197,13 @@ export default function Home() {
                     <a href="#courses">Courses</a>
                   </li>
                   <li className="scroll-to-section">
-                    <a href="#team">Team</a>
-                  </li>
-                  <li className="scroll-to-section">
                     <a href="#events">Events</a>
                   </li>
                   <li>
-                    <Link href="/login">Notification</Link>
+                    <Link href="/login">
+                      <i className="fas fa-bell"></i>{' '}
+                      {/* This is the notification bell icon */}
+                    </Link>
                   </li>
                   <li>
                     <Link href="/User_Home/Profile">
@@ -558,7 +575,7 @@ export default function Home() {
 
           {/* Display filtered courses */}
           <div className="row event_box">
-            {filteredCourses.map((course, index) => (
+            {filteredAppliedCourses.map((appliedCourses, index) => (
               <div
                 key={index}
                 className={`col-lg-4 col-md-6 align-self-center mb-30 event_outer`}
@@ -566,23 +583,124 @@ export default function Home() {
                 <div className="events_item">
                   <div className="thumb">
                     <a href="#">
-                      <img src={course.image} alt={course.name} />
+                      <img
+                        src={appliedCourses.image}
+                        alt={appliedCourses.name}
+                      />
                     </a>
-                    <span className="category">{course.category}</span>
+                    <span className="category">{appliedCourses.category}</span>
                     <span className="price">
                       <h6>
                         <em>$</em>
-                        {course.price}
+                        {appliedCourses.price}
                       </h6>
                     </span>
                   </div>
                   <div className="down-content">
-                    <span className="author">{course.intructor_name}</span>
-                    <h4>{course.name}</h4>
+                    <span className="author">
+                      {appliedCourses.intructor_name}
+                    </span>
+                    <h4>{appliedCourses.name}</h4>
                   </div>
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+      <div className="section courses" id="courses">
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-12 text-center">
+              <div className="section-heading">
+                <h6>Your Courses</h6>
+                <h2>Accepted Courses</h2>
+              </div>
+            </div>
+          </div>
+          {/* -------------------------------------------------------------------------------*/}
+          {/* Course Categories Filter */}
+          <ul className="event_filter">
+            <li>
+              <a
+                className={activeCategory === 'All' ? 'is_active' : ''}
+                href="#!"
+                onClick={() => setActiveCategory('All')}
+              >
+                Show All
+              </a>
+            </li>
+            <li>
+              <a
+                className={activeCategory === 'Data Science' ? 'is_active' : ''}
+                href="#!"
+                onClick={() => setActiveCategory('Data Science')}
+              >
+                Data Science
+              </a>
+            </li>
+            <li>
+              <a
+                className={activeCategory === 'Programming' ? 'is_active' : ''}
+                href="#!"
+                onClick={() => setActiveCategory('Programming')}
+              >
+                Programming
+              </a>
+            </li>
+            <li>
+              <a
+                className={activeCategory === 'English' ? 'is_active' : ''}
+                href="#!"
+                onClick={() => setActiveCategory('English')}
+              >
+                English
+              </a>
+            </li>
+          </ul>
+
+          {/* Display filtered courses or message */}
+          <div className="row event_box">
+            {acceptedCourses.length > 0 ? (
+              filteredAcceptedCourses.map((acceptedCourses, index) => (
+                <div
+                  key={index}
+                  className={`col-lg-4 col-md-6 align-self-center mb-30 event_outer`}
+                >
+                  <div className="events_item">
+                    <div className="thumb">
+                      <a href="#">
+                        <img
+                          src={acceptedCourses.image}
+                          alt={acceptedCourses.name}
+                        />
+                      </a>
+                      <span className="category">
+                        {acceptedCourses.category}
+                      </span>
+                      <span className="price">
+                        <h6>
+                          <em>$</em>
+                          {acceptedCourses.price}
+                        </h6>
+                      </span>
+                    </div>
+                    <div className="down-content">
+                      <span className="author">
+                        {acceptedCourses.intructor_name}
+                      </span>
+                      <h4>{acceptedCourses.name}</h4>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-12 text-center">
+                <p className="waiting-message">
+                  Your application is awaiting instructor acceptance.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>

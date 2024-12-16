@@ -1,3 +1,4 @@
+import { Message } from 'src/schemas/message.schema';
 import {
   Controller,
   Get,
@@ -29,16 +30,13 @@ import { get } from 'mongoose';
 import { FeedbackService } from '../feedback/feedback.service';
 import { Feedback } from 'src/schemas/feedback.schema';
 
-
 @Controller('instructor')
 export class InstructorController {
-
   constructor(
     private readonly instructorService: InstructorService,
     private readonly logsService: LogsService,
-    private readonly feedbackService: FeedbackService
-  ) { }
-
+    private readonly feedbackService: FeedbackService,
+  ) {}
 
   // Register a new user
   @Post('register')
@@ -61,13 +59,16 @@ export class InstructorController {
   async login(
     @Body() { email, passwordHash }: { email: string; passwordHash: string },
   ) {
-    const login = await this.instructorService.loginInstructor(email, passwordHash);
-    const Logs = await this.logsService.create(email, login.log, 'instructor')
+    const login = await this.instructorService.loginInstructor(
+      email,
+      passwordHash,
+    );
+    const Logs = await this.logsService.create(email, login.log, 'instructor');
     return login;
   }
 
   // Get users applied to courses taught by an instructor
- // @UseGuards(AuthorizationGuard)
+  // @UseGuards(AuthorizationGuard)
   @Get('applied-users/:email')
   //@Roles('instructor')
   async getUsersAppliedToCourses(@Param('email') instructorEmail: string) {
@@ -86,7 +87,7 @@ export class InstructorController {
   // Endpoint to accept or reject a student's course application
   //@UseGuards(AuthorizationGuard)
   @Post('accept-reject-course') // No email parameter in the URL
- // @Roles('instructor')
+  // @Roles('instructor')
   async acceptOrRejectCourse(
     @Body()
     body: {
@@ -94,7 +95,7 @@ export class InstructorController {
       courseName: string;
       action: 'accept' | 'reject';
     },
-  ): Promise<Object> {
+  ): Promise<{ user: User; message: string }> {
     const { email, courseName, action } = body; // Extracting data from the body
 
     // Validate the action is either 'accept' or 'reject'
@@ -103,26 +104,22 @@ export class InstructorController {
     }
 
     // Call the service method to accept or reject the course
-    const message = await this.instructorService.AcceptOrReject(
+    const { user, message } = await this.instructorService.AcceptOrReject(
       email,
       courseName,
       action,
     );
-    return { message };
+
+    return { user, message };
   }
-
-
-
 
   // Endpoint to create a course
   //@UseGuards(AuthorizationGuard)
   @Post(':email/create-course')
   //@Roles('instructor')
   async createCourse(
-
-    @Param('email') email: string,  // Instructor email in the URL param
-    @Body() createCourseDto: CreateCourseDto,  // Course data in the request body
-
+    @Param('email') email: string, // Instructor email in the URL param
+    @Body() createCourseDto: CreateCourseDto, // Course data in the request body
   ): Promise<Course> {
     // Call the service method to create the course
     return this.instructorService.createCourse(createCourseDto, email);
@@ -160,7 +157,6 @@ export class InstructorController {
     );
   }
 
-
   // Edit course content (replace the current content with new content)
   //@UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/courses/:courseTitle/editcontent')
@@ -193,40 +189,39 @@ export class InstructorController {
     );
   }
 
+  // 1. Endpoint to get the number of enrolled students in a course
+  //@UseGuards(AuthorizationGuard)
+  @Get('enrolled-students/:courseTitle')
+  //@Roles('instructor')
+  async getEnrolledStudentsCount(
+    @Param('courseTitle') courseTitle: string,
+  ): Promise<number> {
+    return this.instructorService.getEnrolledStudents(courseTitle);
+  }
 
-   // 1. Endpoint to get the number of enrolled students in a course
-   //@UseGuards(AuthorizationGuard)
-   @Get('enrolled-students/:courseTitle')
-   //@Roles('instructor')
-   async getEnrolledStudentsCount(
-     @Param('courseTitle') courseTitle: string,
-   ): Promise<number> {
-     return this.instructorService.getEnrolledStudents(courseTitle);
-   }
- 
-   //@UseGuards(AuthorizationGuard)
-   // 2. Endpoint to get the number of students who completed the course
-   @Get('completed-students/:courseTitle')
+  //@UseGuards(AuthorizationGuard)
+  // 2. Endpoint to get the number of students who completed the course
+  @Get('completed-students/:courseTitle')
   // @Roles('instructor')
-   async getCompletedStudentsCount(
-     @Param('courseTitle') courseTitle: string,
-   ): Promise<number> {
-     return this.instructorService.getCompletedStudentsCount(courseTitle);
-   }
- 
-   //@UseGuards(AuthorizationGuard)
-   // 3. Endpoint to get the number of students based on their scores
-   @Get('students-score/:courseTitle')
-   //@Roles('instructor')
-   async getStudentsByScore(
-     @Param('courseTitle') courseTitle: string,
-   ): Promise<any> {
-     return this.instructorService.getStudentsByScore(courseTitle);
-   }
+  async getCompletedStudentsCount(
+    @Param('courseTitle') courseTitle: string,
+  ): Promise<number> {
+    return this.instructorService.getCompletedStudentsCount(courseTitle);
+  }
 
-   //@UseGuards(AuthorizationGuard)
-   @Get('courses')
-   //@Roles('instructor')
+  //@UseGuards(AuthorizationGuard)
+  // 3. Endpoint to get the number of students based on their scores
+  @Get('students-score/:courseTitle')
+  //@Roles('instructor')
+  async getStudentsByScore(
+    @Param('courseTitle') courseTitle: string,
+  ): Promise<any> {
+    return this.instructorService.getStudentsByScore(courseTitle);
+  }
+
+  //@UseGuards(AuthorizationGuard)
+  @Get('courses')
+  //@Roles('instructor')
   async getCourses(@Query('email') email: string): Promise<string[]> {
     return this.instructorService.getCoursesByInstructor(email);
   }
@@ -239,5 +234,4 @@ export class InstructorController {
     }
     return course;
   }
-
 }

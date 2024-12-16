@@ -6,26 +6,38 @@ import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 
+export interface Instructor {
+  _id: string;
+  email: string;
+  name: string;
+  age: string; // Assuming age is a string, but can be converted to number if necessary
+  passwordHash: string;
+  Teach_Courses: string[]; // List of course names the instructor teaches
+  Certificates: string; // Certificates the instructor holds
+  createdAt: string; // ISO Date format
+  updatedAt: string; // ISO Date format
+  __v: number; // MongoDB version field (not typically required in app logic)
+}
+
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
+  const [instructor, setInstructor] = useState<Instructor | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    // Set a timeout to simulate the page loading process and hide the preloader
     setTimeout(() => {
-      setIsLoading(false); // This will hide the preloader after 2 seconds
+      setIsLoading(false);
     }, 1000);
-  }, []); // Empty array to run this effect once after the initial rend
-  // Handle course click
-  const handleCourseClick = () => {
-    const token = sessionStorage.getItem('authToken');
-    if (!token) {
-      router.push('/Ins_login'); // Redirect to login if no token exists
+    const accessToken = localStorage.getItem('Ins_Token');
+    const Instructor = localStorage.getItem('instructorData');
+    if (Instructor) {
+      if (accessToken) {
+        setInstructor(JSON.parse(Instructor));
+      } // Set userData state only if data exists}
     } else {
-      console.log(`Navigating to course details `);
-      // Navigate to the course details page or take another action
+      router.push('/Ins_login');
     }
-  };
+  }, []);
   return (
     <>
       <meta charSet="utf-8" />
@@ -108,7 +120,7 @@ export default function Home() {
                     <a href="#courses">Courses</a>
                   </li>
                   <li>
-                    <Link href="#top">Welcome Instructor</Link>
+                    <Link href="#top">{instructor?.name}</Link>
                   </li>
                 </ul>
                 <a className="menu-trigger">
@@ -135,17 +147,11 @@ export default function Home() {
                       online educational related websites. This layout is based
                       on the famous Bootstrap v5.3.0 framework.
                     </p>
-                    <div
-                      className="buttons"
-                      onClick={() => handleCourseClick()}
-                    >
+                    <div className="buttons">
                       <div className="main-button">
                         <a href="#">Request Demo</a>
                       </div>
-                      <div
-                        className="icon-button"
-                        onClick={() => handleCourseClick()}
-                      >
+                      <div className="icon-button">
                         <a href="#">
                           <i className="fa fa-play" /> What's Scholar?
                         </a>
@@ -153,10 +159,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div
-                  className="item item-2"
-                  onClick={() => handleCourseClick()}
-                >
+                <div className="item item-2">
                   <div className="header-text">
                     <span className="category">Best Result</span>
                     <h2>Get the best result out of your effort</h2>
@@ -177,10 +180,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <div
-                  className="item item-3"
-                  onClick={() => handleCourseClick()}
-                >
+                <div className="item item-3">
                   <div className="header-text">
                     <span className="category">Online Learning</span>
                     <h2>Online Learning helps you save the time</h2>
@@ -208,7 +208,7 @@ export default function Home() {
       </div>
       <div className="services section" id="services">
         <div className="container">
-          <div className="row" onClick={() => handleCourseClick()}>
+          <div className="row">
             <div className="col-lg-4 col-md-6">
               <div className="service-item">
                 <div className="icon">
@@ -241,7 +241,7 @@ export default function Home() {
                   <h4>Add Content</h4>
                   <p>You can add content to the courses you teach FromHere</p>
                   <div className="main-button">
-                  <a href="/Ins_Home/Add_content">Check</a>
+                    <a href="/Ins_Home/Add_content">Check</a>
                   </div>
                 </div>
               </div>
@@ -295,7 +295,7 @@ export default function Home() {
               </a>
             </li>
           </ul>
-          <div className="row event_box" onClick={() => handleCourseClick()}>
+          <div className="row event_box">
             <div className="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 design">
               <div className="events_item">
                 <div className="thumb">
@@ -467,7 +467,7 @@ export default function Home() {
       </div>
       <div className="team section" id="team">
         <div className="container">
-          <div className="row" onClick={() => handleCourseClick()}>
+          <div className="row">
             <div className="col-lg-3 col-md-6">
               <div className="team-member">
                 <div className="main-content">

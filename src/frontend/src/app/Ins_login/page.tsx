@@ -27,7 +27,9 @@ const InstructorLoginNotification = () => {
       }
 
       const data = await response.json();
-      sessionStorage.setItem('authToken', data.token);
+      localStorage.setItem('Ins_Token', data.accessToken);
+      localStorage.setItem('instructorData', JSON.stringify(data.user));
+
       router.push('/Ins_Home');
     } catch (err: any) {
       setError(err.message || 'An error occurred during login');
