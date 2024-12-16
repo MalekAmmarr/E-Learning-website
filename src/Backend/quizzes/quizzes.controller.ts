@@ -29,9 +29,9 @@ export class QuizzesController {
   constructor(private readonly quizService: QuizzesService) {}
 
   // Route to create a new quiz
-  @UseGuards(AuthorizationGuard)
+  //@UseGuards(AuthorizationGuard)
   @Post()
-  @Roles('instructor')
+  //@Roles('instructor')
   @Post('create')
   async createQuiz(
     @Body('instructorEmail') instructorEmail: string,
@@ -43,9 +43,9 @@ export class QuizzesController {
   }
 
   // Route to update an existing quiz
-  @UseGuards(AuthorizationGuard)
+  //@UseGuards(AuthorizationGuard)
   @Put(':quizId')
-  @Roles('instructor')
+  //@Roles('instructor')
  // Endpoint to update quiz content
  async updateQuiz(
    @Param('quizId') quizId: string,
@@ -103,4 +103,23 @@ export class QuizzesController {
   ) {
     return this.quizService.gradeQuiz(quizId, studentEmail, feedback);
   }
+
+
+  @Get('by-course')
+  async getQuizzesByCourseTitle(@Query('courseTitle') courseTitle: string): Promise<Quiz[]> {
+    return this.quizService.getQuizzesByCourseTitle(courseTitle);
+  }
+
+   // Endpoint to fetch only quiz IDs by course title
+   @Get('ids-by-course')
+   async getQuizIdsByCourseTitle(@Query('courseTitle') courseTitle: string): Promise<string[]> {
+     return this.quizService.getQuizIdsByCourseTitle(courseTitle);
+   }
+
+   // Endpoint to fetch the quiz content by quizId
+  @Get(':quizId')
+  async getQuizById(@Param('quizId') quizId: string): Promise<Quiz> {
+    return this.quizService.getQuizById(quizId);
+  }
+
 }

@@ -52,11 +52,15 @@ const CourseDetailsPage = () => {
   };
 
   const handleUpdateContentClick = () => {
-    router.push(`/Ins_Home/Add_content/course/${courseTitle}/update-course-content/${courseTitle}`);
+    router.push(`/Ins_Home/Add_content/course/${courseTitle}/delete-course-content`);
   };
 
   const handleEditContentClick = () => {
     router.push(`/Ins_Home/Add_content/course/${courseTitle}/edit-course-content`);
+  };
+
+  const handleViewQuizzesClick = () => {
+    router.push(`/Ins_Home/Add_content/course/${encodeURIComponent(courseTitle)}/QuizzesPage`);
   };
 
   if (loading) {
@@ -101,10 +105,13 @@ const CourseDetailsPage = () => {
           Add Content
         </button>
         <button className="action-button update-button" onClick={handleUpdateContentClick}>
-          Update Content
+          Delete Content
         </button>
         <button className="action-button edit-button" onClick={handleEditContentClick}>
           Edit Content
+        </button>
+        <button className="action-button quizzes-button" onClick={handleViewQuizzesClick}>
+          View Quizzes
         </button>
       </div>
     </div>

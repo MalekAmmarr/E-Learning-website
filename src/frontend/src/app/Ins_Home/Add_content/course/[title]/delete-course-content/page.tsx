@@ -14,15 +14,15 @@ type CourseDetails = {
   notes: string[];
 };
 
-const EditCourseContentPage = () => {
+const DeleteCourseContentPage = () => {
   const [course, setCourse] = useState<CourseDetails | null>(null);
-  const [newContent, setNewContent] = useState<string>('');
+  const [selectedContent, setSelectedContent] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
   const params = useParams();
-  
+
   if (!params.title || Array.isArray(params.title)) {
     throw new Error('Invalid course title');
   }
@@ -49,26 +49,35 @@ const EditCourseContentPage = () => {
     fetchCourseDetails();
   }, [courseTitle]);
 
-  const handleSaveContentClick = async () => {
-    if (!newContent.trim()) {
-      setError('Content cannot be empty');
+  const handleCheckboxChange = (content: string) => {
+    setSelectedContent((prev) =>
+      prev.includes(content) ? prev.filter((item) => item !== content) : [...prev, content]
+    );
+  };
+
+  const handleDeleteContentClick = async () => {
+    if (selectedContent.length === 0) {
+      setError('Please select at least one content item to delete.');
       return;
     }
 
     try {
-      const res = await fetch(`http://localhost:3000/instructor/${encodeURIComponent(instructorEmail)}/courses/${encodeURIComponent(courseTitle)}/editcontent`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ newContent: [newContent] }), // Wrap the new content in an array
-      });
+      const res = await fetch(
+        `http://localhost:3000/instructor/${encodeURIComponent(instructorEmail)}/courses/${encodeURIComponent(courseTitle)}/deletecontent`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ contentToDelete: selectedContent }),
+        }
+      );
 
       if (!res.ok) {
-        throw new Error(`Failed to update course content: ${res.statusText}`);
+        throw new Error(`Failed to delete course content: ${res.statusText}`);
       }
 
-      // Redirect back to course details page after saving
+      // Refresh the page or redirect to course details after deletion
       router.push(`/Ins_Home/Add_content/course/${encodeURIComponent(courseTitle)}`);
     } catch (err: any) {
       setError(err.message || 'An unknown error occurred');
@@ -84,32 +93,31 @@ const EditCourseContentPage = () => {
   }
 
   return (
-    <div className="edit-course-content-container">
-      <h1 className="course-title">Edit Content for {course?.title}</h1>
+    <div className="delete-course-content-container">
+      <h1 className="course-title">Delete Content from {course?.title}</h1>
       <div className="course-content">
         <h3>Current Course Content</h3>
-        <ul>
+        <form>
           {course?.courseContent.map((content, index) => (
-            <li key={index}>{content}</li>
+            <div key={index} className="content-item">
+              <input
+                type="checkbox"
+                id={`content-${index}`}
+                value={content}
+                onChange={() => handleCheckboxChange(content)}
+              />
+              <label htmlFor={`content-${index}`}>{content}</label>
+            </div>
           ))}
-        </ul>
-      </div>
-      <div className="new-content">
-        <h3>Add New Content</h3>
-        <textarea
-          className="content-textarea"
-          value={newContent}
-          onChange={(e) => setNewContent(e.target.value)}
-          placeholder="Enter new content here..."
-        />
+        </form>
       </div>
       <div className="action-buttons-container">
-        <button className="action-button save-button" onClick={handleSaveContentClick}>
-          Save Content
+        <button className="action-button delete-button" onClick={handleDeleteContentClick}>
+          Delete Selected Content
         </button>
       </div>
     </div>
   );
 };
 
-export default EditCourseContentPage;
+export default DeleteCourseContentPage;

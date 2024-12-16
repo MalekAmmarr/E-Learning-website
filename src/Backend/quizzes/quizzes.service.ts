@@ -303,6 +303,28 @@ export class QuizzesService {
   
     return quiz;
   }
+
+  // Method to fetch all quizzes for a specific course by title
+  async getQuizzesByCourseTitle(courseTitle: string): Promise<Quiz[]> {
+    return this.quizModel.find({ courseTitle }).exec();
+  }
+
+  // Method to fetch only quiz IDs for a specific course
+  async getQuizIdsByCourseTitle(courseTitle: string): Promise<string[]> {
+    const quizzes = await this.quizModel
+      .find({ courseTitle }, { quizId: 1, _id: 0 }) // Projection to return only quizId
+      .exec();
+    return quizzes.map(quiz => quiz.quizId); // Extract quizId from each quiz
+  }
+
+  // Method to fetch the full quiz content by quizId
+  async getQuizById(quizId: string): Promise<Quiz> {
+    const quiz = await this.quizModel.findOne({ quizId }).exec();
+    if (!quiz) {
+      throw new NotFoundException(`Quiz with ID "${quizId}" not found.`);
+    }
+    return quiz;
+  }
   
   
   
