@@ -2,7 +2,18 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import './page.css';
-
+export interface Instructor {
+  _id: string;
+  email: string;
+  name: string;
+  age: string; // Assuming age is a string, but can be converted to number if necessary
+  passwordHash: string;
+  Teach_Courses: string[]; // List of course names the instructor teaches
+  Certificates: string; // Certificates the instructor holds
+  createdAt: string; // ISO Date format
+  updatedAt: string; // ISO Date format
+  __v: number; // MongoDB version field (not typically required in app logic)
+}
 // User.tsx or any other relevant file for types
 export interface User {
   email: string;
@@ -17,22 +28,33 @@ export interface User {
 
 const Apply_Students: React.FC = () => {
   const [students, setStudents] = useState<User[]>([]); // Holds the list of students
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
+  const [loading, setLoading] = useState<boolean>(true);
+  const [instructor, setInstructor] = useState<Instructor>(); // Loading state
   const [error, setError] = useState<string | null>(null); // Error state
   const router = useRouter(); // Router for navigation
 
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await fetch(
-          'http://localhost:3000/instructor/applied-users/Behz@gmail.com',
-        ); // Replace with your actual API endpoint
-        if (!response.ok) {
-          throw new Error('Failed to fetch students');
+        const storedInstructor = localStorage.getItem('instructorData');
+        console.log(storedInstructor);
+        if (storedInstructor) {
+          const parsedInstructor = JSON.parse(storedInstructor);
+          setInstructor(parsedInstructor);
+
+          const response = await fetch(
+            `http://localhost:3000/instructor/applied-users/${parsedInstructor?.email}`,
+          ); // Replace with your actual API endpoint
+          if (!response.ok) {
+            throw new Error('Failed to fetch students');
+          }
+          const data: User[] = await response.json(); // Parse the response as JSON and map to User[] type
+          setStudents(data);
+          setLoading(false);
+        } else {
+          setError('Instructor data not found.');
         }
-        const data: User[] = await response.json(); // Parse the response as JSON and map to User[] type
-        setStudents(data);
-        setLoading(false);
+        console.log(instructor);
       } catch (err) {
         setError('Failed to fetch students');
         setLoading(false);
@@ -68,7 +90,9 @@ const Apply_Students: React.FC = () => {
       }
 
       const result = await response.json();
+      localStorage.setItem('userData', JSON.stringify(result.user));
       alert(result.message); // Show the message from the backend
+
       // Optionally, refetch students or update the UI state if needed
       setStudents((prevStudents) =>
         prevStudents.map((student) => {

@@ -30,7 +30,7 @@ const Profile = () => {
 
   useEffect(() => {
     try {
-      const userData = sessionStorage.getItem('userData');
+      const userData = localStorage.getItem('userData');
       if (userData) {
         const parsedData: User = JSON.parse(userData); // Parse the single user object
         setUser(parsedData);
@@ -39,7 +39,7 @@ const Profile = () => {
       }
     } catch (err) {
       console.error(
-        'Failed to retrieve or parse user data from sessionStorage',
+        'Failed to retrieve or parse user data from localStorage',
         err,
       );
       router.push('/login');
