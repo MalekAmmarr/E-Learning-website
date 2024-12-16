@@ -19,6 +19,7 @@ const EditCourseContentPage = () => {
   const [newContent, setNewContent] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [instructorEmail, setInstructorEmail] = useState<string>('');
 
   const router = useRouter();
   const params = useParams();
@@ -28,7 +29,6 @@ const EditCourseContentPage = () => {
   }
 
   const courseTitle = decodeURIComponent(params.title);
-  const instructorEmail = 'Behz@gmail.com'; // Assuming instructorEmail is passed in the URL params
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -48,6 +48,15 @@ const EditCourseContentPage = () => {
 
     fetchCourseDetails();
   }, [courseTitle]);
+
+  useEffect(() => {
+    // Automatically set the instructor email from localStorage
+    const storedInstructor = localStorage.getItem('instructorData');
+    if (storedInstructor) {
+      const { email } = JSON.parse(storedInstructor);
+      setInstructorEmail(email); // Store the email for later use
+    }
+  }, []);
 
   const handleSaveContentClick = async () => {
     if (!newContent.trim()) {

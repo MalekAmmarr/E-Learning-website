@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import './page.css'; // Importing the CSS file
 
@@ -9,6 +9,7 @@ const AddCourseContentPage = () => {
   const [success, setSuccess] = useState<string | null>(null); // Success message
   const router = useRouter();
   const params = useParams();
+  const [instructorEmail, setInstructorEmail] = useState<string>('');
 
   // Decode and validate course title from params
   const courseTitle = Array.isArray(params.title) ? params.title[0] : params.title;
@@ -17,14 +18,21 @@ const AddCourseContentPage = () => {
   }
   const decodedTitle = decodeURIComponent(courseTitle);
 
+  useEffect(() => {
+    // Automatically set the instructor email from localStorage
+    const storedInstructor = localStorage.getItem('instructorData');
+    if (storedInstructor) {
+      const { email } = JSON.parse(storedInstructor);
+      setInstructorEmail(email); // Store the email for later use
+    }
+  }, []);
+
   const handleContentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewContent(e.target.value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const instructorEmail = 'Behz@gmail.com'; // Replace with dynamic email
-    const token = sessionStorage.getItem('authToken'); // Retrieve auth token
 
     if (!newContent.trim()) {
       setError('Content cannot be empty.');
@@ -52,9 +60,10 @@ const AddCourseContentPage = () => {
 
       setSuccess('Content added successfully!');
       setNewContent(''); // Clear input
-      // Redirect or refresh after successful submission
+
+      // Redirect after successful submission
       setTimeout(() => {
-        router.push(`/course-details/${decodedTitle}`);
+        router.push(`/course-details/${encodeURIComponent(decodedTitle)}`);
       }, 1500);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';

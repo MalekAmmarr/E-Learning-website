@@ -1,39 +1,35 @@
-'use client'; // Marks this component as a client component
+'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import './page.css';
-
+import { Instructor } from '../Ins_applied-students/page';
 
 const AddContent = () => {
   const [courseTitles, setCourseTitles] = useState<string[]>([]); // Array of course titles
   const [loading, setLoading] = useState(true);
+  const [instructor, setInstructor] = useState<Instructor>(); // Loading state
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const token = sessionStorage.getItem('authToken');
-  const email = "Behz@gmail.com"; // Replace with dynamic email if needed
-
   useEffect(() => {
-    if (!email || !token) {
-      router.push('/Ins_login'); // Redirect if email or token is not available
-      return; // Prevent further execution
-    }
-
     const fetchCourses = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/instructor/courses?email=${email}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`, // Send token in the header
-          },
-        });
+        const storedInstructor = localStorage.getItem('instructorData');
+        if (storedInstructor) {
+          const parsedInstructor = JSON.parse(storedInstructor);
+          setInstructor(parsedInstructor);
+          const res = await fetch(`http://localhost:3000/instructor/courses?email=${parsedInstructor?.email}`);
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch courses: ${res.statusText}`);
+          if (!res.ok) {
+            throw new Error(`Failed to fetch courses: ${res.statusText}`);
+          }
+
+          const data: string[] = await res.json();
+          setCourseTitles(data);
+          setLoading(false);
+        } else {
+          setError('Instructor data not found.');
         }
-
-        const data: string[] = await res.json(); // Assuming the response is an array of strings (course titles)
-        setCourseTitles(data);
-        setLoading(false);
       } catch (err: any) {
         setError(err.message || 'An unknown error occurred');
         setLoading(false);
@@ -41,15 +37,16 @@ const AddContent = () => {
     };
 
     fetchCourses();
-  }, [email, token, router]);
+  }, [router]);
 
   const handleCourseClick = (courseTitle: string) => {
     const encodedTitle = encodeURIComponent(courseTitle);
     router.push(`/Ins_Home/Add_content/course/${encodedTitle}`);
   };
-  
-  
-  
+
+  const handleCreateCourse = () => {
+    router.push('/Ins_Home/Add_content/create-course');
+  };
 
   if (loading) {
     return <div>Loading courses...</div>;
@@ -82,6 +79,13 @@ const AddContent = () => {
               </div>
             </div>
           ))}
+        </div>
+        <div className="row">
+          <div className="col-lg-12 text-center">
+            <button className="btn btn-primary" onClick={handleCreateCourse}>
+              Create Course
+            </button>
+          </div>
         </div>
       </div>
     </section>

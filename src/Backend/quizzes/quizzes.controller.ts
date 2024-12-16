@@ -30,9 +30,8 @@ export class QuizzesController {
 
   // Route to create a new quiz
   //@UseGuards(AuthorizationGuard)
-  @Post()
-  //@Roles('instructor')
   @Post('create')
+  //@Roles('instructor')
   async createQuiz(
     @Body('instructorEmail') instructorEmail: string,
     @Body('quizId') quizId: string,

@@ -49,33 +49,36 @@ const QuizzesPage = () => {
 
   return (
     <div className="quizzes-container">
-      <h1 className="quizzes-title">Quizzes for {params.courseTitle}</h1>
+      <h1 className="quizzes-title">Quizzes for {courseTitle}</h1>
       <div className="quiz-list">
         {quizIds.length === 0 ? (
           <p>No quizzes available for this course.</p>
         ) : (
           <ul>
-            {quizIds.map((quizId) => {
-              console.log('Quiz ID:', quizId); // Logs each quizId
-              return (
-                <li key={quizId}>
-                  <span className="quiz-id">Quiz ID: {quizId}</span>
-                  <button
-                    className="view-quiz-button"
-                    onClick={() =>
-                      router.push(
-                        `/Ins_Home/Add_content/course/${encodeURIComponent(courseTitle)}/QuizzesPage/${encodeURIComponent(quizId)}`,
-                      )
-                    }
-                  >
-                    View Content
-                  </button>
-                </li>
-              );
-            })}
+            {quizIds.map((quizId) => (
+              <li key={quizId}>
+                <span className="quiz-id">Quiz ID: {quizId}</span>
+                <button
+                  className="view-quiz-button"
+                  onClick={() =>
+                    router.push(
+                      `/Ins_Home/Add_content/course/${encodeURIComponent(courseTitle)}/QuizzesPage/${encodeURIComponent(quizId)}`,
+                    )
+                  }
+                >
+                  View Content
+                </button>
+              </li>
+            ))}
           </ul>
         )}
       </div>
+      <button
+        className="create-quiz-button"
+        onClick={() => router.push(`/Ins_Home/Add_content/course/${encodeURIComponent(courseTitle)}/QuizzesPage/CreateQuiz`)}
+      >
+        Create Quiz
+      </button>
     </div>
   );
 };

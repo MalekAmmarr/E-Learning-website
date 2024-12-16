@@ -19,6 +19,7 @@ const DeleteCourseContentPage = () => {
   const [selectedContent, setSelectedContent] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [instructorEmail, setInstructorEmail] = useState<string | null>(null);
 
   const router = useRouter();
   const params = useParams();
@@ -28,9 +29,21 @@ const DeleteCourseContentPage = () => {
   }
 
   const courseTitle = decodeURIComponent(params.title);
-  const instructorEmail = 'Behz@gmail.com'; // Assuming instructorEmail is passed in the URL params
 
   useEffect(() => {
+    // Retrieve instructor email from localStorage
+    const storedInstructor = localStorage.getItem('instructorData');
+    if (storedInstructor) {
+      const parsedInstructor = JSON.parse(storedInstructor);
+      setInstructorEmail(parsedInstructor.email);
+    } else {
+      setError('Instructor data not found. Please log in again.');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!instructorEmail) return;
+
     const fetchCourseDetails = async () => {
       try {
         const res = await fetch(`http://localhost:3000/instructor/course?title=${encodeURIComponent(courseTitle)}`);
@@ -47,7 +60,7 @@ const DeleteCourseContentPage = () => {
     };
 
     fetchCourseDetails();
-  }, [courseTitle]);
+  }, [courseTitle, instructorEmail]);
 
   const handleCheckboxChange = (content: string) => {
     setSelectedContent((prev) =>
@@ -62,6 +75,10 @@ const DeleteCourseContentPage = () => {
     }
 
     try {
+      if (!instructorEmail) {
+        throw new Error('Instructor email not found. Please log in again.');
+      }
+
       const res = await fetch(
         `http://localhost:3000/instructor/${encodeURIComponent(instructorEmail)}/courses/${encodeURIComponent(courseTitle)}/deletecontent`,
         {
