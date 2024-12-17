@@ -1,0 +1,99 @@
+/* page.css */
+
+/* Global Styles */
+body {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7fb;
+  color: #333;
+  margin: 0;
+  padding: 0;
+}
+
+h2, h3, h6 {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+}
+
+h4 {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+}
+
+/* Section Styles */
+.section {
+  padding: 50px 0;
+  background-color: #fff;
+}
+
+.section-heading {
+  margin-bottom: 30px;
+}
+
+.section-heading h6 {
+  font-size: 18px;
+  color: #6c757d;
+  margin-bottom: 10px;
+}
+
+.section-heading h2 {
+  font-size: 36px;
+  color: #333;
+}
+
+.section-heading h3 {
+  font-size: 24px;
+  color: #007bff;
+}
+
+/* Card Styles */
+.student-answer-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.student-answer-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+}
+
+.student-answer-card h4 {
+  font-size: 20px;
+  color: #007bff;
+  margin-bottom: 15px;
+}
+
+.student-answer-card ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.student-answer-card ul li {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+/* Error Message */
+.error-message {
+  color: red;
+  font-size: 18px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .section-heading h2 {
+    font-size: 28px;
+  }
+
+  .student-answer-card h4 {
+    font-size: 18px;
+  }
+
+  .student-answer-card ul li {
+    font-size: 14px;
+  }
+}

@@ -1,0 +1,125 @@
+/* page.css */
+
+/* Global Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fb;
+    color: #333;
+    margin: 0;
+    padding: 0;
+  }
+  
+  h2, h3, h6 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 500;
+  }
+  
+  h4 {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+  }
+  
+  /* Section Styles */
+  .student-answers-container {
+    padding: 50px 0;
+    background-color: #fff;
+  }
+  
+  .content-wrapper {
+    margin: 0 auto;
+    max-width: 800px;
+  }
+  
+  .heading {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .heading h6 {
+    font-size: 18px;
+    color: #6c757d;
+    margin-bottom: 10px;
+  }
+  
+  .heading h2 {
+    font-size: 36px;
+    color: #333;
+  }
+  
+  .heading h3 {
+    font-size: 24px;
+    color: #007bff;
+  }
+  
+  /* Answer Card Styles */
+  .answers-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .answers-card ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .answers-card ul li {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 15px;
+  }
+  
+  textarea {
+    width: 100%;
+    height: 100px;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    resize: vertical;
+  }
+  
+  textarea:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+  
+  /* Grade Button */
+  .grade-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+  }
+  
+  .grade-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Error Message */
+  .error-message {
+    color: red;
+    font-size: 18px;
+    text-align: center;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .heading h2 {
+      font-size: 28px;
+    }
+  
+    .answers-card h4 {
+      font-size: 18px;
+    }
+  
+    .answers-card ul li {
+      font-size: 14px;
+    }
+  }
+  
