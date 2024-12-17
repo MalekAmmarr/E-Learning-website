@@ -9,6 +9,7 @@ import {
   Put,
   Patch,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -18,6 +19,7 @@ import { QuizzesService } from './quizzes.service';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CreateQuizDto } from './dto/create-quiz.dto';
 interface Question {
   question: string; // The question text
   options: string[]; // Array of options for the question
@@ -31,14 +33,30 @@ export class QuizzesController {
   // Route to create a new quiz
   //@UseGuards(AuthorizationGuard)
   @Post('create')
-  //@Roles('instructor')
-  async createQuiz(
-    @Body('instructorEmail') instructorEmail: string,
-    @Body('quizId') quizId: string,
-    @Body('quizType') quizType: string,
-    @Body('numberOfQuestions') numberOfQuestions: number,
-  ) {
-    return this.quizService.createQuiz(instructorEmail, quizId, quizType, numberOfQuestions);
+  async createQuiz(@Body() createQuizDto: CreateQuizDto) {
+    const {
+      instructorEmail,
+      quizId,
+      quizType,
+      numberOfQuestions,
+      studentEmail,
+      courseTitle,
+    } = createQuizDto;
+
+    try {
+      // Call the service to create the quiz
+      const createdQuiz = await this.quizService.createQuiz(
+        instructorEmail,
+        quizId,
+        quizType,
+        numberOfQuestions,
+        studentEmail,
+        courseTitle,
+      );
+      return { success: true, data: createdQuiz };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   // Route to update an existing quiz
@@ -95,12 +113,12 @@ export class QuizzesController {
   @UseGuards(AuthorizationGuard)
   @Patch('grade')
   @Roles('instructor')
-  async gradeQuiz(
+  async giveFeedback(
     @Body('quizId') quizId: string,
     @Body('studentEmail') studentEmail: string,
     @Body('feedback') feedback: string[],
   ) {
-    return this.quizService.gradeQuiz(quizId, studentEmail, feedback);
+    return this.quizService.giveFeedback(quizId, studentEmail, feedback);
   }
 
 
@@ -120,5 +138,31 @@ export class QuizzesController {
   async getQuizById(@Param('quizId') quizId: string): Promise<Quiz> {
     return this.quizService.getQuizById(quizId);
   }
+
+  @Get('instructor/by-instructor')
+  async getQuizzesByInstructor(@Query('email') email: string): Promise<string[]> {
+    if (!email) {
+      throw new NotFoundException('Email is required');
+    }
+
+    return this.quizService.getQuizzesByInstructor(email);
+  }
+
+  @Get(':quizId/student-answers')
+  async getStudentAnswers(@Param('quizId') quizId: string) {
+    return this.quizService.getStudentAnswers(quizId);
+  }
+
+  @Get(':quizId/slecetedstudent-answers')
+async getselectedStudentAnswers(
+  @Param('quizId') quizId: string,
+  @Query('studentEmail') studentEmail: string, // Accept `studentEmail` as a query parameter
+) {
+  if (!studentEmail) {
+    throw new BadRequestException('studentEmail query parameter is required');
+  }
+  return this.quizService.getselectedStudentAnswers(quizId, studentEmail);
+}
+
 
 }

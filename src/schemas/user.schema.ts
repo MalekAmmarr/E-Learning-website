@@ -44,7 +44,14 @@ export class User extends Document {
     type: [
       {
         quizId: String,
-        feedback: [{ question: String, feedback: String }],
+        courseTitle: String,
+        feedback: [
+          {
+            question: String,
+            studentAnswer: String, // Add student answer
+            feedback: String,
+          },
+        ],
       },
     ],
     default: [],
@@ -52,8 +59,13 @@ export class User extends Document {
   feedback: Array<{
     quizId: string;
     courseTitle: string;
-    feedback: Array<{ question: string; feedback: string }>;
+    feedback: Array<{
+      question: string;
+      studentAnswer: string; // Include student answer
+      feedback: string;
+    }>;
   }>;
+  
 
   // Notes tied to specific courses
   @Prop({ type: [String], default: [] })

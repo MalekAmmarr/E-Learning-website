@@ -255,7 +255,7 @@ export default function Home() {
                   <h4>Students grades</h4>
                   <p>You can Add Grades of Quizes and Exams from Here.</p>
                   <div className="main-button">
-                    <a href="#">Put Grades</a>
+                    <a href="/Ins_Home/Put_grades">Put Grades</a>
                   </div>
                 </div>
               </div>
