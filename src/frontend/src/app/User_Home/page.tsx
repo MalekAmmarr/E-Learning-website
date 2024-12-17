@@ -109,6 +109,12 @@ export default function Home() {
   }, []);
   console.log(appliedCourses);
   console.log(acceptedCourses);
+  // Function to handle note title click
+  const handleCourseTitleClick = (courseTitle: string) => {
+    router.push(
+      `/User_Home/CourseContent?title=${encodeURIComponent(courseTitle)}`,
+    );
+  };
 
   return (
     <>
@@ -669,7 +675,11 @@ export default function Home() {
                 >
                   <div className="events_item">
                     <div className="thumb">
-                      <a href="#">
+                      <a
+                        onClick={() =>
+                          handleCourseTitleClick(acceptedCourses.name)
+                        }
+                      >
                         <img
                           src={acceptedCourses.image}
                           alt={acceptedCourses.name}

@@ -36,14 +36,12 @@ import { ChatModule } from './Backend/chat/chat.module';
       {
         connectionName: 'dataManagementDB', // For data management database
       },
-
     ),
     ServeStaticModule.forRoot({
       rootPath: join('C:', 'Users', 'Omar Hossam', 'Downloads'), // Folder where PDFs are stored
       serveRoot: '/files', // URL path prefix for accessing the PDFs
     }),
 
-    
     UsersModule,
     CoursesModule,
     ModulesModule,
@@ -70,4 +68,4 @@ import { ChatModule } from './Backend/chat/chat.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

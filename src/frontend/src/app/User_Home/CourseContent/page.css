@@ -1,0 +1,17 @@
+.section.courseses {
+  margin-bottom: 200x; /* Add spacing after the courses section */
+}
+
+.section.fun-factss {
+  margin-top: 200px; /* Add spacing before the fun-facts section */
+}
+
+.sectionn {
+  padding: 200px 0; /* Ensures consistent spacing for all sections */
+}
+.circle-image img {
+  width: 150px; /* Set the desired width */
+  height: 150px; /* Set the height equal to width for a perfect circle */
+  border-radius: 50%; /* This creates the circular shape */
+  object-fit: cover; /* Ensures the image is well-fitted within the circle */
+}
