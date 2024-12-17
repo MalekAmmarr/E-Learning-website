@@ -54,12 +54,6 @@ export default function Home() {
       price: 240,
       image: '/assets/images/English (2).jpg',
       intructor_name: 'Dr.Behziouni',
-    },{
-      name: 'German begginner',
-      category: 'Germen',
-      price: 240,
-      image: '/assets/images/germen-course.jpg',
-      intructor_name: 'Dr.Gee',
     },
   ];
   // Filter courses based on the active category
@@ -714,37 +708,37 @@ export default function Home() {
       <div className="team section" id="team">
         <div className="container">
           <div className="row">
-          <div className="col-lg-3 col-md-6">
-             <div className="team-member">
-               <div className="main-content">
-                <img src="assets\images\Gee.jpg" alt="" />
-                <span className="category">Germen Instructor</span>
-                <h4>Youssef Galal</h4>
-                 <ul className="social-icons">
-                 <li>
-                  <a
-                  href="https://www.facebook.com/share/aSGMuz3T3WPDbWUz/?mibextid=wwXIfr"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i className="fab fa-facebook" />
-                  </a>
-                </li>
-                <li>
-                  <a
-                  href="https://www.instagram.com/yousssefgalal/profilecard"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i className="fab fa-instagram" />
-                  </a>
-                  </li>
+            <div className="col-lg-3 col-md-6">
+              <div className="team-member">
+                <div className="main-content">
+                  <img src="assets\images\Gee.jpg" alt="" />
+                  <span className="category">Germen Instructor</span>
+                  <h4>Youssef Galal</h4>
+                  <ul className="social-icons">
+                    <li>
+                      <a
+                        href="https://www.facebook.com/share/aSGMuz3T3WPDbWUz/?mibextid=wwXIfr"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-facebook" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.instagram.com/yousssefgalal/profilecard"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-instagram" />
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </div>
             </div>
           </div>
-          </div>
+        </div>
       </div>
       <div className="section testimonials">
         <div className="container">
@@ -809,11 +803,12 @@ export default function Home() {
                 <div className="item">
                   <p>
                     “<strong>Learn German, Unlock Opportunities!</strong>
-                    Mastering German connects you to global opportunities, rich culture, and new career paths. Start your journey today!”
-                    </p>
-                    <div className="author">
-                      <img src="/assets/images/Gee.jpg" alt="" />
-                      <span className="category">German Instructor</span>
+                    Mastering German connects you to global opportunities, rich
+                    culture, and new career paths. Start your journey today!”
+                  </p>
+                  <div className="author">
+                    <img src="/assets/images/Gee.jpg" alt="" />
+                    <span className="category">German Instructor</span>
                     <h4>Dr.Gee</h4>
                   </div>
                 </div>

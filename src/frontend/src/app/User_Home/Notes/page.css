@@ -1,0 +1,48 @@
+/* Style for the Delete button */
+.btn-delete {
+  display: inline-block;
+  background-color: #e74c3c; /* Red color for delete */
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-delete:hover {
+  background-color: #c0392b; /* Darker red on hover */
+  transform: scale(1.05); /* Slight scaling on hover */
+}
+
+.btn-delete:active {
+  background-color: #e74c3c; /* Maintain red color on active */
+  transform: scale(1); /* Reset scale on active state */
+}
+
+.btn-delete:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.5); /* Focus state with a glow */
+}
+
+.btn-delete .icon {
+  margin-right: 5px; /* Space between icon and text */
+}
+
+.delete-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.delete-container button {
+  margin: 5px;
+}

@@ -1,8 +1,23 @@
-import { Controller, Post, Body, Param, Patch, Delete ,UseGuards,Request,BadRequestException,Get,Query} from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Patch,
+  Delete,
+  UseGuards,
+  Request,
+  BadRequestException,
+  Get,
+  Query,
+  Res,
+  HttpStatus,
+} from '@nestjs/common';
 import { NotesService } from './note.service';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Note } from 'src/schemas/note.schema';
+import { Response } from 'express';
 
 @Controller('note')
 export class NotesController {
@@ -10,20 +25,13 @@ export class NotesController {
 
   @UseGuards(AuthorizationGuard)
   @Post('createNote')
-  @Roles('student','instructor') // Ensure only students can create notes
+  @Roles('student', 'instructor') // Ensure only students can create notes
   async createNote(
-    @Body() body: { content: string; courseId: string }, // Accept content and courseId directly in the body
-    @Request() req, // Access the request object to get user data
+    @Body() { studentEmail, Title }: { studentEmail: string; Title: string },
   ): Promise<Note> {
     try {
-      // Get the user's email from the token (extracted by the AuthorizationGuard)
-      const studentEmail = req.user.email;
-  
-      // Add the user's email to the note data
-      const noteData = { ...body, studentEmail };
-  
       // Pass the data to the service for saving
-      return await this.notesService.createNote(noteData.content, noteData.courseId, studentEmail);
+      return await this.notesService.createNote(studentEmail, Title);
     } catch (error) {
       // Handle errors (e.g., database constraint violations)
       const errorMessage = error.message || 'An unexpected error occurred';
@@ -37,49 +45,154 @@ export class NotesController {
   @Patch('editNote')
   @Roles('student')
   async editNote(
-    @Body() body: { content: string; courseId: string },
-    @Request() req,
+    @Body()
+    {
+      studentEmail,
+      newTitle,
+      newEmail,
+    }: {
+      studentEmail: string;
+      newTitle: string;
+      newEmail: string;
+    },
   ): Promise<Note> {
     try {
-      const studentEmail = req.user.email;
-      return await this.notesService.editNote(body.content, body.courseId, studentEmail);
+      return await this.notesService.editNote(studentEmail, newTitle, newEmail);
+    } catch (error) {
+      const errorMessage = error.message || 'An unexpected error occurred';
+      throw new BadRequestException(errorMessage);
+    }
+  }
+  @UseGuards(AuthorizationGuard)
+  @Patch('/editSpecificNote')
+  @Roles('student')
+  async editNodeString(
+    @Body()
+    {
+      studentEmail,
+      index,
+      newString,
+    }: {
+      studentEmail: string;
+      index: number;
+      newString: string;
+    },
+  ): Promise<Note> {
+    try {
+      return await this.notesService.editNodeString(
+        studentEmail,
+        index,
+        newString,
+      );
     } catch (error) {
       const errorMessage = error.message || 'An unexpected error occurred';
       throw new BadRequestException(errorMessage);
     }
   }
 
-  // Delete an existing note (by studentEmail and courseId)
   @UseGuards(AuthorizationGuard)
   @Delete('deleteNote')
   @Roles('student')
-  async deleteNote(
-    @Body() body: { courseId: string }, // Only courseId is required to identify the note
-    @Request() req,
-  ): Promise<{ message: string }> {
+  async deleteNodeString(
+    @Body()
+    {
+      studentEmail,
+      index,
+      Title,
+    }: {
+      studentEmail: string;
+      index: number;
+      Title: String;
+    },
+  ): Promise<Note> {
     try {
-      const studentEmail = req.user.email;
-      await this.notesService.deleteNote(body.courseId, studentEmail);
-      return { message: 'Succesfully deleted' };
+      return await this.notesService.deleteNodeString(
+        studentEmail,
+        index,
+        Title,
+      );
     } catch (error) {
       const errorMessage = error.message || 'An unexpected error occurred';
       throw new BadRequestException(errorMessage);
     }
   }
-
   @UseGuards(AuthorizationGuard)
-  @Get('getNotes')
+  @Delete('deleteAllNote')
   @Roles('student')
-  async getNotes(
-    @Request() req,
-  ): Promise<Note[]> {
+  async deleteNote(
+    @Body()
+    {
+      studentEmail,
+      Title,
+    }: {
+      studentEmail: string;
+
+      Title: String;
+    },
+  ): Promise<void> {
     try {
-      const studentEmail = req.user.email;
-      return await this.notesService.getNotes(studentEmail);
+      return await this.notesService.deleteAllNote(studentEmail, Title);
     } catch (error) {
       const errorMessage = error.message || 'An unexpected error occurred';
       throw new BadRequestException(errorMessage);
     }
   }
 
+  @Post('getNotes')
+  async getNotesByStudentEmail(
+    @Body() { studentEmail }: { studentEmail: string },
+    @Res() res: Response,
+  ) {
+    try {
+      const notes =
+        await this.notesService.getNotesByStudentEmail(studentEmail);
+      return res.status(HttpStatus.OK).json(notes);
+    } catch (error) {
+      console.error(error.message);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message || 'Internal server error' });
+    }
+  }
+  @Post('showNotes')
+  async getNotesByTitle(
+    @Body() { Title }: { Title: string },
+    @Res() res: Response,
+  ) {
+    try {
+      const notes = await this.notesService.getNotesByTitle(Title);
+      return res.status(HttpStatus.OK).json(notes);
+    } catch (error) {
+      console.error(error.message);
+      return res
+        .status(error.status || HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ message: error.message || 'Internal server error' });
+    }
+  }
+  @UseGuards(AuthorizationGuard)
+  @Post('addNote')
+  @Roles('student') // Or any role you want to assign this endpoint to
+  async addNote(
+    @Body()
+    {
+      studentEmail,
+      Title,
+      content,
+    }: {
+      studentEmail: string;
+      Title: string;
+      content: string;
+    },
+  ): Promise<Note> {
+    try {
+      return await this.notesService.addNoteToDatabase(
+        studentEmail,
+        Title,
+        content,
+      );
+    } catch (error) {
+      const errorMessage = error.message || 'An unexpected error occurred';
+      throw new BadRequestException(errorMessage);
+    }
+  }
 }

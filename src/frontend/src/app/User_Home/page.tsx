@@ -200,7 +200,7 @@ export default function Home() {
                     <a href="#events">Events</a>
                   </li>
                   <li>
-                    <Link href="/login">
+                    <Link href="/User_Home/Notification">
                       <i className="fas fa-bell"></i>{' '}
                       {/* This is the notification bell icon */}
                     </Link>
@@ -380,7 +380,7 @@ export default function Home() {
                     keep track of ideas, or jot down important information.
                   </p>
                   <div className="main-button">
-                    <a href="#!">Add Notes</a>
+                    <a href="/User_Home/Notes">Add Notes</a>
                   </div>
                 </div>
               </div>
