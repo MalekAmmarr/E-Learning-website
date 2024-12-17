@@ -38,20 +38,22 @@ export class QuizzesController {
     @Body('quizType') quizType: string,
     @Body('numberOfQuestions') numberOfQuestions: number,
   ) {
-    return this.quizService.createQuiz(instructorEmail, quizId, quizType, numberOfQuestions);
+    return this.quizService.createQuiz(
+      instructorEmail,
+      quizId,
+      quizType,
+      numberOfQuestions,
+    );
   }
 
   // Route to update an existing quiz
   //@UseGuards(AuthorizationGuard)
   @Put(':quizId')
   //@Roles('instructor')
- // Endpoint to update quiz content
- async updateQuiz(
-   @Param('quizId') quizId: string,
-   @Body() updateData: any,
- ) {
-   return this.quizService.updateQuiz(quizId, updateData);
- }
+  // Endpoint to update quiz content
+  async updateQuiz(@Param('quizId') quizId: string, @Body() updateData: any) {
+    return this.quizService.updateQuiz(quizId, updateData);
+  }
 
   // Start the quiz for a student
   @UseGuards(AuthorizationGuard)
@@ -82,13 +84,23 @@ export class QuizzesController {
       email,
       quizId,
       answers,
+      score,
+      Coursetitle,
     }: {
       quizId: string;
       email: string;
       answers: string[];
+      score: number;
+      Coursetitle: string;
     },
-  ) {
-    return this.quizService.submitAnswers(email, quizId, answers);
+  ): Promise<void> {
+    return this.quizService.submitAnswers(
+      email,
+      quizId,
+      answers,
+      score,
+      Coursetitle,
+    );
   }
 
   // Endpoint to grade a quiz and update user score
@@ -103,22 +115,24 @@ export class QuizzesController {
     return this.quizService.gradeQuiz(quizId, studentEmail, feedback);
   }
 
-
   @Get('by-course')
-  async getQuizzesByCourseTitle(@Query('courseTitle') courseTitle: string): Promise<Quiz[]> {
+  async getQuizzesByCourseTitle(
+    @Query('courseTitle') courseTitle: string,
+  ): Promise<Quiz[]> {
     return this.quizService.getQuizzesByCourseTitle(courseTitle);
   }
 
-   // Endpoint to fetch only quiz IDs by course title
-   @Get('ids-by-course')
-   async getQuizIdsByCourseTitle(@Query('courseTitle') courseTitle: string): Promise<string[]> {
-     return this.quizService.getQuizIdsByCourseTitle(courseTitle);
-   }
+  // Endpoint to fetch only quiz IDs by course title
+  @Get('ids-by-course')
+  async getQuizIdsByCourseTitle(
+    @Query('courseTitle') courseTitle: string,
+  ): Promise<string[]> {
+    return this.quizService.getQuizIdsByCourseTitle(courseTitle);
+  }
 
-   // Endpoint to fetch the quiz content by quizId
+  // Endpoint to fetch the quiz content by quizId
   @Get(':quizId')
   async getQuizById(@Param('quizId') quizId: string): Promise<Quiz> {
     return this.quizService.getQuizById(quizId);
   }
-
 }
