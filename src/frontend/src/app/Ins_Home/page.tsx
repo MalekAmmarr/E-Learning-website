@@ -252,10 +252,10 @@ export default function Home() {
                   <img src="/assets/images/service-03.png" alt="web experts" />
                 </div>
                 <div className="main-content">
-                  <h4>Students grades</h4>
-                  <p>You can Add Grades of Quizes and Exams from Here.</p>
+                  <h4>Students feedbacks</h4>
+                  <p>You can give feedbacks for Quizes and Exams from Here.</p>
                   <div className="main-button">
-                    <a href="/Ins_Home/Put_grades">Put Grades</a>
+                    <a href="/Ins_Home/Put_grades">Give feedbacks</a>
                   </div>
                 </div>
               </div>

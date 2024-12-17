@@ -1,97 +1,95 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter, useParams } from 'next/navigation';
 import './page.css';
-import { useRouter, useParams } from 'next/navigation'; // Correctly import Next.js hooks
 
-interface StudentAnswer {
+interface StudentEmail {
   studentEmail: string;
-  answers: string[];
+  hasFeedback: boolean; // Add hasFeedback field
 }
 
 const StudentAnswers = () => {
   const params = useParams();
-  const quizId = params.quizId;
-
-  const [studentAnswers, setStudentAnswers] = useState<StudentAnswer[]>([]);
+  const quizId = Array.isArray(params.quizId)
+    ? params.quizId[0]
+    : params.quizId; // Ensure quizId is a string
+  const [studentEmails, setStudentEmails] = useState<StudentEmail[]>([]);
   const [error, setError] = useState<string | null>(null);
-
   const router = useRouter();
 
   useEffect(() => {
-    if (!quizId) return; // Guard for missing quizId
+    if (!quizId) return;
 
-    let isMounted = true; // Cleanup flag
-
-    const fetchStudentAnswers = async () => {
+    const fetchStudentEmails = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/quizzes/${quizId}/student-answers`);
-        if (!res.ok) throw new Error(`Failed to fetch student answers: ${res.statusText}`);
+        const res = await fetch(
+          `http://localhost:3000/quizzes/${quizId}/student-answers`, // Update API endpoint
+        );
+        if (!res.ok)
+          throw new Error(`Failed to fetch student emails: ${res.statusText}`);
+
         const data = await res.json();
-        if (isMounted) setStudentAnswers(data);
+        // Map studentEmail and hasFeedback fields
+        const emails = data.map((item: any) => ({
+          studentEmail: item.studentEmail,
+          hasFeedback: item.hasFeedback, // Include the hasFeedback field
+        }));
+        setStudentEmails(emails);
       } catch (err) {
-        if (isMounted) setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        setError(
+          err instanceof Error ? err.message : 'An unknown error occurred',
+        );
       }
     };
 
-    fetchStudentAnswers();
-
-    return () => {
-      isMounted = false; // Cleanup
-    };
+    fetchStudentEmails();
   }, [quizId]);
 
   const handleCardClick = (studentEmail: string) => {
-    const validQuizId = Array.isArray(quizId) ? quizId[0] : quizId;
-
-    if (!validQuizId) {
-      console.error("Quiz ID is missing or invalid.");
-      return;
-    }
+    const validQuizId = quizId ?? ''; // Fallback to an empty string if quizId is undefined
 
     router.push(
-      `/Ins_Home/Put_grades/${encodeURIComponent(validQuizId)}/GradeQuiz?studentEmail=${encodeURIComponent(studentEmail)}`
+      `/Ins_Home/Put_grades/${encodeURIComponent(validQuizId)}/GradeQuiz?studentEmail=${encodeURIComponent(studentEmail)}`,
     );
   };
 
-  if (!quizId) return <div>Error: Quiz ID is missing.</div>; // Guard for missing quizId
+  if (!quizId)
+    return <div className="error-message">Error: Quiz ID is missing.</div>;
 
   return (
     <section className="section student-answers" id="student-answers">
       <div className="container">
-        <div className="row">
-          <div className="col-lg-12 text-center">
-            <div className="section-heading">
-              <h6>Student Answers</h6>
-              <h2>Answers for Quiz ID: {quizId}</h2>
-            </div>
-          </div>
+        <div className="section-heading text-center">
+          <h6>Student Emails</h6>
+          <h2>Quiz ID: {quizId}</h2>
         </div>
+
         {error ? (
-          <div className="row">
-            <div className="col-lg-12 text-center">
-              <div className="error-message">
-                <h4>Error: {error}</h4>
-              </div>
-            </div>
+          <div className="error-message text-center">
+            <h4>{error}</h4>
           </div>
         ) : (
-          <div className="row">
-            {studentAnswers.map((answer, index) => (
-              <div
-                key={index}
-                className="col-lg-4 col-md-6 align-self-center mb-30"
-                onClick={() => handleCardClick(answer.studentEmail)}
-              >
-                <div className="student-answer-card">
-                  <h4>{answer.studentEmail}</h4>
-                  <ul>
-                    {answer.answers.map((ans, idx) => (
-                      <li key={idx}>{ans}</li>
-                    ))}
-                  </ul>
+          <div className="row justify-content-center">
+            {studentEmails.length > 0 ? (
+              studentEmails.map(({ studentEmail, hasFeedback }, index) => (
+                <div
+                  key={index}
+                  className="col-lg-3 col-md-4 col-sm-6 mb-4"
+                  onClick={() => handleCardClick(studentEmail)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="student-card text-center p-3 shadow-sm rounded">
+                    <h5 className="mb-0">
+                      {studentEmail} {hasFeedback && <span>(Feedbacked)</span>}
+                    </h5>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="col-12 text-center">
+                <p>No student emails available.</p>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>

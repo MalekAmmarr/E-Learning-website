@@ -45,6 +45,7 @@ export class User extends Document {
       {
         quizId: String,
         courseTitle: String,
+        isfeedbacked: Boolean, // New attribute added here
         feedback: [
           {
             question: String,
@@ -59,6 +60,7 @@ export class User extends Document {
   feedback: Array<{
     quizId: string;
     courseTitle: string;
+    isfeedbacked: boolean; // Include isfeedbacked as a boolean
     feedback: Array<{
       question: string;
       studentAnswer: string; // Include student answer
