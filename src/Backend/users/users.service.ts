@@ -29,9 +29,7 @@ export class UsersService {
     @InjectModel(Progress.name, 'eLearningDB')
     private readonly progressModel: Model<Progress>,
     private readonly authService: AuthService, // Inject AuthService
-
   ) {}
-
 
   // Register a new Student
   async registerUser(createUserDto: CreateUserDto) {
@@ -59,14 +57,12 @@ export class UsersService {
     return { Notifications: notifications };
   }
 
-
   // Method to allow a student to download a PDF and update their progress
   async downloadPDFAndUpdateProgress(
     userEmail: string,
     Coursetitle: string,
     pdfUrl: string,
   ): Promise<any> {
-
     // Find the user
     const user = await this.userModel.findOne({ email: userEmail });
     if (!user) {
@@ -103,15 +99,25 @@ export class UsersService {
     if (!course.courseContent.includes(pdfUrl)) {
       throw new Error('The provided PDF URL is not part of the course content');
     }
+    // Return the URL of the PDF for the student to download (or just a success message)
+    const baseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://yourdomain.com'
+        : 'http://localhost:3000';
+    const downloadLink = `${baseUrl}/files/${pdfUrl}`;
 
     // Check if the lecture is already marked as completed (by its PDF URL or some other unique identifier)
 
     const existingLecture = progress.completedLectures.find(
       (lecture) => lecture.pdfUrl === pdfUrl,
     );
-    // if (existingLecture) {
-    //   return { message: 'Lecture already downloaded, no changes made.' };
-    // }
+    if (existingLecture) {
+      return {
+        message:
+          'PDF download link generated successfully but not for the first Time',
+        downloadLink,
+      };
+    }
 
     // Add the completed lecture to the progress (assuming the PDF corresponds to a completed lecture)
     progress.completedLectures.push({
@@ -119,7 +125,6 @@ export class UsersService {
       pdfUrl,
       completedLectures: 1,
     });
-
 
     // Calculate the new completion rate
     const completedLecturesCount = progress.completedLectures.length;
@@ -130,39 +135,28 @@ export class UsersService {
     progress.completionRate = completionRate;
     await progress.save();
 
-    // Return the URL of the PDF for the student to download (or just a success message)
-    const baseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://yourdomain.com'
-        : 'http://localhost:3000';
-    const downloadLink = `${baseUrl}/files/${pdfUrl}`;
-
     return {
-
       message: 'PDF download link generated successfully',
       downloadLink,
     };
-
-}
-
-async findUserById(userId: string): Promise<User> {
-  try {
-    const user = await this.userModel.findOne({ _id: userId }).exec();
-    if (!user) {
-      throw new Error(`User with ID ${userId} not found.`);
-    }
-    return user;
-  } catch (error) {
-    console.error('Error finding user by ID:', error);
-    throw new Error('Error finding user.');
   }
-}
 
+  async findUserById(userId: string): Promise<User> {
+    try {
+      const user = await this.userModel.findOne({ _id: userId }).exec();
+      if (!user) {
+        throw new Error(`User with ID ${userId} not found.`);
+      }
+      return user;
+    } catch (error) {
+      console.error('Error finding user by ID:', error);
+      throw new Error('Error finding user.');
+    }
+  }
 
   async getCourse(courseTitle: string): Promise<{ content: string[] }> {
     // Find the course document by title
     const course = await this.courseModel.findOne({ title: courseTitle });
-
 
     // Handle case where the course is not found
     if (!course) {
@@ -204,5 +198,4 @@ async findUserById(userId: string): Promise<User> {
 
     return result;
   }
-
 }

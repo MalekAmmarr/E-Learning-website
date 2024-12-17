@@ -8,7 +8,9 @@ import { User } from 'src/schemas/user.schema';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { use } from 'passport';
 import { Module as CourseModule } from 'src/schemas/module.schema';
+
 import { Instructor } from 'src/schemas/instructor.schema';
+
 import { Progress } from 'src/schemas/progress.schema';
 
 interface Question {
@@ -24,8 +26,9 @@ export class QuizzesService {
     private readonly quizModel: Model<Quiz>,
     @InjectModel(User.name, 'eLearningDB')
     private readonly userModel: Model<User>,
-    @InjectModel(CourseModule.name, 'eLearningDB') 
+    @InjectModel(CourseModule.name, 'eLearningDB')
     private readonly moduleModel: Model<CourseModule>,
+
     @InjectModel(Instructor.name, 'eLearningDB') 
     private readonly instructorModel: Model<Instructor>,
     @InjectModel(Progress.name, 'eLearningDB') 
@@ -50,6 +53,8 @@ async createQuiz(
   // Step 2: Get the student data and populate progress
 const student = await this.userModel
 .findOne({ email: studentEmail }).exec();
+
+
 
 
 
@@ -78,6 +83,7 @@ const firstQuizGrade = progress.score
     );
   }
 
+
   // Step 6: Create the quiz object
   const quiz = new this.quizModel({
     quizId: module.quizId,
@@ -90,13 +96,16 @@ const firstQuizGrade = progress.score
     isGraded: false,
   });
 
+
   // Step 7: Save the quiz to the database
   const savedQuiz = await quiz.save();
 
   
 
+
   return savedQuiz; // Return the created quiz
 }
+
 
 // Helper method to determine difficulty level based on the first quiz grade
 
@@ -134,87 +143,95 @@ private randomSample(arr: any[], size: number) {
 }
 
 
+  // Method to update the quiz content
+  async updateQuiz(quizId: string, updateData: any) {
+    // Step 1: Find the quiz by quizId
+    const quiz = await this.quizModel.findOne({ quizId }).exec();
+    if (!quiz) {
+      throw new Error(`Quiz with quizId ${quizId} not found`);
+    }
 
- // Method to update the quiz content
- async updateQuiz(quizId: string, updateData: any) {
-  // Step 1: Find the quiz by quizId
-  const quiz = await this.quizModel.findOne({ quizId }).exec();
-  if (!quiz) {
-    throw new Error(`Quiz with quizId ${quizId} not found`);
-  }
+    // Step 2: Update the quiz fields (e.g., questions, quiz type, etc.)
+    if (updateData.quizType) {
+      quiz.quizType = updateData.quizType;
+    }
+    if (updateData.questions) {
+      quiz.questions = updateData.questions; // Assuming questions is an array of questions
+    }
+    if (updateData.isGraded !== undefined) {
+      quiz.isGraded = updateData.isGraded;
+    }
 
-  // Step 2: Update the quiz fields (e.g., questions, quiz type, etc.)
-  if (updateData.quizType) {
-    quiz.quizType = updateData.quizType;
-  }
-  if (updateData.questions) {
-    quiz.questions = updateData.questions; // Assuming questions is an array of questions
-  }
-  if (updateData.isGraded !== undefined) {
-    quiz.isGraded = updateData.isGraded;
-  }
+    // Step 3: Save the updated quiz
+    await quiz.save();
 
-  // Step 3: Save the updated quiz
-  await quiz.save();
-
-  // Return the updated quiz
-  return quiz;
-}
-  
+    // Return the updated quiz
+    return quiz;
+  }
 
   // Start Quiz (Fetch the quiz for the student)
   async startQuiz(
     userEmail: string,
     quizId: string,
     courseTitle: string,
-  ): Promise<any> {  // Return type can be adjusted depending on the structure you want
+  ): Promise<any> {
+    // Return type can be adjusted depending on the structure you want
     // Fetch the quiz for the student based on the course title and quiz ID, excluding correctAnswer
     const quiz = await this.quizModel
       .findOne({ quizId, courseTitle })
-      .select('courseTitle quizId questions')  // Select courseTitle, quizId, and questions only
+      .select('courseTitle quizId questions') // Select courseTitle, quizId, and questions only
       .exec();
-  
+
     if (!quiz) {
       throw new Error('Quiz not found for this course');
     }
-  
+
     // Exclude correctAnswer from each question
-    const questionsWithoutAnswers = quiz.questions.map(question => {
+    const questionsWithoutAnswers = quiz.questions.map((question) => {
       // Destructure question and exclude the correctAnswer field
       const { correctAnswer, ...questionWithoutAnswer } = question;
       return questionWithoutAnswer;
     });
-  
+    // Exclude correctAnswer from each question
+    const questionsWithAnswers = quiz.questions.map((question) => {
+      // Destructure question and exclude the correctAnswer field
+      const { ...questionsWithAnswers } = question;
+      return questionsWithAnswers;
+    });
+
     return {
       courseTitle: quiz.courseTitle,
       quizId: quiz.quizId,
-      questions: questionsWithoutAnswers,
+
+      questionsWithAnswers: questionsWithAnswers,
     };
   }
-  
 
   async submitAnswers(
     userEmail: string,
     quizId: string,
     answers: string[],
+    score: number, // Update to use number type for score
+    courseTitle: string,
   ): Promise<void> {
     // Fetch the user based on the email
     const user = await this.userModel.findOne({ email: userEmail }).exec();
-  
+
     if (!user) {
       throw new Error('Student not found');
     }
-  
-    // Fetch the quiz by quizId
+
+    // Fetch the quiz by quizId (if needed for additional logic)
     const quiz = await this.quizModel.findOne({ quizId }).exec();
-  
+
     if (!quiz) {
       throw new Error('Quiz not found');
     }
-  
     // Check if the student has already submitted answers
-    const existingEntry = quiz.studentAnswers.find(entry => entry.studentEmail === userEmail);
-    
+    const existingEntry = quiz.studentAnswers.find(
+      (entry) => entry.studentEmail === userEmail,
+    );
+
     if (existingEntry) {
       // If the student already exists, update their answers
       existingEntry.answers = answers;
@@ -222,11 +239,28 @@ private randomSample(arr: any[], size: number) {
       // If the student doesn't exist, create a new entry
       quiz.studentAnswers.push({ studentEmail: userEmail, answers });
     }
-  
+
     // Save the updated quiz
     await quiz.save();
+
+    // Fetch the progress record for the user in the specific course
+    let progress = await this.progressModel // Corrected to use progressModel
+      .findOne({ studentEmail: userEmail, courseTitle })
+      .exec();
+
+    if (!progress) {
+      throw new Error('Progress Not Found');
+    }
+    console.log('Before :', progress.score);
+    // Assuming that you want to update the student's score in the progress record:
+    progress.score = progress.score + score; // Update score directly
+    console.log('After :', progress.score);
+
+    // Save the updated progress and user data
+    await progress.save();
+
+    await quiz.save(); // Save updated progress
   }
-  
 
   // Find quiz by quizId
   async findQuizById(quizId: string): Promise<Quiz> {
@@ -242,24 +276,27 @@ private randomSample(arr: any[], size: number) {
     feedback: string[],
   ): Promise<Quiz> {
     const quiz = await this.findQuizById(quizId);
-  
+
     // Fetch the user
     const user = await this.userModel.findOne({ email: studentEmail });
     if (!user) {
       throw new NotFoundException(`User with email ${studentEmail} not found`);
     }
-  
+
     // Find the student's answers entry in the quiz using their email
     const studentEntry = quiz.studentAnswers.find(
       (entry) => entry.studentEmail === studentEmail,
     );
-  
+
     if (!studentEntry) {
-      throw new Error(`No answers found for student with email: ${studentEmail}`);
+      throw new Error(
+        `No answers found for student with email: ${studentEmail}`,
+      );
     }
-  
+
     // Extract the answers from the studentEntry
     const answers = studentEntry.answers;
+
   
     // Map feedback for each question
     const feedbackArray = answers.map((answer, index) => ({
@@ -268,16 +305,19 @@ private randomSample(arr: any[], size: number) {
       feedback: feedback[index] || '', // Instructor's feedback or empty string
     }));
   
+
     // Update user feedback
     user.feedback.push({
       quizId,
       courseTitle: quiz.courseTitle,
       feedback: feedbackArray, // Feedback contains question, student's answer, and instructor's feedback
     });
+
   
+
     // Save the updated user data
     await user.save();
-  
+
     return quiz;
   }
   
@@ -294,7 +334,7 @@ private randomSample(arr: any[], size: number) {
     const quizzes = await this.quizModel
       .find({ courseTitle }, { quizId: 1, _id: 0 }) // Projection to return only quizId
       .exec();
-    return quizzes.map(quiz => quiz.quizId); // Extract quizId from each quiz
+    return quizzes.map((quiz) => quiz.quizId); // Extract quizId from each quiz
   }
 
   // Method to fetch the full quiz content by quizId
@@ -305,6 +345,7 @@ private randomSample(arr: any[], size: number) {
     }
     return quiz;
   }
+
   
 
   async getQuizzesByInstructor(email: string): Promise<string[]> {
@@ -357,4 +398,5 @@ private randomSample(arr: any[], size: number) {
     return studentAnswer; // Return the specific student's email and answers
   }
   
+
 }

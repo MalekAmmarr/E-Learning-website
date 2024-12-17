@@ -174,12 +174,103 @@ const CourseContent: React.FC = () => {
   }, []);
 
   // Function to handle note title click
-  const handleCourseTitleClick = (courseTitle: string) => {
+  const HandleStartQuiz = (courseTitle: string) => {
     router.push(
-      `/User_Home/CourseContent?title=${encodeURIComponent(courseTitle)}`,
+      `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01`,
     );
   };
+  const HandleStartMid = async () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const courseTitle = queryParams.get('title'); // Get 'title' from query params
+    const studentEmail = userData.email;
+    try {
+      // Step 1: Get the student's progress from the backend using fetch
+      const response = await fetch(
+        `/progress/getProgress/${courseTitle}/${studentEmail}`,
+      );
+      const data = await response.json();
 
+      if (!response.ok) {
+        throw new Error(data.message || 'Error fetching progress data');
+      }
+
+      const score = data.score; // Assuming the score is in the response
+
+      // Step 2: Decide the difficulty level based on the score
+      if (score < 5) {
+        // Call the API to set the level to 'low' and get the mid questions
+        const difficultyResponse = await fetch('/api/setDifficulty', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            courseTitle,
+            studentEmail,
+            level: 'low', // Set the difficulty level
+          }),
+        });
+        const difficultyData = await difficultyResponse.json();
+        if (!difficultyResponse.ok) {
+          throw new Error(difficultyData.message || 'Error setting difficulty');
+        }
+        if (courseTitle)
+          router.push(
+            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=low`,
+          );
+        else throw new Error('No Course Title Provided');
+      } else if (score >= 5 && score <= 7) {
+        // Call the API to set the level to 'medium' and get a combination of mid questions
+        const difficultyResponse = await fetch('/api/setDifficulty', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            courseTitle,
+            studentEmail,
+            level: 'medium', // Set the difficulty level
+          }),
+        });
+        const difficultyData = await difficultyResponse.json();
+        if (!difficultyResponse.ok) {
+          throw new Error(difficultyData.message || 'Error setting difficulty');
+        }
+        if (courseTitle)
+          router.push(
+            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=medium`,
+          );
+        else throw new Error('No Course Title Provided');
+      } else {
+        // Call the API to set the level to 'high' and get the hard questions
+        const difficultyResponse = await fetch('/api/setDifficulty', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            courseTitle,
+            studentEmail,
+            level: 'high', // Set the difficulty level
+          }),
+        });
+        const difficultyData = await difficultyResponse.json();
+        if (!difficultyResponse.ok) {
+          throw new Error(difficultyData.message || 'Error setting difficulty');
+        }
+        if (courseTitle)
+          router.push(
+            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=low`,
+          );
+        else throw new Error('No Course Title Provided');
+      }
+    } catch (error) {
+      console.error(
+        'Error fetching student progress or updating difficulty level:',
+        error,
+      );
+    }
+  };
   return (
     <>
       <meta charSet="utf-8" />
@@ -334,7 +425,9 @@ const CourseContent: React.FC = () => {
                   <h4>Quiz</h4>
                   <p>Start your quiz that will show us your level</p>
                   <div className="main-button">
-                    <a href="#">Start Now</a>
+                    <a onClick={() => HandleStartQuiz(courseinfo[0].name)}>
+                      Start Now
+                    </a>
                   </div>
                 </div>
               </div>
