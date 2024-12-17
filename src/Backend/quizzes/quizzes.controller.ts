@@ -33,7 +33,6 @@ export class QuizzesController {
   // Route to create a new quiz
   //@UseGuards(AuthorizationGuard)
   @Post('create')
-
   async createQuiz(@Body() createQuizDto: CreateQuizDto) {
     const {
 
@@ -63,33 +62,6 @@ export class QuizzesController {
 
   }
 
-  // Route to update an existing quiz
-  //@UseGuards(AuthorizationGuard)
-  @Put(':quizId')
-  //@Roles('instructor')
-  // Endpoint to update quiz content
-  async updateQuiz(@Param('quizId') quizId: string, @Body() updateData: any) {
-    return this.quizService.updateQuiz(quizId, updateData);
-  }
-
-  // Start the quiz for a student
-  @UseGuards(AuthorizationGuard)
-  @Post('startQuiz')
-  @Roles('student')
-  async startQuiz(
-    @Body()
-    {
-      email,
-      quizId,
-      courseTitle,
-    }: {
-      quizId: string;
-      email: string;
-      courseTitle: string;
-    },
-  ): Promise<Question[]> {
-    return this.quizService.startQuiz(email, quizId, courseTitle);
-  }
 
   // Submit answers from the student
   @UseGuards(AuthorizationGuard)
@@ -122,7 +94,7 @@ export class QuizzesController {
 
   // Endpoint to grade a quiz and update user score
   @UseGuards(AuthorizationGuard)
-  @Patch('grade')
+  @Patch('feedback')
   @Roles('instructor')
   async giveFeedback(
     @Body('quizId') quizId: string,

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import './page.css';
 
-
 const Putgrades = () => {
   const [quizIds, setQuizIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,11 +43,16 @@ const Putgrades = () => {
   };
 
   if (loading) {
-    return <div>Loading quizzes...</div>;
+    return (
+      <div className="loading-container">
+        <div className="spinner"></div>
+        <p>Loading quizzes...</p>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="error-message">Error: {error}</div>;
   }
 
   return (
@@ -66,11 +70,12 @@ const Putgrades = () => {
           {quizIds.map((quizId, index) => (
             <div
               key={index}
-              className="col-lg-4 col-md-6 align-self-center mb-30"
+              className="col-lg-4 col-md-6 mb-30"
               onClick={() => handleQuizClick(quizId)}
             >
               <div className="quiz-card">
                 <h4>{quizId}</h4>
+                <p>Click to manage feedbacks</p>
               </div>
             </div>
           ))}

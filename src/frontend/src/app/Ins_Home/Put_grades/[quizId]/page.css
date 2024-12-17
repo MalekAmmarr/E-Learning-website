@@ -1,99 +1,123 @@
-/* page.css */
-
-/* Global Styles */
+/* General Styles */
 body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f4f7fb;
+  font-family: Arial, sans-serif;
+  background-color: #f4f7fc;
   color: #333;
-  margin: 0;
-  padding: 0;
 }
 
-h2, h3, h6 {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 500;
-}
-
-h4 {
-  font-family: 'Roboto', sans-serif;
-  font-weight: 400;
-}
-
-/* Section Styles */
-.section {
-  padding: 50px 0;
-  background-color: #fff;
-}
-
-.section-heading {
-  margin-bottom: 30px;
+.error-message {
+  color: red;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
 }
 
 .section-heading h6 {
   font-size: 18px;
   color: #6c757d;
+  text-transform: uppercase;
   margin-bottom: 10px;
 }
 
 .section-heading h2 {
-  font-size: 36px;
-  color: #333;
+  font-size: 28px;
+  font-weight: 600;
+  color: #343a40;
 }
 
-.section-heading h3 {
-  font-size: 24px;
-  color: #007bff;
+/* Student Answers Section */
+.student-answers {
+  padding: 50px 0;
 }
 
-/* Card Styles */
-.student-answer-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.student-answer-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
-.student-answer-card h4 {
-  font-size: 20px;
-  color: #007bff;
-  margin-bottom: 15px;
+.col-lg-3,
+.col-md-4,
+.col-sm-6 {
+  flex: 1 1 calc(25% - 20px);
+  max-width: calc(25% - 20px);
+  box-sizing: border-box;
 }
 
-.student-answer-card ul {
-  list-style-type: none;
-  padding: 0;
+@media (max-width: 1200px) {
+  .col-lg-3 {
+    max-width: calc(33.33% - 20px);
+  }
 }
 
-.student-answer-card ul li {
-  font-size: 16px;
-  color: #555;
-  margin-bottom: 8px;
+@media (max-width: 992px) {
+  .col-md-4 {
+    max-width: calc(50% - 20px);
+  }
 }
 
-/* Error Message */
-.error-message {
-  color: red;
-  font-size: 18px;
-}
-
-/* Responsive Styles */
 @media (max-width: 768px) {
+  .col-sm-6 {
+    max-width: 100%;
+  }
+}
+
+/* Student Card Styles */
+.student-card {
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.student-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.student-card h5 {
+  font-size: 16px;
+  color: #333;
+  margin: 0;
+}
+
+.student-card span {
+  color: #28a745;
+  font-size: 14px;
+  font-weight: bold;
+  margin-left: 8px;
+}
+
+/* Styling for when no student emails are available */
+.col-12.text-center p {
+  font-size: 18px;
+  color: #777;
+  font-weight: 500;
+}
+
+/* Responsive Design for small screens */
+@media (max-width: 480px) {
+  .section-heading h6 {
+    font-size: 16px;
+  }
+
   .section-heading h2 {
-    font-size: 28px;
+    font-size: 22px;
   }
 
-  .student-answer-card h4 {
-    font-size: 18px;
+  .student-card {
+    padding: 15px;
   }
 
-  .student-answer-card ul li {
+  .student-card h5 {
     font-size: 14px;
   }
 }
