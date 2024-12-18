@@ -4,7 +4,6 @@ import { User } from './user.schema';
 import { Instructor } from './instructor.schema';
 import { Note } from './note.schema';
 
-
 @Schema({ timestamps: true })
 export class Course extends Document {
   @Prop({ required: true, unique: true })
@@ -13,8 +12,8 @@ export class Course extends Document {
   @Prop({ required: true })
   title: string;
 
- @Prop({ required: true })
- instructormail: string; 
+  @Prop({ required: true })
+  instructormail: string;
 
   @Prop()
   instructorName?: string;
@@ -41,6 +40,12 @@ export class Course extends Document {
   @Prop({ type: [String], default: [] })
   notes: string[];
 
+  // Add price and image properties
+  @Prop({ required: true })
+  price: number;  // Price of the course
+
+  @Prop({ required: true })
+  image: string;  // URL or path to the course image
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);

@@ -63,7 +63,7 @@ const AddCourseContentPage = () => {
 
       // Redirect after successful submission
       setTimeout(() => {
-        router.push(`/course-details/${encodeURIComponent(decodedTitle)}`);
+        router.push(`/Ins_Home/Add_Content/course/${encodeURIComponent(decodedTitle)}`);
       }, 1500);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';

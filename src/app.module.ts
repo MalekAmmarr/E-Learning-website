@@ -20,7 +20,7 @@ import { LogsModule } from './Backend/logs/logs.module';
 import { ProgressModule } from './Backend/progress/progress.module';
 import { AuthModule } from './Backend/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
+import path, { join } from 'path';
 import { ChatModule } from './Backend/chat/chat.module';
 
 @Module({
@@ -38,10 +38,9 @@ import { ChatModule } from './Backend/chat/chat.module';
       },
     ),
     ServeStaticModule.forRoot({
-      rootPath: join('C:', 'Users', 'Omar Hossam', 'Downloads'), // Folder where PDFs are stored
+      rootPath: join('D:', 'ahmed', 'Downloads', 'files'), // Folder where PDFs are stored
       serveRoot: '/files', // URL path prefix for accessing the PDFs
     }),
-
     UsersModule,
     CoursesModule,
     ModulesModule,
