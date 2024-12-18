@@ -33,10 +33,8 @@ export class QuizzesController {
   // Route to create a new quiz
   //@UseGuards(AuthorizationGuard)
   @Post('create')
-
   async createQuiz(@Body() createQuizDto: CreateQuizDto) {
     const {
-
       instructorEmail,
       quizId,
       quizType,
@@ -60,7 +58,6 @@ export class QuizzesController {
     } catch (error) {
       throw new BadRequestException(error.message);
     }
-
   }
 
   // Route to update an existing quiz
@@ -87,7 +84,8 @@ export class QuizzesController {
       email: string;
       courseTitle: string;
     },
-  ): Promise<Question[]> {
+  ) {
+    console.log(email, courseTitle, quizId);
     return this.quizService.startQuiz(email, quizId, courseTitle);
   }
 
@@ -153,9 +151,10 @@ export class QuizzesController {
     return this.quizService.getQuizById(quizId);
   }
 
-
   @Get('instructor/by-instructor')
-  async getQuizzesByInstructor(@Query('email') email: string): Promise<string[]> {
+  async getQuizzesByInstructor(
+    @Query('email') email: string,
+  ): Promise<string[]> {
     if (!email) {
       throw new NotFoundException('Email is required');
     }
@@ -169,16 +168,13 @@ export class QuizzesController {
   }
 
   @Get(':quizId/slecetedstudent-answers')
-async getselectedStudentAnswers(
-  @Param('quizId') quizId: string,
-  @Query('studentEmail') studentEmail: string, // Accept `studentEmail` as a query parameter
-) {
-  if (!studentEmail) {
-    throw new BadRequestException('studentEmail query parameter is required');
+  async getselectedStudentAnswers(
+    @Param('quizId') quizId: string,
+    @Query('studentEmail') studentEmail: string, // Accept `studentEmail` as a query parameter
+  ) {
+    if (!studentEmail) {
+      throw new BadRequestException('studentEmail query parameter is required');
+    }
+    return this.quizService.getselectedStudentAnswers(quizId, studentEmail);
   }
-  return this.quizService.getselectedStudentAnswers(quizId, studentEmail);
-}
-
-
-
 }
