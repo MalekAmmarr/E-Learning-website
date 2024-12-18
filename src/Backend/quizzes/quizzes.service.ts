@@ -146,31 +146,6 @@ export class QuizzesService {
     return _.sampleSize(arr, size);
   }
 
-  // Method to update the quiz content
-  async updateQuiz(quizId: string, updateData: any) {
-    // Step 1: Find the quiz by quizId
-    const quiz = await this.quizModel.findOne({ quizId }).exec();
-    if (!quiz) {
-      throw new Error(`Quiz with quizId ${quizId} not found`);
-    }
-
-    // Step 2: Update the quiz fields (e.g., questions, quiz type, etc.)
-    if (updateData.quizType) {
-      quiz.quizType = updateData.quizType;
-    }
-    if (updateData.questions) {
-      quiz.questions = updateData.questions; // Assuming questions is an array of questions
-    }
-    if (updateData.isGraded !== undefined) {
-      quiz.isGraded = updateData.isGraded;
-    }
-
-    // Step 3: Save the updated quiz
-    await quiz.save();
-
-    // Return the updated quiz
-    return quiz;
-  }
 
   // Start Quiz (Fetch the quiz for the student)
   async startQuiz(
@@ -311,7 +286,8 @@ export class QuizzesService {
     user.feedback.push({
       quizId,
       courseTitle: quiz.courseTitle,
-      feedback: feedbackArray, // Feedback contains question, student's answer, and instructor's feedback
+      feedback: feedbackArray, 
+      isfeedbacked: true// Feedback contains question, student's answer, and instructor's feedback
     });
 
     // Save the updated user data
@@ -362,6 +338,7 @@ export class QuizzesService {
     return quizzes.map((quiz) => quiz.quizId);
   }
 
+
   async getStudentAnswers(
     quizId: string,
   ): Promise<{ studentEmail: string; answers: string[] }[]> {
@@ -369,12 +346,35 @@ export class QuizzesService {
       .findOne({ quizId })
       .select('studentAnswers');
 
+// =======
+//   async getStudentAnswers(quizId: string): Promise<{ studentEmail: string, hasFeedback: boolean }[]> {
+//     // Fetch the quiz document by quizId
+//     const quiz = await this.quizModel
+//       .findOne({ quizId })
+//       .select({ 'studentAnswers.studentEmail': 1, _id: 0 }); // Project only studentEmail field
+  
+// >>>>>>> main
     if (!quiz) {
       throw new NotFoundException('Quiz not found');
     }
-
-    return quiz.studentAnswers; // Return the studentAnswers array
+  
+    // Fetch users who have feedback for this quiz
+    const usersWithFeedback = await this.userModel
+      .find({ 'feedback.quizId': quizId })
+      .select({ email: 1, 'feedback.quizId': 1, _id: 0 }); // Only select email and feedback.quizId
+  
+    // Create a set of student emails who have provided feedback
+    const feedbackEmails = usersWithFeedback.map((user) => user.email);
+  
+    // Map the studentAnswers array to return only studentEmail and if they have feedback for the quiz
+    const studentEmails = quiz.studentAnswers.map((answer) => ({
+      studentEmail: answer.studentEmail,
+      hasFeedback: feedbackEmails.includes(answer.studentEmail), // Check if the email exists in the feedback list
+    }));
+  
+    return studentEmails;
   }
+
 
   async getselectedStudentAnswers(
     quizId: string,

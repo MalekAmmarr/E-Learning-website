@@ -60,6 +60,7 @@ export class QuizzesController {
     }
   }
 
+
   // Route to update an existing quiz
   //@UseGuards(AuthorizationGuard)
   @Put(':quizId')
@@ -88,6 +89,7 @@ export class QuizzesController {
     console.log(email, courseTitle, quizId);
     return this.quizService.startQuiz(email, quizId, courseTitle);
   }
+
 
   // Submit answers from the student
   @UseGuards(AuthorizationGuard)
@@ -120,7 +122,7 @@ export class QuizzesController {
 
   // Endpoint to grade a quiz and update user score
   @UseGuards(AuthorizationGuard)
-  @Patch('grade')
+  @Patch('feedback')
   @Roles('instructor')
   async giveFeedback(
     @Body('quizId') quizId: string,
