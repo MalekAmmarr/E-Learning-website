@@ -20,6 +20,9 @@ export class Thread extends Document {
 
   @Prop({ default: false })
   isClosed: boolean; // Flag to indicate if the thread is closed for further replies
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const ThreadSchema = SchemaFactory.createForClass(Thread);

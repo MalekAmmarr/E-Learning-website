@@ -38,11 +38,16 @@ export class InstructorService {
       'instructor',
     );
   }
+  async findInstructorById(instructorId: string): Promise<Instructor | null> {
+    return this.InstructorModel.findById(instructorId).exec();
+  }
+
 
   // Login Intructor
   async loginInstructor(email: string, password: string) {
     return await this.authService.login(email, password, 'instructor');
   }
+
 
   // Method to get all users applied to courses taught by an instructor
   async getUsersAppliedToCourses(email: string) {

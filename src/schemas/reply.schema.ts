@@ -14,6 +14,9 @@ export class Reply extends Document {
 
   @Prop({ default: 0 })
   likes: number; // Number of likes this reply has
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const ReplySchema = SchemaFactory.createForClass(Reply);
