@@ -67,6 +67,8 @@ const Quiz = () => {
       const queryParams = new URLSearchParams(window.location.search);
       const courseTitle = queryParams.get('title');
       const user = localStorage.getItem('userData');
+      const quizId = queryParams.get('quiz_id');
+
       let email = 'Nothing';
       if (user) {
         const parsedUser = JSON.parse(user);
@@ -87,7 +89,7 @@ const Quiz = () => {
         },
         body: JSON.stringify({
           email,
-          quizId: 'quiz01',
+          quizId: quizId,
           courseTitle: courseTitle,
         }),
       });
@@ -98,6 +100,7 @@ const Quiz = () => {
 
       const data = await response.json();
       setQuizData(data.questionsWithAnswers);
+      console.log('Questions :', data.questionsWithAnswers);
     } catch (error) {
       console.error('Error fetching content:', error);
     } finally {
@@ -149,7 +152,7 @@ const Quiz = () => {
       setUserLevel(level);
       const queryParams = new URLSearchParams(window.location.search);
       const courseTitle = queryParams.get('title');
-
+      const quizId = queryParams.get('quiz_id');
       const response = await fetch('http://localhost:3000/quizzes/submitQuiz', {
         method: 'POST',
         headers: {
@@ -159,7 +162,7 @@ const Quiz = () => {
         body: JSON.stringify({
           email,
           score: userScore,
-          quizId: 'quiz01',
+          quizId: quizId,
           answers,
           CourseTitle: courseTitle,
         }),

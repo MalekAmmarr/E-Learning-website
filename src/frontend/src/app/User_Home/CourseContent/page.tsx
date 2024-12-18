@@ -174,19 +174,14 @@ const CourseContent: React.FC = () => {
   }, []);
 
   // Function to handle note title click
-  const HandleStartQuiz = (courseTitle: string) => {
-    router.push(
-      `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01`,
-    );
-  };
-  const HandleStartMid = async () => {
+  const HandleStartQuiz = async () => {
     const queryParams = new URLSearchParams(window.location.search);
     const courseTitle = queryParams.get('title'); // Get 'title' from query params
     const studentEmail = userData.email;
     try {
       // Step 1: Get the student's progress from the backend using fetch
       const response = await fetch(
-        `/progress/getProgress/${courseTitle}/${studentEmail}`,
+        `http://localhost:3000/progress/getProgress/${courseTitle}/${studentEmail}`,
       );
       const data = await response.json();
 
@@ -195,80 +190,86 @@ const CourseContent: React.FC = () => {
       }
 
       const score = data.score; // Assuming the score is in the response
+      // Step 3: Create quiz by calling the backend API
+      const quizResponse = await fetch('http://localhost:3000/quizzes/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          instructorEmail: 'omar.hossam3@gmail.com', // Replace with the actual instructor's email
+          quizId: `quiz01`, // Dynamic quiz ID based on course title
+          quizType: 'Small', // Set based on score
+          numberOfQuestions: 10, // Example number of questions
+          studentEmail: studentEmail, // Student email
+          courseTitle: courseTitle, // Course title
+        }),
+      });
 
-      // Step 2: Decide the difficulty level based on the score
-      if (score < 5) {
-        // Call the API to set the level to 'low' and get the mid questions
-        const difficultyResponse = await fetch('/api/setDifficulty', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            courseTitle,
-            studentEmail,
-            level: 'low', // Set the difficulty level
-          }),
-        });
-        const difficultyData = await difficultyResponse.json();
-        if (!difficultyResponse.ok) {
-          throw new Error(difficultyData.message || 'Error setting difficulty');
-        }
-        if (courseTitle)
-          router.push(
-            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=low`,
-          );
-        else throw new Error('No Course Title Provided');
-      } else if (score >= 5 && score <= 7) {
-        // Call the API to set the level to 'medium' and get a combination of mid questions
-        const difficultyResponse = await fetch('/api/setDifficulty', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            courseTitle,
-            studentEmail,
-            level: 'medium', // Set the difficulty level
-          }),
-        });
-        const difficultyData = await difficultyResponse.json();
-        if (!difficultyResponse.ok) {
-          throw new Error(difficultyData.message || 'Error setting difficulty');
-        }
-        if (courseTitle)
-          router.push(
-            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=medium`,
-          );
-        else throw new Error('No Course Title Provided');
-      } else {
-        // Call the API to set the level to 'high' and get the hard questions
-        const difficultyResponse = await fetch('/api/setDifficulty', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            courseTitle,
-            studentEmail,
-            level: 'high', // Set the difficulty level
-          }),
-        });
-        const difficultyData = await difficultyResponse.json();
-        if (!difficultyResponse.ok) {
-          throw new Error(difficultyData.message || 'Error setting difficulty');
-        }
-        if (courseTitle)
-          router.push(
-            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=low`,
-          );
-        else throw new Error('No Course Title Provided');
+      const quizData = await quizResponse.json();
+
+      if (!quizResponse.ok) {
+        throw new Error(quizData.message || 'Error creating quiz');
       }
+
+      // Step 4: Handle the successful quiz creation (e.g., redirect to the quiz page)
+      console.log('Quiz : ', quizData);
+      console.log('Quiz_Id :', quizData.data.quiz_id);
+      if (courseTitle)
+        window.location.href = `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&quiz_id=${quizData.data.quiz_id}`;
+      else throw new Error('Course Not Found');
     } catch (error) {
-      console.error(
-        'Error fetching student progress or updating difficulty level:',
-        error,
+      console.error('An error occurred:', error);
+      alert(`An error occurred while processing your request: ${error}`);
+    }
+  };
+  const HandleStartMid = async () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const courseTitle = queryParams.get('title'); // Get 'title' from query params
+    const studentEmail = userData.email;
+    try {
+      // Step 1: Get the student's progress from the backend using fetch
+      const response = await fetch(
+        `http://localhost:3000/progress/getProgress/${courseTitle}/${studentEmail}`,
       );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error fetching progress data');
+      }
+
+      const score = data.score; // Assuming the score is in the response
+      // Step 3: Create quiz by calling the backend API
+      const quizResponse = await fetch('http://localhost:3000/quizzes/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          instructorEmail: 'omar.hossam3@gmail.com', // Replace with the actual instructor's email
+          quizId: `midterm`, // Dynamic quiz ID based on course title
+          quizType: 'Midterm', // Set based on score
+          numberOfQuestions: 15, // Example number of questions
+          studentEmail: studentEmail, // Student email
+          courseTitle: courseTitle, // Course title
+        }),
+      });
+
+      const quizData = await quizResponse.json();
+
+      if (!quizResponse.ok) {
+        throw new Error(quizData.message || 'Error creating quiz');
+      }
+
+      // Step 4: Handle the successful quiz creation (e.g., redirect to the quiz page)
+      console.log('Quiz : ', quizData);
+      console.log('Quiz_Id :', quizData.data.quiz_id);
+      if (courseTitle)
+        window.location.href = `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&quiz_id=${quizData.data.quiz_id}`;
+      else throw new Error('Course Not Found');
+    } catch (error) {
+      console.error('An error occurred:', error);
+      alert(`An error occurred while processing your request: ${error}`);
     }
   };
   return (
@@ -425,9 +426,7 @@ const CourseContent: React.FC = () => {
                   <h4>Quiz</h4>
                   <p>Start your quiz that will show us your level</p>
                   <div className="main-button">
-                    <a onClick={() => HandleStartQuiz(courseinfo[0].name)}>
-                      Start Now
-                    </a>
+                    <a onClick={() => HandleStartQuiz()}>Start Now</a>
                   </div>
                 </div>
               </div>
@@ -446,7 +445,7 @@ const CourseContent: React.FC = () => {
                   </p>
 
                   <div className="main-button">
-                    <a href="#">Start Midterm</a>
+                    <a onClick={() => HandleStartMid()}>Start Midterm</a>
                   </div>
                 </div>
               </div>
