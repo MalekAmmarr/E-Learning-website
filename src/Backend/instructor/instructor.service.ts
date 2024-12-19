@@ -31,6 +31,9 @@ export class InstructorService {
     private readonly authService: AuthService, // Inject AuthService
   ) {}
 
+
+  
+
   // Register a new Instructor
   async registerInstructor(createInstructorDto: CreateInstructorDto) {
     return await this.authService.registerUser(
@@ -129,27 +132,28 @@ export class InstructorService {
     const instructor = await this.InstructorModel.findOne({
       email: instructorEmail,
     });
-
+  
     if (!instructor) {
       throw new Error('Instructor not found');
     }
-
+  
     // Step 2: Create the course with instructor's email and data
     const newCourse = new this.courseModel({
       ...createCourseDto, // All course data except instructor email
       instructormail: instructor.email, // Link course to instructor via email
       instructorName: instructor.name, // Optional: Add instructor's name to course
     });
-
+  
     // Step 3: Save the course to the database
     const savedCourse = await newCourse.save();
-
+  
     // Step 4: Add the new course to the instructor's Teach_Courses array
     instructor.Teach_Courses.push(savedCourse.title); // You can use the course title or ID here
     await instructor.save(); // Save the updated instructor document
-
+  
     return savedCourse;
   }
+  
 
   // Method to update a course, excluding the courseContent array
   async updateCourse(
@@ -387,15 +391,102 @@ export class InstructorService {
   }
 
   // Method to get all courses taught by an instructor
-  async getCoursesByInstructor(email: string): Promise<string[]> {
+  async getCoursesByInstructor(email: string): Promise<any[]> {
+    // Fetch the instructor by email
     const instructor = await this.InstructorModel.findOne({ email }).exec();
+    
+    // If the instructor is not found, throw a NotFoundException
     if (!instructor) {
       throw new NotFoundException(`Instructor with email ${email} not found`);
     }
-    return instructor.Teach_Courses;
+  
+    // Use the Teach_Courses array to fetch course details from the Course model
+    const courses = await this.courseModel.find({ title: { $in: instructor.Teach_Courses } }).exec();
+  
+    // Map and return the required course details
+    return courses.map((course) => ({
+      title: course.title,
+      instructor_name: instructor.name,
+      price: course.price,
+      image: `http://localhost:3000/files/${course.image}`, // Assuming this is the correct path for images
+      category: course.category,
+    }));
+  }
+  
+  
+  
+
+  async findCourseByTitle(title: string): Promise<{ course: { title: string; instructorName: string; description: string; category: string; difficultyLevel: string; totalClasses: number; courseContent: string[]; notes: string[]; image: string } }> {
+    const course = await this.courseModel.findOne({ title }).lean();
+  
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+  
+    const courseDetails = {
+      title: course.title,
+      instructorName: course.instructorName || '', // Default to empty string if instructorName is not available
+      description: course.description,
+      category: course.category,
+      difficultyLevel: course.difficultyLevel,
+      totalClasses: course.totalClasses,
+      courseContent: course.courseContent,
+      notes: course.notes,
+      image: `http://localhost:3000/files/${course.image}`, // Assuming the image is stored in the "files" folder
+    };
+  
+    return { course: courseDetails };
+  }
+  
+  
+  
+
+
+  async getStudentsBycourses(email: string): Promise<{ students: { email: string; name: string; age: string; profilePictureUrl?: string; acceptedCourses: string[]; GPA: number }[] }> {
+    
+    const instructor = await this.InstructorModel.findOne({ email });
+    if (!instructor) {
+      throw new NotFoundException('Instructor not found');
+    }
+    
+    const students = await this.UserModel
+      .find({ acceptedCourses: { $in: instructor.Teach_Courses } })
+      .select('-progress -passwordHash')
+      .lean();
+  
+    const updatedStudents = students.map((student) => ({
+      ...student,
+      profilePictureUrl: student.profilePictureUrl
+        ? `http://localhost:3000/files/${student.profilePictureUrl}`
+        : null,
+    }));
+  
+    return { students: updatedStudents };
+  }
+  
+  
+
+
+  async getStudentProgressByEmail(email: string) {
+    const progressData = await this.progressModel
+      .find({ studentEmail: email })
+      .exec();
+
+    if (!progressData || progressData.length === 0) {
+      throw new Error('No progress data found for this student');
+    }
+
+    // Format the response
+    const formattedProgress = progressData.map((progress) => ({
+      courseTitle: progress.Coursetitle,
+      score: progress.score,
+      completionRate: progress.completionRate,
+      lastAccessed: progress.lastAccessed,
+      completedLectures: progress.completedLectures || [], // Ensure it's an array if not defined
+    }));
+
+    return formattedProgress;
   }
 
-  async findCourseByTitle(title: string): Promise<Course | null> {
-    return this.courseModel.findOne({ title }).exec();
-  }
+
 }

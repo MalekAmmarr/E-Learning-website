@@ -1,0 +1,184 @@
+/* General styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+}
+
+body {
+  background-color: #f4f7fc;
+  color: #333;
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* Course Details Container */
+.course-details-container {
+  max-width: 1200px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.course-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.course-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 1rem;
+}
+
+.course-meta p {
+  margin-bottom: 10px;
+}
+
+.course-description {
+  margin-bottom: 30px;
+}
+
+.course-description h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.course-content {
+  margin-bottom: 30px;
+}
+
+.course-content h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.course-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.course-content-item {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Course Image */
+.course-image-container {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.course-image {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* PDF Button */
+.pdf-button {
+  padding: 10px 20px;
+  background-color: #2196f3;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pdf-button:hover {
+  background-color: #1976d2;
+}
+
+.course-notes {
+  margin-bottom: 30px;
+}
+
+.course-notes h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.course-notes ul {
+  list-style: none;
+  padding: 0;
+}
+
+.course-notes li {
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: #555;
+}
+
+/* Action Buttons */
+.action-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+}
+
+.action-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.action-button.add-button {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+.action-button.add-button:hover {
+  background-color: #45a049;
+}
+
+.action-button.update-button {
+  background-color: #f44336;
+  color: #fff;
+}
+
+.action-button.update-button:hover {
+  background-color: #e53935;
+}
+
+.action-button.edit-button {
+  background-color: #ffa500;
+  color: #fff;
+}
+
+.action-button.edit-button:hover {
+  background-color: #ff8c00;
+}
+
+.action-button.quizzes-button {
+  background-color: #2196f3;
+  color: #fff;
+}
+
+.action-button.quizzes-button:hover {
+  background-color: #1976d2;
+}
+
+/* Loading and Error Messages */
+.loading, .error {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #ff5722;
+  margin-top: 50px;
+}

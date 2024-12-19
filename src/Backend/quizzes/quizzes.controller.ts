@@ -61,14 +61,7 @@ export class QuizzesController {
   }
 
 
-  // Route to update an existing quiz
-  //@UseGuards(AuthorizationGuard)
-  @Put(':quizId')
-  //@Roles('instructor')
-  // Endpoint to update quiz content
-  async updateQuiz(@Param('quizId') quizId: string, @Body() updateData: any) {
-    return this.quizService.updateQuiz(quizId, updateData);
-  }
+
 
   // Start the quiz for a student
   @UseGuards(AuthorizationGuard)

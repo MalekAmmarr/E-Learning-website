@@ -341,35 +341,30 @@ export class QuizzesService {
 
   async getStudentAnswers(
     quizId: string,
-  ): Promise<{ studentEmail: string; answers: string[] }[]> {
+  ): Promise<{ studentEmail: string; answers: string[]; hasFeedback: boolean }[]> {
+    // Find the quiz by quizId
     const quiz = await this.quizModel
       .findOne({ quizId })
       .select('studentAnswers');
-
-// =======
-//   async getStudentAnswers(quizId: string): Promise<{ studentEmail: string, hasFeedback: boolean }[]> {
-//     // Fetch the quiz document by quizId
-//     const quiz = await this.quizModel
-//       .findOne({ quizId })
-//       .select({ 'studentAnswers.studentEmail': 1, _id: 0 }); // Project only studentEmail field
   
-// >>>>>>> main
+    // Check if the quiz exists
     if (!quiz) {
       throw new NotFoundException('Quiz not found');
     }
   
-    // Fetch users who have feedback for this quiz
+    // Fetch users who have provided feedback for this quiz
     const usersWithFeedback = await this.userModel
       .find({ 'feedback.quizId': quizId })
-      .select({ email: 1, 'feedback.quizId': 1, _id: 0 }); // Only select email and feedback.quizId
+      .select({ email: 1, 'feedback.quizId': 1, _id: 0 });
   
     // Create a set of student emails who have provided feedback
-    const feedbackEmails = usersWithFeedback.map((user) => user.email);
+    const feedbackEmails = new Set(usersWithFeedback.map((user) => user.email));
   
-    // Map the studentAnswers array to return only studentEmail and if they have feedback for the quiz
+    // Map the studentAnswers array to return student email, answers, and feedback status
     const studentEmails = quiz.studentAnswers.map((answer) => ({
       studentEmail: answer.studentEmail,
-      hasFeedback: feedbackEmails.includes(answer.studentEmail), // Check if the email exists in the feedback list
+      answers: answer.answers, // Assuming answers are stored in the answer object
+      hasFeedback: feedbackEmails.has(answer.studentEmail), // Check if the email exists in the feedback list
     }));
   
     return studentEmails;
