@@ -1,6 +1,8 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import router from 'next/router';
+
 import './page.css'; // Importing the CSS file
 
 const AddCourseContentPage = () => {
@@ -63,7 +65,7 @@ const AddCourseContentPage = () => {
 
       // Redirect after successful submission
       setTimeout(() => {
-        router.push(`/Ins_Home/Add_Content/course/${encodeURIComponent(decodedTitle)}`);
+        router.push(`/Ins_Home/selected_course/${encodeURIComponent(decodedTitle)}`);
       }, 1500);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';

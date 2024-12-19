@@ -76,11 +76,17 @@ export default function Home() {
           (Teach_Courses) => Teach_Courses.category === activeCategory,
         );
 
-  const handleCourseTitleClick = (courseTitle: string) => {
+  const handleCourseTitleClick = (title: string) => {
     router.push(
-      `/Ins_Home/Add_content/course?title=${encodeURIComponent(courseTitle)}`,
+      `/Ins_Home/selected_course?title=${encodeURIComponent(title)}`,
     );
   };
+
+
+  const handleCreateCourse = () => {
+    router.push('/Ins_Home/create-course');
+  };
+
   return (
     <>
       <meta charSet="utf-8" />
@@ -281,10 +287,10 @@ export default function Home() {
                   />
                 </div>
                 <div className="main-content">
-                  <h4>Add Content</h4>
-                  <p>You can add content to the courses you teach FromHere</p>
+                  <h4>Give Certificates</h4>
+                  <p>You can give Certificates for the students with their final grade from here</p>
                   <div className="main-button">
-                    <a href="/Ins_Home/Add_content">Check</a>
+                    <a href="/Ins_Home/Certificates">Add</a>
                   </div>
                 </div>
               </div>
@@ -363,14 +369,6 @@ export default function Home() {
       <div className="main-content">
       <section className="section courses" id="courses">
   <div className="container">
-    <div className="row">
-      <div className="col-lg-12 text-center">
-        <div className="section-heading">
-          <h6>Latest Courses</h6>
-          <h2>Latest Courses</h2>
-        </div>
-      </div>
-    </div>
     {/* Course Categories Filter */}
     <ul className="event_filter">
       {filteredAcceptedCourses.map((course) => (
@@ -387,6 +385,13 @@ export default function Home() {
     </ul>
   </div>
 </section>
+<div className="row">
+          <div className="col-lg-12 text-center">
+            <button className="btn btn-primary" onClick={handleCreateCourse}>
+              Create Course
+            </button>
+          </div>
+        </div>
 
 
 

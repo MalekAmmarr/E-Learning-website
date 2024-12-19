@@ -31,6 +31,9 @@ export class InstructorService {
     private readonly authService: AuthService, // Inject AuthService
   ) {}
 
+
+  
+
   // Register a new Instructor
   async registerInstructor(createInstructorDto: CreateInstructorDto) {
     return await this.authService.registerUser(
@@ -413,7 +416,77 @@ export class InstructorService {
   
   
 
-  async findCourseByTitle(title: string): Promise<Course | null> {
-    return this.courseModel.findOne({ title }).exec();
+  async findCourseByTitle(title: string): Promise<{ course: { title: string; instructorName: string; description: string; category: string; difficultyLevel: string; totalClasses: number; courseContent: string[]; notes: string[]; image: string } }> {
+    const course = await this.courseModel.findOne({ title }).lean();
+  
+    if (!course) {
+      throw new NotFoundException('Course not found');
+    }
+  
+    const courseDetails = {
+      title: course.title,
+      instructorName: course.instructorName || '', // Default to empty string if instructorName is not available
+      description: course.description,
+      category: course.category,
+      difficultyLevel: course.difficultyLevel,
+      totalClasses: course.totalClasses,
+      courseContent: course.courseContent,
+      notes: course.notes,
+      image: `http://localhost:3000/files/${course.image}`, // Assuming the image is stored in the "files" folder
+    };
+  
+    return { course: courseDetails };
   }
+  
+  
+  
+
+
+  async getStudentsBycourses(email: string): Promise<{ students: { email: string; name: string; age: string; profilePictureUrl?: string; acceptedCourses: string[]; GPA: number }[] }> {
+    
+    const instructor = await this.InstructorModel.findOne({ email });
+    if (!instructor) {
+      throw new NotFoundException('Instructor not found');
+    }
+    
+    const students = await this.UserModel
+      .find({ acceptedCourses: { $in: instructor.Teach_Courses } })
+      .select('-progress -passwordHash')
+      .lean();
+  
+    const updatedStudents = students.map((student) => ({
+      ...student,
+      profilePictureUrl: student.profilePictureUrl
+        ? `http://localhost:3000/files/${student.profilePictureUrl}`
+        : null,
+    }));
+  
+    return { students: updatedStudents };
+  }
+  
+  
+
+
+  async getStudentProgressByEmail(email: string) {
+    const progressData = await this.progressModel
+      .find({ studentEmail: email })
+      .exec();
+
+    if (!progressData || progressData.length === 0) {
+      throw new Error('No progress data found for this student');
+    }
+
+    // Format the response
+    const formattedProgress = progressData.map((progress) => ({
+      courseTitle: progress.Coursetitle,
+      score: progress.score,
+      completionRate: progress.completionRate,
+      lastAccessed: progress.lastAccessed,
+      completedLectures: progress.completedLectures || [], // Ensure it's an array if not defined
+    }));
+
+    return formattedProgress;
+  }
+
+
 }
