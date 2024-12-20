@@ -203,24 +203,25 @@ export class InstructorService {
       title: courseTitle,
       instructormail: instructorEmail,
     });
-
+  
     if (!course) {
       throw new NotFoundException(
         'Course not found or you are not the instructor of this course',
       );
     }
-
+  
     // Ensure newContent is an array before updating
     if (!Array.isArray(newContent)) {
       throw new Error('newContent must be an array');
     }
-
+  
     // Push the new content to the courseContent array
     course.courseContent.push(...newContent);
-
-    // Save the updated course
-    return await course.save();
+  
+    // Save the updated course, but exclude validation for fields like 'price'
+    return await course.save({ validateModifiedOnly: true });
   }
+  
 
   // Method to update the course content
   async updateCourseContent(
@@ -293,21 +294,25 @@ export class InstructorService {
       title: courseTitle,
       instructormail: instructorEmail,
     });
-
+  
     if (!course) {
       throw new NotFoundException(
         'Course not found or you are not the instructor of this course',
       );
     }
-
+  
     // Remove the specified content from the courseContent array
     course.courseContent = course.courseContent.filter(
       (content) => !contentToDelete.includes(content),
     );
-
+  
+    // Explicitly prevent price validation during this operation
+    // This assumes the `price` field is not being updated, so it won't be validated
+  
     // Save and return the updated course
-    return await course.save();
+    return await course.save({ validateModifiedOnly: true });
   }
+  
 
   // Get all students enrolled in a course and their count
   async getEnrolledStudents(courseTitle: string): Promise<any> {

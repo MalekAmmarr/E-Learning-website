@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import './page.css';
 
 interface CompletedLecture {
@@ -17,6 +18,23 @@ interface StudentProgress {
   completedLectures: CompletedLecture[];
   notes?: string[];
 }
+
+// Helper function to determine the grade based on the score
+const getGrade = (score: number): string => {
+  if (score > 43) return 'A+';
+  if (score > 41) return 'A';
+  if (score > 39) return 'A-';
+  if (score > 37) return 'B+';
+  if (score > 35) return 'B';
+  if (score > 33) return 'B-';
+  if (score > 31) return 'C+';
+  if (score > 29) return 'C';
+  if (score > 27) return 'C-';
+  if (score > 25) return 'D+';
+  if (score > 23) return 'D';
+  if (score > 22) return 'D-';
+  return 'F'; // Adjust ths as needed for lower scores
+};
 
 const StudentProgressPage: React.FC = () => {
   const [studentProgress, setStudentProgress] = useState<StudentProgress | null>(null);
@@ -43,7 +61,6 @@ const StudentProgressPage: React.FC = () => {
         const data = await response.json();
         console.log('Received data:', data);
 
-        // Check if the data is structured correctly and extract the completed lectures
         const completedLectures = data[0]?.completedLectures || []; // Access the first item in the array
 
         setStudentProgress({
@@ -74,6 +91,7 @@ const StudentProgressPage: React.FC = () => {
         <div className="student-progress-details">
           <h2>Progress for {studentProgress.courseTitle}</h2>
           <p>Score: {studentProgress.score}</p>
+          <p>Final Grade: {getGrade(studentProgress.score)}</p> {/* Displaying final grade */}
           <p>Completion Rate: {studentProgress.completionRate}%</p>
           <h3>Completed Lectures:</h3>
           <ul>
@@ -90,6 +108,13 @@ const StudentProgressPage: React.FC = () => {
               <p>No completed lectures available.</p>
             )}
           </ul>
+          {studentProgress.completionRate >= 100 ? (
+            <Link href="/Ins_Home/Certificates/student-progress/certificate">
+              <button className="certificate-button">Get Certificate</button>
+            </Link>
+          ) : (
+            <p className="incomplete-message">Student hasn't finished the course yet.</p>
+          )}
         </div>
       ) : (
         <p>No progress data found for this student.</p>

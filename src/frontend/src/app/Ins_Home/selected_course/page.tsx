@@ -110,16 +110,6 @@ const CourseDetailsPage = () => {
             Delete Content
           </button>
         </Link>
-        <Link href={`/Ins_Home/selected_course/${courseTitle}/edit-course-content`}>
-          <button className="action-button edit-button">
-            Edit Content
-          </button>
-        </Link>
-        <Link href={`/Ins_Home/selected-course/${encodeURIComponent(courseTitle)}/QuizzesPage`}>
-          <button className="action-button quizzes-button">
-            View Quizzes
-          </button>
-        </Link>
       </div>
     </div>
   );
