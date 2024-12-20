@@ -44,10 +44,18 @@ export class QuizzesService {
     studentEmail: string,
     courseTitle: string,
   ) {
+    const searchQuiz = await this.quizModel.findOne({
+      quizType,
+      studentEmail,
+      courseTitle,
+    });
+    if (searchQuiz) {
+      throw new Error(`you cannot enter ${quizId} of ${courseTitle} Twice`);
+    }
     // Step 1: Get the module associated with the given quizId
     const module = await this.moduleModel.findOne({ quizId }).exec();
     if (!module) {
-      throw new Error(`Module with quizId ${quizId} not found`);
+      throw new Error(`There is no ${quizId} posted yet`);
     }
 
     // Step 2: Get the student data and populate progress
@@ -68,13 +76,18 @@ export class QuizzesService {
 
     // Step 5: Generate questions for the quiz
     let selectedQuestions = [];
+
     if (quizType === 'Small') {
+      student.HaveEnteredQuiz = true;
+      await student.save();
       // Small quiz: Select questions evenly from all difficulty levels
       selectedQuestions = this.selectSmallQuizQuestions(
         module.questions,
         numberOfQuestions,
       );
     } else {
+      student.HaveEnteredMid = true;
+      await student.save();
       // Midterm or Final quiz: Adjust questions based on difficulty and student's grade
       selectedQuestions = this.selectQuizQuestionsByDifficulty(
         module.questions,
@@ -90,6 +103,7 @@ export class QuizzesService {
       quizType,
       courseTitle: module.courseTitle,
       instructorEmail,
+      studentEmail,
       questions: selectedQuestions,
       studentAnswers: [],
       studentScores: [],
@@ -133,9 +147,9 @@ export class QuizzesService {
     const hardQuestions = questions.filter((q) => q.difficulty === 'hard');
 
     const selectedQuestions = [
-      ...this.randomSample(easyQuestions, Math.ceil(numberOfQuestions / 3)),
-      ...this.randomSample(mediumQuestions, Math.ceil(numberOfQuestions / 3)),
-      ...this.randomSample(hardQuestions, Math.ceil(numberOfQuestions / 3)),
+      ...this.randomSample(easyQuestions, 4),
+      ...this.randomSample(mediumQuestions, 3),
+      ...this.randomSample(hardQuestions, 3),
     ];
 
     return selectedQuestions;
@@ -145,7 +159,6 @@ export class QuizzesService {
   private randomSample(arr: any[], size: number) {
     return _.sampleSize(arr, size);
   }
-
 
   // Start Quiz (Fetch the quiz for the student)
   async startQuiz(
@@ -286,8 +299,8 @@ export class QuizzesService {
     user.feedback.push({
       quizId,
       courseTitle: quiz.courseTitle,
-      feedback: feedbackArray, 
-      isfeedbacked: true// Feedback contains question, student's answer, and instructor's feedback
+      feedback: feedbackArray,
+      isfeedbacked: true, // Feedback contains question, student's answer, and instructor's feedback
     });
 
     // Save the updated user data
@@ -338,38 +351,38 @@ export class QuizzesService {
     return quizzes.map((quiz) => quiz.quizId);
   }
 
-
   async getStudentAnswers(
     quizId: string,
-  ): Promise<{ studentEmail: string; answers: string[]; hasFeedback: boolean }[]> {
+  ): Promise<
+    { studentEmail: string; answers: string[]; hasFeedback: boolean }[]
+  > {
     // Find the quiz by quizId
     const quiz = await this.quizModel
       .findOne({ quizId })
       .select('studentAnswers');
-  
+
     // Check if the quiz exists
     if (!quiz) {
       throw new NotFoundException('Quiz not found');
     }
-  
+
     // Fetch users who have provided feedback for this quiz
     const usersWithFeedback = await this.userModel
       .find({ 'feedback.quizId': quizId })
       .select({ email: 1, 'feedback.quizId': 1, _id: 0 });
-  
+
     // Create a set of student emails who have provided feedback
     const feedbackEmails = new Set(usersWithFeedback.map((user) => user.email));
-  
+
     // Map the studentAnswers array to return student email, answers, and feedback status
     const studentEmails = quiz.studentAnswers.map((answer) => ({
       studentEmail: answer.studentEmail,
       answers: answer.answers, // Assuming answers are stored in the answer object
       hasFeedback: feedbackEmails.has(answer.studentEmail), // Check if the email exists in the feedback list
     }));
-  
+
     return studentEmails;
   }
-
 
   async getselectedStudentAnswers(
     quizId: string,

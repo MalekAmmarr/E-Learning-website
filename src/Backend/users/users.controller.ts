@@ -56,7 +56,20 @@ export class UsersController {
     const Logs = await this.logsService.create(email, login.log, 'student');
     return login;
   }
+  // Get user by email
+  @Post('getUser/:email')
+  async getUserByEmail(@Param('email') email: string) {
+    if (!email) {
+      throw new BadRequestException('Email query parameter is required');
+    }
 
+    const user = await this.userService.findUserByEmail(email);
+    if (!user) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+
+    return user;
+  }
   // Route to get notifications by email
   @UseGuards(AuthorizationGuard)
   @Get('notifications')

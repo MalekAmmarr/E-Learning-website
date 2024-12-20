@@ -130,7 +130,7 @@ html {
 }
 .error-message {
   color: rgb(170, 18, 18); /* Text color to black */
-  font-size: 14px; /* Optional: Adjust font size */
+  font-size: 20px; /* Optional: Adjust font size */
   font-weight: bold; /* Optional: Make it bold */
   margin-top: 10px; /* Optional: Add spacing from other elements */
   text-align: center; /* Optional: Center align the text */

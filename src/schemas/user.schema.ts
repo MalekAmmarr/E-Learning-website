@@ -21,6 +21,12 @@ export class User extends Document {
   @Prop({ required: false })
   profilePictureUrl?: string;
 
+  @Prop({ required: false, default: false })
+  HaveEnteredQuiz?: boolean;
+
+  @Prop({ required: false, default: false })
+  HaveEnteredMid?: boolean;
+
   @Prop({ type: [String], default: [] })
   appliedCourses: string[]; // Array of courses the user wants to apply to
 
@@ -67,7 +73,6 @@ export class User extends Document {
       feedback: string;
     }>;
   }>;
-  
 
   // Notes tied to specific courses
   @Prop({ type: [String], default: [] })
