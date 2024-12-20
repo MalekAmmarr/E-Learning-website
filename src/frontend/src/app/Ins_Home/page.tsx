@@ -14,6 +14,7 @@ export interface Instructor {
   age: string; // Assuming age is a string, but can be converted to number if necessary
   passwordHash: string;
   Teach_Courses: string[]; // List of course names the instructor teaches
+  profilePictureUrl?: string;
   Certificates: string; // Certificates the instructor holds
   createdAt: string; // ISO Date format
   updatedAt: string; // ISO Date format
@@ -169,7 +170,31 @@ export default function Home() {
                     <a href="#courses">Courses</a>
                   </li>
                   <li>
-                    <Link href="#top">{instructor?.name}</Link>
+                  <Link href="/Ins_Home/Profile">
+                      {instructor?.profilePictureUrl ? (
+                        <img
+                          src={`http://localhost:3000/files/${instructor.profilePictureUrl}`}
+                          alt="Profile"
+                          style={{
+                            width: '90px',
+                            height: '90px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src={'/assets/images/Default.jpg'}
+                          alt="Profile"
+                          style={{
+                            width: '90px',
+                            height: '90px',
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                          }}
+                        />
+                      )}
+                    </Link>
                   </li>
                 </ul>
                 <a className="menu-trigger">
