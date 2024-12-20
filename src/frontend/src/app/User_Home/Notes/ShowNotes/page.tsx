@@ -41,16 +41,45 @@ const ShowNotes: React.FC = () => {
 
   const [title, setTitle] = useState<string | null>(null);
   const router = useRouter();
+  const fetchUserDetails = async (
+    email: string,
+    accessToken: string,
+  ): Promise<User> => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/users/getUser/${email}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const data: User = await response.json();
+      console.log('Fetched user details:', data); // Debugging: Log the fetched user details
+      setUser(data); // Update state with user data
+      return data; // Return the fetched user data
+    } catch (error) {
+      console.error('Error fetching user details', error);
+      throw error; // Propagate the error for the caller to handle
+    }
+  };
 
   useEffect(() => {
     try {
-      const userData = localStorage.getItem('userData');
-      const accessToken = localStorage.getItem('authToken');
+      const userData = sessionStorage.getItem('userData');
+      const accessToken = sessionStorage.getItem('authToken');
       console.log('Title : ', title);
       if (userData) {
         if (accessToken) {
           const parsedData: User = JSON.parse(userData); // Parse the single user object
-          setUser(parsedData);
+          fetchUserDetails(parsedData.email, accessToken);
         } else router.push('login');
       } else {
         router.push('/login');
@@ -73,7 +102,7 @@ const ShowNotes: React.FC = () => {
           method: 'POST', // Assuming your API uses POST to accept email in the body
           headers: {
             'Content-Type': 'application/json', // Specify the content type
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Add the Bearer token
+            Authorization: `Bearer ${sessionStorage.getItem('authToken')}`, // Add the Bearer token
           },
           body: JSON.stringify({ Title: titleFromQuery }), // Send the email in the request body
         });
@@ -107,7 +136,7 @@ const ShowNotes: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
         },
         body: JSON.stringify({
           studentEmail: Note[0].studentEmail,
@@ -136,7 +165,7 @@ const ShowNotes: React.FC = () => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
         },
         body: JSON.stringify({
           studentEmail: Note[0].studentEmail,
