@@ -16,6 +16,9 @@ export class Quiz extends Document {
   instructorEmail: string; // Instructor who created the quiz (links to Instructor schema)
 
   @Prop({ required: true })
+  studentEmail: string;
+
+  @Prop({ required: true })
   questions: Array<{
     question: string;
     options: string[];
@@ -24,7 +27,6 @@ export class Quiz extends Document {
 
   @Prop({ type: [{ studentEmail: String, answers: [String] }], default: [] })
   studentAnswers: { studentEmail: string; answers: string[] }[];
-
 
   @Prop({ type: [{ studentEmail: String, score: Number }], default: [] })
   studentScores: { studentEmail: string; score: number }[]; // Student scores for the quiz

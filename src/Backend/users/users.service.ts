@@ -40,7 +40,9 @@ export class UsersService {
   async loginUser(email: string, password: string) {
     return await this.authService.login(email, password, 'student');
   }
-
+  async findUserByEmail(email: string): Promise<User | null> {
+    return this.userModel.findOne({ email: email }).exec();
+  }
   async Notifications(
     email: string,
   ): Promise<{ Notifications: string[] | string }> {
