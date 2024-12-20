@@ -58,7 +58,7 @@ export class UsersController {
   }
   // Get user by email
   @Post('getUser/:email')
-  async getUserByEmail(@Param('email') email: string) {
+  async getUserByEmail(@Param('email') email: string): Promise<User | null> {
     if (!email) {
       throw new BadRequestException('Email query parameter is required');
     }

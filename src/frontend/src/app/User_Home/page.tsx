@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import { User } from './Notes/page';
 
 interface Course {
   name: string;
@@ -82,31 +83,46 @@ export default function Home() {
         );
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    const accessToken = localStorage.getItem('authToken');
-    const user = localStorage.getItem('userData');
-    if (user) {
-      if (accessToken) {
-        const parsedUser = JSON.parse(user);
-        setUserData(parsedUser);
+    const initialize = async () => {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
 
-        // Filter applied and accepted courses based on user data
-        const userAppliedCourses = courses.filter((course) =>
-          parsedUser?.appliedCourses.includes(course.name),
-        );
-        const userAcceptedCourses = courses.filter((course) =>
-          parsedUser?.acceptedCourses.includes(course.name),
-        );
+      const accessToken = sessionStorage.getItem('authToken');
+      const user = sessionStorage.getItem('userData');
 
-        setAppliedCourses(userAppliedCourses);
-        setAcceptedCourses(userAcceptedCourses);
-      } // Set userData state only if data exists}
-    } else {
-      router.push('/login');
-    }
+      if (user) {
+        if (accessToken) {
+          const parsedUser = JSON.parse(user);
+          try {
+            // Fetch updated user details
+            const updatedUser = await fetchUserDetails(
+              parsedUser.email,
+              accessToken,
+            );
+
+            // Filter applied and accepted courses based on user data
+            const userAppliedCourses = courses.filter((course) =>
+              updatedUser?.appliedCourses.includes(course.name),
+            );
+            const userAcceptedCourses = courses.filter((course) =>
+              updatedUser?.acceptedCourses.includes(course.name),
+            );
+
+            setAppliedCourses(userAppliedCourses);
+            setAcceptedCourses(userAcceptedCourses);
+          } catch (error) {
+            console.error('Error fetching user details:', error);
+          }
+        }
+      } else {
+        router.push('/login');
+      }
+    };
+
+    initialize();
   }, []);
+
   console.log(appliedCourses);
   console.log(acceptedCourses);
   // Function to handle note title click
@@ -115,6 +131,37 @@ export default function Home() {
       `/User_Home/CourseContent?title=${encodeURIComponent(courseTitle)}`,
     );
   };
+  const fetchUserDetails = async (
+    email: string,
+    accessToken: string,
+  ): Promise<User> => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/users/getUser/${email}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const data: User = await response.json();
+      console.log('Fetched user details:', data); // Debugging: Log the fetched user details
+      setUserData(data); // Update state with user data
+      return data; // Return the fetched user data
+    } catch (error) {
+      console.error('Error fetching user details', error);
+      throw error; // Propagate the error for the caller to handle
+    }
+  };
+
+  const getCourses = async (user: User) => {};
 
   return (
     <>
@@ -614,6 +661,17 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* Want  A Space here  */}
+
+      <div
+        style={{
+          height: '500px',
+          backgroundColor: 'white',
+          marginTop: '30px',
+          marginBottom: '30px',
+        }}
+      ></div>
+
       <div className="section courses" id="courses">
         <div className="container">
           <div className="row">
