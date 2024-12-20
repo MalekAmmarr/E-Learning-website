@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Quiz } from 'src/schemas/quiz.schema';
 import * as _ from 'lodash';
 import { InjectModel } from '@nestjs/mongoose';
-
+import { v4 as uuidv4 } from 'uuid';
 import { Model, Types } from 'mongoose';
 import { User } from 'src/schemas/user.schema';
 import { UpdateQuizDto } from './dto/update-quiz.dto';
@@ -29,144 +29,135 @@ export class QuizzesService {
     @InjectModel(CourseModule.name, 'eLearningDB')
     private readonly moduleModel: Model<CourseModule>,
 
-    @InjectModel(Instructor.name, 'eLearningDB') 
+    @InjectModel(Instructor.name, 'eLearningDB')
     private readonly instructorModel: Model<Instructor>,
-    @InjectModel(Progress.name, 'eLearningDB') 
+    @InjectModel(Progress.name, 'eLearningDB')
     private readonly progressModel: Model<Progress>,
   ) {}
 
-    // Method to create a quiz based on quizId
-async createQuiz(
-  instructorEmail: string,
-  quizId: string,
-  quizType: string,
-  numberOfQuestions: number,
-  studentEmail: string,
-  courseTitle: string
-) {
-  // Step 1: Get the module associated with the given quizId
-  const module = await this.moduleModel.findOne({ quizId }).exec();
-  if (!module) {
-    throw new Error(`Module with quizId ${quizId} not found`);
+  // Method to create a quiz based on quizId
+  async createQuiz(
+    instructorEmail: string,
+    quizId: string,
+    quizType: string,
+    numberOfQuestions: number,
+    studentEmail: string,
+    courseTitle: string,
+  ) {
+    const searchQuiz = await this.quizModel.findOne({
+      quizType,
+      studentEmail,
+      courseTitle,
+    });
+    if (searchQuiz) {
+      throw new Error(`you cannot enter ${quizId} of ${courseTitle} Twice`);
+    }
+    // Step 1: Get the module associated with the given quizId
+    const module = await this.moduleModel.findOne({ quizId }).exec();
+    if (!module) {
+      throw new Error(`There is no ${quizId} posted yet`);
+    }
+
+    // Step 2: Get the student data and populate progress
+    const student = await this.userModel
+      .findOne({ email: studentEmail })
+      .exec();
+
+    if (!student) {
+      throw new Error(`Student with email ${studentEmail} not found`);
+    }
+
+    const progress = await this.progressModel
+      .findOne({ studentEmail: studentEmail })
+      .exec();
+
+    // Step 3: Determine the student's first quiz grade for the given course
+    const firstQuizGrade = progress.score;
+
+    // Step 5: Generate questions for the quiz
+    let selectedQuestions = [];
+
+    if (quizType === 'Small') {
+      student.HaveEnteredQuiz = true;
+      await student.save();
+      // Small quiz: Select questions evenly from all difficulty levels
+      selectedQuestions = this.selectSmallQuizQuestions(
+        module.questions,
+        numberOfQuestions,
+      );
+    } else {
+      student.HaveEnteredMid = true;
+      await student.save();
+      // Midterm or Final quiz: Adjust questions based on difficulty and student's grade
+      selectedQuestions = this.selectQuizQuestionsByDifficulty(
+        module.questions,
+        firstQuizGrade,
+        numberOfQuestions,
+      );
+    }
+    const quiz_id = `${module.quizId}-${uuidv4()}`;
+
+    // Step 6: Create the quiz object
+    const quiz = new this.quizModel({
+      quizId: quiz_id,
+      quizType,
+      courseTitle: module.courseTitle,
+      instructorEmail,
+      studentEmail,
+      questions: selectedQuestions,
+      studentAnswers: [],
+      studentScores: [],
+      isGraded: false,
+    });
+
+    // Step 7: Save the quiz to the database
+    const savedQuiz = await quiz.save();
+
+    return { quiz_id, savedQuiz }; // Return the created quiz
   }
 
-  // Step 2: Get the student data and populate progress
-const student = await this.userModel
-.findOne({ email: studentEmail }).exec();
+  // Helper method to determine difficulty level based on the first quiz grade
 
-
-
-
-
-if (!student) {
-throw new Error(`Student with email ${studentEmail} not found`);
-}
-
-const progress = await this.progressModel
-.findOne({ studentEmail: studentEmail }).exec();
-
-// Step 3: Determine the student's first quiz grade for the given course
-const firstQuizGrade = progress.score
-
-
-  // Step 5: Generate questions for the quiz
-  let selectedQuestions = [];
-  if (quizType === 'Small') {
-    // Small quiz: Select questions evenly from all difficulty levels
-    selectedQuestions = this.selectSmallQuizQuestions(module.questions, numberOfQuestions);
-  } else {
-    // Midterm or Final quiz: Adjust questions based on difficulty and student's grade
-    selectedQuestions = this.selectQuizQuestionsByDifficulty(
-      module.questions,
-      firstQuizGrade,
-      numberOfQuestions
-    );
+  // Helper method to select questions based on difficulty
+  private selectQuizQuestionsByDifficulty(
+    questions: any[],
+    grade: number,
+    numberOfQuestions: number,
+  ) {
+    let filteredQuestions;
+    if (grade < 5) {
+      filteredQuestions = questions.filter(
+        (q) => q.difficulty === 'easy' || q.difficulty === 'medium',
+      );
+    } else {
+      filteredQuestions = questions.filter(
+        (q) => q.difficulty === 'medium' || q.difficulty === 'hard',
+      );
+    }
+    return this.randomSample(filteredQuestions, numberOfQuestions);
   }
 
+  // Select questions for a Small quiz
+  private selectSmallQuizQuestions(
+    questions: any[],
+    numberOfQuestions: number,
+  ) {
+    const easyQuestions = questions.filter((q) => q.difficulty === 'easy');
+    const mediumQuestions = questions.filter((q) => q.difficulty === 'medium');
+    const hardQuestions = questions.filter((q) => q.difficulty === 'hard');
 
-  // Step 6: Create the quiz object
-  const quiz = new this.quizModel({
-    quizId: module.quizId,
-    quizType,
-    courseTitle: module.courseTitle,
-    instructorEmail,
-    questions: selectedQuestions,
-    studentAnswers: [],
-    studentScores: [],
-    isGraded: false,
-  });
+    const selectedQuestions = [
+      ...this.randomSample(easyQuestions, 4),
+      ...this.randomSample(mediumQuestions, 3),
+      ...this.randomSample(hardQuestions, 3),
+    ];
 
-
-  // Step 7: Save the quiz to the database
-  const savedQuiz = await quiz.save();
-
-  
-
-
-  return savedQuiz; // Return the created quiz
-}
-
-
-// Helper method to determine difficulty level based on the first quiz grade
-
-
-// Helper method to select questions based on difficulty
-private selectQuizQuestionsByDifficulty(questions: any[], grade: number, numberOfQuestions: number) {
-  let filteredQuestions;
-  if (grade < 5) {
-    filteredQuestions = questions.filter(q => q.difficulty === 'easy' || q.difficulty === 'medium');
-  } else {
-    filteredQuestions = questions.filter(q => q.difficulty === 'medium' || q.difficulty === 'hard');
+    return selectedQuestions;
   }
-  return this.randomSample(filteredQuestions, numberOfQuestions);
-}
 
-
-// Select questions for a Small quiz
-private selectSmallQuizQuestions(questions: any[], numberOfQuestions: number) {
-  const easyQuestions = questions.filter(q => q.difficulty === 'easy');
-  const mediumQuestions = questions.filter(q => q.difficulty === 'medium');
-  const hardQuestions = questions.filter(q => q.difficulty === 'hard');
-
-  const selectedQuestions = [
-    ...this.randomSample(easyQuestions, Math.ceil(numberOfQuestions / 3)),
-    ...this.randomSample(mediumQuestions, Math.ceil(numberOfQuestions / 3)),
-    ...this.randomSample(hardQuestions, Math.ceil(numberOfQuestions / 3)),
-  ];
-
-  return selectedQuestions;
-}
-
-// Helper function to get a random sample of questions
-private randomSample(arr: any[], size: number) {
-  return _.sampleSize(arr, size);
-}
-
-
-  // Method to update the quiz content
-  async updateQuiz(quizId: string, updateData: any) {
-    // Step 1: Find the quiz by quizId
-    const quiz = await this.quizModel.findOne({ quizId }).exec();
-    if (!quiz) {
-      throw new Error(`Quiz with quizId ${quizId} not found`);
-    }
-
-    // Step 2: Update the quiz fields (e.g., questions, quiz type, etc.)
-    if (updateData.quizType) {
-      quiz.quizType = updateData.quizType;
-    }
-    if (updateData.questions) {
-      quiz.questions = updateData.questions; // Assuming questions is an array of questions
-    }
-    if (updateData.isGraded !== undefined) {
-      quiz.isGraded = updateData.isGraded;
-    }
-
-    // Step 3: Save the updated quiz
-    await quiz.save();
-
-    // Return the updated quiz
-    return quiz;
+  // Helper function to get a random sample of questions
+  private randomSample(arr: any[], size: number) {
+    return _.sampleSize(arr, size);
   }
 
   // Start Quiz (Fetch the quiz for the student)
@@ -297,32 +288,26 @@ private randomSample(arr: any[], size: number) {
     // Extract the answers from the studentEntry
     const answers = studentEntry.answers;
 
-  
     // Map feedback for each question
     const feedbackArray = answers.map((answer, index) => ({
       question: quiz.questions[index]?.question || 'Unknown Question',
       studentAnswer: answer, // Include student's answer
       feedback: feedback[index] || '', // Instructor's feedback or empty string
     }));
-  
 
     // Update user feedback
     user.feedback.push({
       quizId,
       courseTitle: quiz.courseTitle,
-      feedback: feedbackArray, // Feedback contains question, student's answer, and instructor's feedback
+      feedback: feedbackArray,
+      isfeedbacked: true, // Feedback contains question, student's answer, and instructor's feedback
     });
-
-  
 
     // Save the updated user data
     await user.save();
 
     return quiz;
   }
-  
-  
-  
 
   // Method to fetch all quizzes for a specific course by title
   async getQuizzesByCourseTitle(courseTitle: string): Promise<Quiz[]> {
@@ -346,8 +331,6 @@ private randomSample(arr: any[], size: number) {
     return quiz;
   }
 
-  
-
   async getQuizzesByInstructor(email: string): Promise<string[]> {
     // Step 1: Find the instructor by email
     const instructor = await this.instructorModel.findOne({ email }).exec();
@@ -367,36 +350,64 @@ private randomSample(arr: any[], size: number) {
     // Extract and return the quizIds
     return quizzes.map((quiz) => quiz.quizId);
   }
-  
 
-  async getStudentAnswers(quizId: string): Promise<{ studentEmail: string; answers: string[] }[]> {
-    const quiz = await this.quizModel.findOne({ quizId }).select('studentAnswers');
+  async getStudentAnswers(
+    quizId: string,
+  ): Promise<
+    { studentEmail: string; answers: string[]; hasFeedback: boolean }[]
+  > {
+    // Find the quiz by quizId
+    const quiz = await this.quizModel
+      .findOne({ quizId })
+      .select('studentAnswers');
 
+    // Check if the quiz exists
     if (!quiz) {
       throw new NotFoundException('Quiz not found');
     }
 
-    return quiz.studentAnswers; // Return the studentAnswers array
+    // Fetch users who have provided feedback for this quiz
+    const usersWithFeedback = await this.userModel
+      .find({ 'feedback.quizId': quizId })
+      .select({ email: 1, 'feedback.quizId': 1, _id: 0 });
+
+    // Create a set of student emails who have provided feedback
+    const feedbackEmails = new Set(usersWithFeedback.map((user) => user.email));
+
+    // Map the studentAnswers array to return student email, answers, and feedback status
+    const studentEmails = quiz.studentAnswers.map((answer) => ({
+      studentEmail: answer.studentEmail,
+      answers: answer.answers, // Assuming answers are stored in the answer object
+      hasFeedback: feedbackEmails.has(answer.studentEmail), // Check if the email exists in the feedback list
+    }));
+
+    return studentEmails;
   }
-  
 
-  async getselectedStudentAnswers(quizId: string, studentEmail: string): Promise<{ studentEmail: string; answers: string[] }> {
+  async getselectedStudentAnswers(
+    quizId: string,
+    studentEmail: string,
+  ): Promise<{ studentEmail: string; answers: string[] }> {
     // Fetch the quiz by its ID, selecting only the studentAnswers field
-    const quiz = await this.quizModel.findOne({ quizId }).select('studentAnswers');
-  
+    const quiz = await this.quizModel
+      .findOne({ quizId })
+      .select('studentAnswers');
+
     if (!quiz) {
       throw new NotFoundException('Quiz not found');
     }
-  
+
     // Search for the student's answers in the studentAnswers array
-    const studentAnswer = quiz.studentAnswers.find((answer) => answer.studentEmail === studentEmail);
-  
+    const studentAnswer = quiz.studentAnswers.find(
+      (answer) => answer.studentEmail === studentEmail,
+    );
+
     if (!studentAnswer) {
-      throw new NotFoundException(`No answers found for student with email ${studentEmail}`);
+      throw new NotFoundException(
+        `No answers found for student with email ${studentEmail}`,
+      );
     }
-  
+
     return studentAnswer; // Return the specific student's email and answers
   }
-  
-
 }

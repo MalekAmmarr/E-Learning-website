@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
+import Link from 'next/link'; // Import Link from next/link
 import './page.css'; // Importing the CSS file
 
 type CourseDetails = {
@@ -10,7 +11,8 @@ type CourseDetails = {
   category: string;
   difficultyLevel: string;
   totalClasses: number;
-  courseContent: string[];
+  courseContent: string[]; // Array of PDF URLs/paths
+  image: string; // URL or path to the course image
   notes: string[];
 };
 
@@ -19,14 +21,14 @@ const CourseDetailsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const router = useRouter();
-  const params = useParams();
+  const searchParams = useSearchParams();
+  const title = searchParams.get('title');
 
-  if (!params.title || Array.isArray(params.title)) {
+  if (!title) {
     throw new Error('Invalid course title');
   }
 
-  const courseTitle = decodeURIComponent(params.title);
+  const courseTitle = decodeURIComponent(title);
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -36,7 +38,8 @@ const CourseDetailsPage = () => {
           throw new Error(`Failed to fetch course details: ${res.statusText}`);
         }
         const data = await res.json();
-        setCourse(data);
+        console.log('Fetched course data:', data); // Log the data for debugging
+        setCourse(data.course); // Assuming the data is nested under 'course'
         setLoading(false);
       } catch (err: any) {
         setError(err.message || 'An unknown error occurred');
@@ -47,28 +50,16 @@ const CourseDetailsPage = () => {
     fetchCourseDetails();
   }, [courseTitle]);
 
-  const handleAddContentClick = () => {
-    router.push(`/Ins_Home/Add_content/course/${encodeURIComponent(courseTitle)}/add-course-content`);
-  };
-
-  const handleUpdateContentClick = () => {
-    router.push(`/Ins_Home/Add_content/course/${courseTitle}/delete-course-content`);
-  };
-
-  const handleEditContentClick = () => {
-    router.push(`/Ins_Home/Add_content/course/${courseTitle}/edit-course-content`);
-  };
-
-  const handleViewQuizzesClick = () => {
-    router.push(`/Ins_Home/Add_content/course/${encodeURIComponent(courseTitle)}/QuizzesPage`);
-  };
-
   if (loading) {
     return <div className="loading">Loading course details...</div>;
   }
 
   if (error) {
     return <div className="error">Error: {error}</div>;
+  }
+
+  if (!course) {
+    return <div className="error">No course data available</div>;
   }
 
   return (
@@ -88,7 +79,15 @@ const CourseDetailsPage = () => {
         <h3>Course Content</h3>
         <ul>
           {course?.courseContent.map((content, index) => (
-            <li key={index}>{content}</li>
+            <li key={index} className="course-content-item">
+              {/* Display course image above each lecture */}
+              <div className="course-image-container">
+                <img src={course?.image} alt={`Lecture ${index + 1}`} className="course-image" />
+              </div>
+              <a href={content} target="_blank" rel="noopener noreferrer">
+                <button className="pdf-button">View PDF {index + 1}</button>
+              </a>
+            </li>
           ))}
         </ul>
       </div>
@@ -101,18 +100,16 @@ const CourseDetailsPage = () => {
         </ul>
       </div>
       <div className="action-buttons-container">
-        <button className="action-button add-button" onClick={handleAddContentClick}>
-          Add Content
-        </button>
-        <button className="action-button update-button" onClick={handleUpdateContentClick}>
-          Delete Content
-        </button>
-        <button className="action-button edit-button" onClick={handleEditContentClick}>
-          Edit Content
-        </button>
-        <button className="action-button quizzes-button" onClick={handleViewQuizzesClick}>
-          View Quizzes
-        </button>
+        <Link href={`/Ins_Home/selected_course/${encodeURIComponent(courseTitle)}/add-course-content`}>
+          <button className="action-button add-button">
+            Add Content
+          </button>
+        </Link>
+        <Link href={`/Ins_Home/selected_course/${courseTitle}/delete-course-content`}>
+          <button className="action-button update-button">
+            Delete Content
+          </button>
+        </Link>
       </div>
     </div>
   );

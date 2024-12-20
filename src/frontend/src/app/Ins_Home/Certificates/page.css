@@ -1,0 +1,147 @@
+/* General Styles */
+body {
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f5f7;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+.certificates-page {
+  width: 90%;
+  max-width: 1200px;
+  margin-top: 40px;
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 36px;
+  color: #1a3e75; /* Deep blue color for professional look */
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 16px;
+  color: #4c5c68;
+  line-height: 1.6;
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.students-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.student-item {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.student-card {
+  display: flex;
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 900px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.student-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.student-profile-picture {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 20px;
+}
+
+.student-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex-grow: 1;
+}
+
+.student-info h3 {
+  font-size: 20px;
+  color: #2e3a59;
+  margin: 0;
+}
+
+.student-info p {
+  font-size: 14px;
+  color: #6b7a8f;
+  margin: 5px 0;
+  line-height: 1.5;
+}
+
+.student-info p span {
+  font-weight: bold;
+  color: #1a3e75;
+}
+
+.student-card i {
+  margin-left: 10px;
+  color: #1a3e75;
+  font-size: 20px;
+}
+
+.student-card:hover i {
+  color: #ff5722; /* Change icon color on hover */
+}
+
+/* Icons Styling */
+.student-card .student-info p {
+  display: flex;
+  align-items: center;
+}
+
+.student-card .student-info p i {
+  margin-right: 8px;
+}
+
+/* No Students Found */
+.no-students-message {
+  text-align: center;
+  font-size: 18px;
+  color: #f44336;
+}
+
+/* Loading and Error States */
+.loading, .error {
+  text-align: center;
+  font-size: 18px;
+  color: #f44336;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .certificates-page {
+    padding: 20px;
+  }
+
+  .student-card {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .student-profile-picture {
+    margin-bottom: 15px;
+  }
+}

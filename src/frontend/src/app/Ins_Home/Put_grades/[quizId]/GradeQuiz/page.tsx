@@ -89,7 +89,7 @@ const StudentAnswers = () => {
     }
   
     try {
-      const res = await fetch('http://localhost:3000/quizzes/giveFeedback', {
+      const res = await fetch('http://localhost:3000/quizzes/feedback', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +144,7 @@ const StudentAnswers = () => {
               ))}
             </ul>
             <button className="grade-button" onClick={handleGradeClick}>
-              Grade
+              Sumbit
             </button>
           </div>
         ) : (

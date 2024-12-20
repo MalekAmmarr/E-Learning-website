@@ -6,8 +6,8 @@ import {
   IsArray,
   IsNumber,
   IsPositive,
+  IsBoolean,
 } from 'class-validator';
-
 
 // Define the DTO for creating a User
 // Define the DTO for creating a User
@@ -32,6 +32,14 @@ export class CreateUserDto {
   @IsOptional() // Profile picture URL is optional
   @IsString()
   profilePictureUrl?: string;
+
+  @IsOptional() // Profile picture URL is optional
+  @IsBoolean()
+  HaveEnteredQuiz?: boolean;
+
+  @IsOptional() // Profile picture URL is optional
+  @IsBoolean()
+  HaveEnteredMid?: boolean;
 
   @IsOptional() // Applied courses is an optional array of strings
   @IsArray()

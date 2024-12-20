@@ -1,46 +1,112 @@
-.section.quizzes {
-    padding: 60px 0;
-    background-color: #f9f9f9;
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 0;
+}
+
+h6 {
+  font-size: 1.2rem;
+  color: #888;
+}
+
+h2 {
+  font-size: 2rem;
+  color: #333;
+  font-weight: 600;
+}
+
+section {
+  padding: 60px 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Quiz Card Styles */
+.quiz-card {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.quiz-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-card h4 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.quiz-card p {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Loading Spinner */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-container p {
+  margin-top: 10px;
+  color: #3498db;
+}
+
+/* Error Message */
+.error-message {
+  text-align: center;
+  color: #e74c3c;
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+/* Section Heading */
+.section-heading h6 {
+  color: #888;
+}
+
+.section-heading h2 {
+  color: #333;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .col-lg-4 {
+    width: 100%;
+    margin-bottom: 20px;
   }
-  
-  .section-heading {
-    margin-bottom: 40px;
-  }
-  
-  .section-heading h6 {
-    font-size: 14px;
-    color: #555;
-    margin-bottom: 10px;
-  }
-  
-  .section-heading h2 {
-    font-size: 28px;
-    font-weight: bold;
-    color: #333;
-  }
-  
-  .quiz-card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer;
-  }
-  
-  .quiz-card h4 {
-    font-size: 18px;
-    color: #333;
-  }
-  
-  .quiz-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  }
-  
-  .mb-30 {
-    margin-bottom: 30px;
-  }
-  
+}

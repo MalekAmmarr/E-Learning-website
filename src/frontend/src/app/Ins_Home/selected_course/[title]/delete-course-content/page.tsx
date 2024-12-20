@@ -12,6 +12,7 @@ type CourseDetails = {
   totalClasses: number;
   courseContent: string[];
   notes: string[];
+  image: string;
 };
 
 const DeleteCourseContentPage = () => {
@@ -20,6 +21,7 @@ const DeleteCourseContentPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [instructorEmail, setInstructorEmail] = useState<string | null>(null);
+  const [courseContent, setCourseContent] = useState<string[]>([]); // Store course content separately
 
   const router = useRouter();
   const params = useParams();
@@ -51,7 +53,8 @@ const DeleteCourseContentPage = () => {
           throw new Error(`Failed to fetch course details: ${res.statusText}`);
         }
         const data = await res.json();
-        setCourse(data);
+        setCourse(data.course);
+        setCourseContent(data.course.courseContent || []); // Ensure courseContent is always an array
         setLoading(false);
       } catch (err: any) {
         setError(err.message || 'An unknown error occurred');
@@ -74,11 +77,12 @@ const DeleteCourseContentPage = () => {
       return;
     }
 
-    try {
-      if (!instructorEmail) {
-        throw new Error('Instructor email not found. Please log in again.');
-      }
+    if (!instructorEmail) {
+      setError('Instructor email is not available.');
+      return;
+    }
 
+    try {
       const res = await fetch(
         `http://localhost:3000/instructor/${encodeURIComponent(instructorEmail)}/courses/${encodeURIComponent(courseTitle)}/deletecontent`,
         {
@@ -94,10 +98,19 @@ const DeleteCourseContentPage = () => {
         throw new Error(`Failed to delete course content: ${res.statusText}`);
       }
 
-      // Refresh the page or redirect to course details after deletion
-      router.push(`/Ins_Home/Add_content/course/${encodeURIComponent(courseTitle)}`);
-    } catch (err: any) {
-      setError(err.message || 'An unknown error occurred');
+      const updatedCourse = await res.json();
+      setCourse(updatedCourse);
+      setSelectedContent([]); // Clear the selected content after successful deletion
+      setError(null); // Clear any previous error messages
+      setTimeout(() => {
+        router.push(`/Ins_Home/selected_course/${encodeURIComponent(courseTitle)}`);
+      }, 150);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message || 'An unknown error occurred');
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
 
@@ -112,10 +125,10 @@ const DeleteCourseContentPage = () => {
   return (
     <div className="delete-course-content-container">
       <h1 className="course-title">Delete Content from {course?.title}</h1>
-      <div className="course-content">
-        <h3>Current Course Content</h3>
+      {courseContent.length > 0 ? (
         <form>
-          {course?.courseContent.map((content, index) => (
+          <h2>Current Course Content</h2>
+          {courseContent.map((content, index) => (
             <div key={index} className="content-item">
               <input
                 type="checkbox"
@@ -127,7 +140,16 @@ const DeleteCourseContentPage = () => {
             </div>
           ))}
         </form>
-      </div>
+      ) : (
+        <>
+          <h2>Current Course Content</h2>
+          <p>No course content available.</p>
+          <div>
+            <h3>Debugging Course Content</h3>
+            <pre>{JSON.stringify(course, null, 2)}</pre>
+          </div>
+        </>
+      )}
       <div className="action-buttons-container">
         <button className="action-button delete-button" onClick={handleDeleteContentClick}>
           Delete Selected Content

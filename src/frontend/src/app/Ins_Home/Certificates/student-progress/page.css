@@ -1,0 +1,158 @@
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Body Styling */
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #f4f6f9;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+/* Main Container Styling */
+.student-progress-page {
+  background-color: white;
+  width: 100%;
+  max-width: 900px;
+  padding: 30px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+/* Heading Styling */
+h1 {
+  font-size: 2.5rem;
+  color: #2a4d67;
+  margin-bottom: 20px;
+  text-align: center;
+  font-family: 'Georgia', serif;
+}
+
+h2 {
+  font-size: 2rem;
+  color: #4b6d8e;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: 1.5rem;
+  color: #4b6d8e;
+  margin-top: 20px;
+}
+
+/* Text Styling for important attributes */
+p {
+  font-size: 1.1rem;
+  color: #4b6d8e;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+strong {
+  color: #2a4d67;
+  font-weight: bold;
+}
+
+/* Score and Completion Rate Styling */
+p span {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #f95959; /* Highlighting important attributes like score and completion rate */
+}
+
+.pdf-link {
+  display: inline-block;
+  color: #2a4d67;
+  margin-top: 5px;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.pdf-link:hover {
+  text-decoration: underline;
+}
+
+/* List Styling for Completed Lectures */
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+ul li {
+  margin-bottom: 10px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+ul li strong {
+  font-size: 1.1rem;
+  color: #2a4d67;
+}
+
+/* Button Styling for "Get Certificate" */
+.certificate-button {
+  background-color: #2a4d67;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: block;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+  text-align: center;
+  width: 100%;
+}
+
+.certificate-button:hover {
+  background-color: #1a3a50;
+}
+
+/* Loading and Error Messages */
+.loading, .error {
+  color: #f95959;
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 20px;
+}
+
+/* Incomplete Course Message */
+.incomplete-message {
+  color: #ff8800;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-top: 30px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .student-progress-page {
+    width: 100%;
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .certificate-button {
+    font-size: 1rem;
+  }
+}

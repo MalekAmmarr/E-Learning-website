@@ -21,6 +21,12 @@ export class User extends Document {
   @Prop({ required: false })
   profilePictureUrl?: string;
 
+  @Prop({ required: false, default: false })
+  HaveEnteredQuiz?: boolean;
+
+  @Prop({ required: false, default: false })
+  HaveEnteredMid?: boolean;
+
   @Prop({ type: [String], default: [] })
   appliedCourses: string[]; // Array of courses the user wants to apply to
 
@@ -45,6 +51,7 @@ export class User extends Document {
       {
         quizId: String,
         courseTitle: String,
+        isfeedbacked: Boolean, // New attribute added here
         feedback: [
           {
             question: String,
@@ -59,13 +66,13 @@ export class User extends Document {
   feedback: Array<{
     quizId: string;
     courseTitle: string;
+    isfeedbacked: boolean; // Include isfeedbacked as a boolean
     feedback: Array<{
       question: string;
       studentAnswer: string; // Include student answer
       feedback: string;
     }>;
   }>;
-  
 
   // Notes tied to specific courses
   @Prop({ type: [String], default: [] })

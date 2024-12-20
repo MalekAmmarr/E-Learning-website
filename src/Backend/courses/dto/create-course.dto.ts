@@ -1,29 +1,14 @@
-import { IsString, IsInt, IsEnum, IsArray, IsOptional, IsEmail } from 'class-validator';
-
 export class CreateCourseDto {
-  @IsString()
-  @IsOptional()
-  courseId?: string;  // Optionally, let the system generate this ID
-
-  @IsString()
+  courseId: string;
   title: string;
-
-  @IsEmail()
   instructormail: string;
-
-  @IsString()
+  instructorName?: string;
   description: string;
-
-  @IsString()
   category: string;
-
-  @IsEnum(['Beginner', 'Intermediate', 'Advanced'])
   difficultyLevel: string;
-
-  @IsInt()
   totalClasses: number;
-
-  @IsArray()
-  @IsOptional()
-  courseContent: string[]; // Array of PDF URLs/paths
+  courseContent: string[];
+  notes: string[];
+  price: number;  // New field
+  image: string;  // New field
 }

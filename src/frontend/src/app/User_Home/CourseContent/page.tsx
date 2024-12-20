@@ -23,6 +23,7 @@ const CourseContent: React.FC = () => {
   const [acceptedCourses, setAcceptedCourses] = useState<Course[]>([]);
   const [courseContent, setCourseContent] = useState<string[]>([]);
   const [courseinfo, setCourseInfo] = useState<Course[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const router = useRouter();
   const courses = [
@@ -165,28 +166,52 @@ const CourseContent: React.FC = () => {
     if (user) {
       if (accessToken) {
         const parsedUser = JSON.parse(user);
-        setUserData(parsedUser);
+        fetchUserDetails(parsedUser.email, accessToken);
       } // Set userData state only if data exists}
     } else {
       router.push('/login');
     }
     fetchContent();
   }, []);
+  // Method to fetch user details from the API
+  const fetchUserDetails = async (email: string, accessToken: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/users/getUser/${email}`,
+        {
+          method: 'Post',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Fetched user details:', data); // Debugging: Log the fetched user details
+      setUserData(data); // Update state with user data
+    } catch (error) {
+      console.error('Error fetching user details');
+    }
+  };
 
   // Function to handle note title click
-  const HandleStartQuiz = (courseTitle: string) => {
-    router.push(
-      `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01`,
-    );
-  };
-  const HandleStartMid = async () => {
+  const HandleStartExam = async (
+    quizId: string,
+    quizType: string,
+    numberOfQuestions: number,
+  ) => {
     const queryParams = new URLSearchParams(window.location.search);
     const courseTitle = queryParams.get('title'); // Get 'title' from query params
     const studentEmail = userData.email;
     try {
       // Step 1: Get the student's progress from the backend using fetch
       const response = await fetch(
-        `/progress/getProgress/${courseTitle}/${studentEmail}`,
+        `http://localhost:3000/progress/getProgress/${courseTitle}/${studentEmail}`,
       );
       const data = await response.json();
 
@@ -195,80 +220,87 @@ const CourseContent: React.FC = () => {
       }
 
       const score = data.score; // Assuming the score is in the response
+      // Step 3: Create quiz by calling the backend API
+      const quizResponse = await fetch('http://localhost:3000/quizzes/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          instructorEmail: 'omar.hossam3@gmail.com', // Replace with the actual instructor's email
+          quizId: quizId, // Dynamic quiz ID based on course title
+          quizType: quizType, // Set based on score
+          numberOfQuestions: numberOfQuestions, // Example number of questions
+          studentEmail: studentEmail, // Student email
+          courseTitle: courseTitle, // Course title
+        }),
+      });
 
-      // Step 2: Decide the difficulty level based on the score
-      if (score < 5) {
-        // Call the API to set the level to 'low' and get the mid questions
-        const difficultyResponse = await fetch('/api/setDifficulty', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            courseTitle,
-            studentEmail,
-            level: 'low', // Set the difficulty level
-          }),
-        });
-        const difficultyData = await difficultyResponse.json();
-        if (!difficultyResponse.ok) {
-          throw new Error(difficultyData.message || 'Error setting difficulty');
-        }
-        if (courseTitle)
-          router.push(
-            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=low`,
-          );
-        else throw new Error('No Course Title Provided');
-      } else if (score >= 5 && score <= 7) {
-        // Call the API to set the level to 'medium' and get a combination of mid questions
-        const difficultyResponse = await fetch('/api/setDifficulty', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            courseTitle,
-            studentEmail,
-            level: 'medium', // Set the difficulty level
-          }),
-        });
-        const difficultyData = await difficultyResponse.json();
-        if (!difficultyResponse.ok) {
-          throw new Error(difficultyData.message || 'Error setting difficulty');
-        }
-        if (courseTitle)
-          router.push(
-            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=medium`,
-          );
-        else throw new Error('No Course Title Provided');
-      } else {
-        // Call the API to set the level to 'high' and get the hard questions
-        const difficultyResponse = await fetch('/api/setDifficulty', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            courseTitle,
-            studentEmail,
-            level: 'high', // Set the difficulty level
-          }),
-        });
-        const difficultyData = await difficultyResponse.json();
-        if (!difficultyResponse.ok) {
-          throw new Error(difficultyData.message || 'Error setting difficulty');
-        }
-        if (courseTitle)
-          router.push(
-            `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&id=quiz01&level=low`,
-          );
-        else throw new Error('No Course Title Provided');
+      const quizData = await quizResponse.json();
+
+      if (!quizResponse.ok) {
+        setError(quizData.message);
+        throw new Error(quizData.message || 'Error creating quiz');
       }
+
+      // Step 4: Handle the successful quiz creation (e.g., redirect to the quiz page)
+      console.log('Quiz : ', quizData);
+      console.log('Quiz_Id :', quizData.data.quiz_id);
+      if (courseTitle)
+        window.location.href = `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&quiz_id=${quizData.data.quiz_id}`;
+      else throw new Error('Course Not Found');
     } catch (error) {
-      console.error(
-        'Error fetching student progress or updating difficulty level:',
-        error,
+      //console.error('An error occurred:', error);
+      //alert(`An error occurred while processing your request: ${error}`);
+    }
+  };
+  const HandleStartMid = async () => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const courseTitle = queryParams.get('title'); // Get 'title' from query params
+    const studentEmail = userData.email;
+    try {
+      // Step 1: Get the student's progress from the backend using fetch
+      const response = await fetch(
+        `http://localhost:3000/progress/getProgress/${courseTitle}/${studentEmail}`,
       );
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Error fetching progress data');
+      }
+
+      const score = data.score; // Assuming the score is in the response
+      // Step 3: Create quiz by calling the backend API
+      const quizResponse = await fetch('http://localhost:3000/quizzes/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          instructorEmail: 'omar.hossam3@gmail.com', // Replace with the actual instructor's email
+          quizId: `midterm`, // Dynamic quiz ID based on course title
+          quizType: 'Midterm', // Set based on score
+          numberOfQuestions: 15, // Example number of questions
+          studentEmail: studentEmail, // Student email
+          courseTitle: courseTitle, // Course title
+        }),
+      });
+
+      const quizData = await quizResponse.json();
+
+      if (!quizResponse.ok) {
+        throw new Error(quizData.message || 'Error creating quiz');
+      }
+
+      // Step 4: Handle the successful quiz creation (e.g., redirect to the quiz page)
+      console.log('Quiz : ', quizData);
+      console.log('Quiz_Id :', quizData.data.quiz_id);
+      if (courseTitle)
+        window.location.href = `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&quiz_id=${quizData.data.quiz_id}`;
+      else throw new Error('Course Not Found');
+    } catch (error) {
+      console.error('An error occurred:', error);
+      //alert(`An error occurred while processing your request: ${error}`);
     }
   };
   return (
@@ -424,51 +456,97 @@ const CourseContent: React.FC = () => {
                 <div className="main-content">
                   <h4>Quiz</h4>
                   <p>Start your quiz that will show us your level</p>
+
+                  {/* Error message */}
                   <div className="main-button">
-                    <a onClick={() => HandleStartQuiz(courseinfo[0].name)}>
+                    <a onClick={() => HandleStartExam('quiz01', 'Small', 10)}>
                       Start Now
                     </a>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="col-lg-4 col-md-6">
-              <div className="service-item">
-                <div className="circle-image">
-                  <img src="/assets/images/midterm.jpg" alt="online degrees" />
-                </div>
-                <div className="main-content">
-                  <h4>Midterm</h4>
-                  <p>
-                    The midterm exam tests your understanding of the first half
-                    of the course. Make sure to review key topics and practice
-                    in preparation.
-                  </p>
-
-                  <div className="main-button">
-                    <a href="#">Start Midterm</a>
+            {userData && userData.HaveEnteredQuiz && (
+              <div className="col-lg-4 col-md-6">
+                <div className="service-item">
+                  <div className="circle-image">
+                    <img
+                      src="/assets/images/midterm.jpg"
+                      alt="online degrees"
+                    />
+                  </div>
+                  <div className="main-content">
+                    <h4>Midterm</h4>
+                    <p>
+                      The midterm exam tests your understanding of the first
+                      half of the course. Make sure to review key topics and
+                      practice in preparation.
+                    </p>
+                    <div className="main-button">
+                      <a
+                        onClick={() =>
+                          HandleStartExam('midterm', 'Midterm', 15)
+                        }
+                      >
+                        Start Midterm
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-lg-4 col-md-6">
-              <div className="service-item">
-                <div className="circle-image">
-                  <img src="/assets/images/final.jpg" alt="online degrees" />
-                </div>
-                <div className="main-content">
-                  <h4>Final</h4>
-                  <p>
-                    The final exam will cover all course material. Be sure to
-                    review everything to perform your best.
-                  </p>
-                  <div className="main-button">
-                    <a href="#">Start Final</a>
+            )}
+            {userData && userData.HaveEnteredMid && (
+              <div className="col-lg-4 col-md-6">
+                <div className="service-item">
+                  <div className="circle-image">
+                    <img src="/assets/images/final.jpg" alt="online degrees" />
+                  </div>
+                  <div className="main-content">
+                    <h4>Final</h4>
+                    <p>
+                      The final exam will cover all course material. Be sure to
+                      review everything to perform your best.
+                    </p>
+                    <div className="main-button">
+                      <a href="#">Start Final</a>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
+          {error && (
+            <div className="error">
+              <div className="error__icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={24}
+                  viewBox="0 0 24 24"
+                  height={24}
+                  fill="none"
+                >
+                  <path
+                    fill="#393a37"
+                    d="m13 13h-2v-6h2zm0 4h-2v-2h2zm-1-15c-1.3132 0-2.61358.25866-3.82683.7612-1.21326.50255-2.31565 1.23915-3.24424 2.16773-1.87536 1.87537-2.92893 4.41891-2.92893 7.07107 0 2.6522 1.05357 5.1957 2.92893 7.0711.92859.9286 2.03098 1.6651 3.24424 2.1677 1.21325.5025 2.51363.7612 3.82683.7612 2.6522 0 5.1957-1.0536 7.0711-2.9289 1.8753-1.8754 2.9289-4.4189 2.9289-7.0711 0-1.3132-.2587-2.61358-.7612-3.82683-.5026-1.21326-1.2391-2.31565-2.1677-3.24424-.9286-.92858-2.031-1.66518-3.2443-2.16773-1.2132-.50254-2.5136-.7612-3.8268-.7612z"
+                  />
+                </svg>
+              </div>
+              <div className="error__title">{error}</div>
+              <div className="error__close">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width={20}
+                  viewBox="0 0 20 20"
+                  height={20}
+                >
+                  <path
+                    fill="#393a37"
+                    d="m15.8333 5.34166-1.175-1.175-4.6583 4.65834-4.65833-4.65834-1.175 1.175 4.65833 4.65834-4.65833 4.6583 1.175 1.175 4.65833-4.6583 4.6583 4.6583 1.175-1.175-4.6583-4.6583z"
+                  />
+                </svg>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

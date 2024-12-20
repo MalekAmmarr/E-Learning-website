@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
+import React from 'react';
 
 export interface Instructor {
   _id: string;
@@ -19,25 +20,73 @@ export interface Instructor {
   __v: number; // MongoDB version field (not typically required in app logic)
 }
 
+interface Course {
+  title: string;
+  category: string;
+  price: number;
+  image: string;
+  instructor_name: string;
+}
+
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
+  const [activeCategory, setActiveCategory] = React.useState('All');
+  const [Teach_Courses, setTeachCourses] = useState<Course[]>([]);
   const router = useRouter();
 
   useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        // Fetch instructor data and set the instructor state
+        const accessToken = localStorage.getItem('Ins_Token');
+        const storedInstructor = localStorage.getItem('instructorData');
+        if (storedInstructor) {
+          const parsedInstructor = JSON.parse(storedInstructor);
+          setInstructor(parsedInstructor);
+          const response = await fetch(
+            `http://localhost:3000/instructor/courses?email=${parsedInstructor?.email}`,
+          ); // Replace with your API endpoint
+          if (response.ok) {
+            const data = await response.json();
+            console.log('API Response:', data); // Log the response
+            setTeachCourses(data); // Set the fetched courses into the state
+          } else {
+            console.error('Failed to fetch courses');
+          }
+          // Set userData state only if data exists
+        } else {
+          router.push('/Ins_login');
+        }
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    };
+
+    fetchCourses(); // Call the fetchCourses function
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    const accessToken = localStorage.getItem('Ins_Token');
-    const Instructor = localStorage.getItem('instructorData');
-    if (Instructor) {
-      if (accessToken) {
-        setInstructor(JSON.parse(Instructor));
-      } // Set userData state only if data exists}
-    } else {
-      router.push('/Ins_login');
-    }
-  }, []);
+  }, [router]);
+
+  const filteredAcceptedCourses =
+    activeCategory === 'All'
+      ? Teach_Courses
+      : Teach_Courses.filter(
+          (Teach_Courses) => Teach_Courses.category === activeCategory,
+        );
+
+  const handleCourseTitleClick = (title: string) => {
+    router.push(
+      `/Ins_Home/selected_course?title=${encodeURIComponent(title)}`,
+    );
+  };
+
+
+  const handleCreateCourse = () => {
+    router.push('/Ins_Home/create-course');
+  };
+
   return (
     <>
       <meta charSet="utf-8" />
@@ -238,10 +287,10 @@ export default function Home() {
                   />
                 </div>
                 <div className="main-content">
-                  <h4>Add Content</h4>
-                  <p>You can add content to the courses you teach FromHere</p>
+                  <h4>Give Certificates</h4>
+                  <p>You can give Certificates for the students with their final grade from here</p>
                   <div className="main-button">
-                    <a href="/Ins_Home/Add_content">Check</a>
+                    <a href="/Ins_Home/Certificates">Add</a>
                   </div>
                 </div>
               </div>
@@ -252,10 +301,10 @@ export default function Home() {
                   <img src="/assets/images/service-03.png" alt="web experts" />
                 </div>
                 <div className="main-content">
-                  <h4>Students grades</h4>
-                  <p>You can Add Grades of Quizes and Exams from Here.</p>
+                  <h4>Students feedbacks</h4>
+                  <p>You can give feedbacks for Quizes and Exams from Here.</p>
                   <div className="main-button">
-                    <a href="/Ins_Home/Put_grades">Put Grades</a>
+                    <a href="/Ins_Home/Put_grades">Give feedbacks</a>
                   </div>
                 </div>
               </div>
@@ -273,321 +322,95 @@ export default function Home() {
               </div>
             </div>
           </div>
+          {/* Course Categories Filter */}
           <ul className="event_filter">
             <li>
-              <a className="is_active" href="#!" data-filter="*">
+              <a
+                className={activeCategory === 'All' ? 'is_active' : ''}
+                href="#!"
+                onClick={() => setActiveCategory('All')}
+              >
                 Show All
               </a>
             </li>
             <li>
-              <a href="#!" data-filter=".design">
-                Webdesign
+              <a
+                className={activeCategory === 'Data Science' ? 'is_active' : ''}
+                href="#!"
+                onClick={() => setActiveCategory('Data Science')}
+              >
+                Data Science
               </a>
             </li>
             <li>
-              <a href="#!" data-filter=".development">
-                Development
+              <a
+                className={activeCategory === 'Programming' ? 'is_active' : ''}
+                href="#!"
+                onClick={() => setActiveCategory('Programming')}
+              >
+                Programming
               </a>
             </li>
             <li>
-              <a href="#!" data-filter=".wordpress">
-                Wordpress
+              <a
+                className={activeCategory === 'English' ? 'is_active' : ''}
+                href="#!"
+                onClick={() => setActiveCategory('English')}
+              >
+                English
               </a>
             </li>
           </ul>
-          <div className="row event_box">
-            <div className="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 design">
-              <div className="events_item">
-                <div className="thumb">
-                  <a href="#">
-                    <img src="/assets/images/course-01.jpg" alt="" />
-                  </a>
-                  <span className="category">Webdesign</span>
-                  <span className="price">
-                    <h6>
-                      <em>$</em>160
-                    </h6>
-                  </span>
-                </div>
-                <div className="down-content">
-                  <span className="author">Stella Blair</span>
-                  <h4>Learn Web Design</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6  development">
-              <div className="events_item">
-                <div className="thumb">
-                  <a href="#">
-                    <img src="/assets/images/course-02.jpg" alt="" />
-                  </a>
-                  <span className="category">Development</span>
-                  <span className="price">
-                    <h6>
-                      <em>$</em>340
-                    </h6>
-                  </span>
-                </div>
-                <div className="down-content">
-                  <span className="author">Cindy Walker</span>
-                  <h4>Web Development Tips</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 design wordpress">
-              <div className="events_item">
-                <div className="thumb">
-                  <a href="#">
-                    <img src="/assets/images/course-03.jpg" alt="" />
-                  </a>
-                  <span className="category">Wordpress</span>
-                  <span className="price">
-                    <h6>
-                      <em>$</em>640
-                    </h6>
-                  </span>
-                </div>
-                <div className="down-content">
-                  <span className="author">David Hutson</span>
-                  <h4>Latest Web Trends</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 development">
-              <div className="events_item">
-                <div className="thumb">
-                  <a href="#">
-                    <img src="/assets/images/course-04.jpg" alt="" />
-                  </a>
-                  <span className="category">Development</span>
-                  <span className="price">
-                    <h6>
-                      <em>$</em>450
-                    </h6>
-                  </span>
-                </div>
-                <div className="down-content">
-                  <span className="author">Stella Blair</span>
-                  <h4>Online Learning Steps</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 wordpress development">
-              <div className="events_item">
-                <div className="thumb">
-                  <a href="#">
-                    <img src="/assets/images/course-05.jpg" alt="" />
-                  </a>
-                  <span className="category">Wordpress</span>
-                  <span className="price">
-                    <h6>
-                      <em>$</em>320
-                    </h6>
-                  </span>
-                </div>
-                <div className="down-content">
-                  <span className="author">Sophia Rose</span>
-                  <h4>Be a WordPress Master</h4>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4 col-md-6 align-self-center mb-30 event_outer col-md-6 wordpress design">
-              <div className="events_item">
-                <div className="thumb">
-                  <a href="#">
-                    <img src="/assets/images/course-06.jpg" alt="" />
-                  </a>
-                  <span className="category">Webdesign</span>
-                  <span className="price">
-                    <h6>
-                      <em>$</em>240
-                    </h6>
-                  </span>
-                </div>
-                <div className="down-content">
-                  <span className="author">David Hutson</span>
-                  <h4>Full Stack Developer</h4>
-                </div>
-              </div>
-            </div>
-          </div>
+
+          {/*wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww*/}
         </div>
       </section>
-      <div className="section fun-facts">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-12">
-              <div className="wrapper">
-                <div className="row">
-                  <div className="col-lg-3 col-md-6">
-                    <div className="counter">
-                      <h2
-                        className="timer count-title count-number"
-                        data-to={150}
-                        data-speed={1000}
-                      />
-                      <p className="count-text ">Happy Students</p>
-                    </div>
-                  </div>
-                  <div className="col-lg-3 col-md-6">
-                    <div className="counter">
-                      <h2
-                        className="timer count-title count-number"
-                        data-to={804}
-                        data-speed={1000}
-                      />
-                      <p className="count-text ">Course Hours</p>
-                    </div>
-                  </div>
-                  <div className="col-lg-3 col-md-6">
-                    <div className="counter">
-                      <h2
-                        className="timer count-title count-number"
-                        data-to={50}
-                        data-speed={1000}
-                      />
-                      <p className="count-text ">Employed Students</p>
-                    </div>
-                  </div>
-                  <div className="col-lg-3 col-md-6">
-                    <div className="counter end">
-                      <h2
-                        className="timer count-title count-number"
-                        data-to={15}
-                        data-speed={1000}
-                      />
-                      <p className="count-text ">Years Experience</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* Display filtered courses or message */}
+      <div className="main-content">
+      <section className="section courses" id="courses">
+  <div className="container">
+    {/* Course Categories Filter */}
+    <ul className="event_filter">
+      {filteredAcceptedCourses.map((course) => (
+        <li key={course.title} onClick={() => handleCourseTitleClick(course.title)}>
+          <div className="course-card">
+            <Image src={course.image} alt={course.title} width={300} height={200} />
+            <h3>{course.title}</h3>
+            <p>Instructor: {course.instructor_name}</p>
+            <p>Price: ${course.price}</p>
+            <p>Category: {course.category}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+<div className="row">
+          <div className="col-lg-12 text-center">
+            <button className="btn btn-primary" onClick={handleCreateCourse}>
+              Create Course
+            </button>
           </div>
         </div>
+
+
+
+  <footer className="footer-spacing">
+    <div className="container">
+      <div className="col-lg-12">
+        <p>
+          Copyright © Omar Hossam. All rights reserved To Intifada Team
+          &nbsp;&nbsp;&nbsp; Design:{' '}
+          <a href="https://templatemo.com" rel="nofollow" target="_blank">
+            Hossam & Behziouni
+          </a>
+        </p>
       </div>
-      <div className="team section" id="team">
-        <div className="container">
-          <div className="row">
-            <div className="col-lg-3 col-md-6">
-              <div className="team-member">
-                <div className="main-content">
-                  <img src="/assets/images/member-01.jpg" alt="" />
-                  <span className="category">UX Teacher</span>
-                  <h4>Sophia Rose</h4>
-                  <ul className="social-icons">
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-facebook" />
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-twitter" />
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-linkedin" />
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-              <div className="team-member">
-                <div className="main-content">
-                  <img src="/assets/images/member-02.jpg" alt="" />
-                  <span className="category">Graphic Teacher</span>
-                  <h4>Cindy Walker</h4>
-                  <ul className="social-icons">
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-facebook" />
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-twitter" />
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-linkedin" />
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-              <div className="team-member">
-                <div className="main-content">
-                  <img src="/assets/images/member-03.jpg" alt="" />
-                  <span className="category">Full Stack Master</span>
-                  <h4>David Hutson</h4>
-                  <ul className="social-icons">
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-facebook" />
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-twitter" />
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-linkedin" />
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-3 col-md-6">
-              <div className="team-member">
-                <div className="main-content">
-                  <img src="/assets/images/member-04.jpg" alt="" />
-                  <span className="category">Digital Animator</span>
-                  <h4>Stella Blair</h4>
-                  <ul className="social-icons">
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-facebook" />
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-twitter" />
-                      </a>
-                    </li>
-                    <li>
-                      <a href="#">
-                        <i className="fab fa-linkedin" />
-                      </a>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <footer>
-        <div className="container">
-          <div className="col-lg-12">
-            <p>
-              Copyright © Omar Hossam. All rights reserved To Intifada Team
-              &nbsp;&nbsp;&nbsp; Design:{' '}
-              <a href="https://templatemo.com" rel="nofollow" target="_blank">
-                Hossam & Behziouni
-              </a>
-            </p>
-          </div>
-        </div>
-      </footer>
+    </div>
+  </footer>
+</div>
+
+
       {/* Scripts */}
       {/* Bootstrap core JavaScript */}
       {/* Add the jQuery script */}

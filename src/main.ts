@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import * as path from 'path';
 dotenv.config();
 
 async function bootstrap() {
@@ -14,6 +16,7 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization', // specify the headers you expect from the frontend
     credentials: true, // Allow sending cookies or authorization headers
   });
+
 
   await app.listen(process.env.PORT ?? 3000);
 
