@@ -33,6 +33,29 @@ const StudentListPage: React.FC = () => {
     fetchStudents();
   }, []);
 
+  const handleDelete = async (email: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/admins/students/deleteByEmail/${email}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete student. Status: ${response.status}`);
+      }
+
+      // Remove the deleted student from the UI
+      setStudents((prevStudents) =>
+        prevStudents.filter((student) => student.email !== email)
+      );
+    } catch (error: any) {
+      console.error('Error deleting student:', error);
+      setError(error.message || 'An unexpected error occurred while deleting');
+    }
+  };
+
   return (
     <div className="container">
       <h1>Student List</h1>
@@ -52,15 +75,16 @@ const StudentListPage: React.FC = () => {
                 <td>{student.name}</td>
                 <td>{student.email}</td>
                 <td className="actions">
-                  <Link href={`/students/edit/${student.email}`}>
+                  {/* Update Edit link */}
+                  <Link href={`/students/edit?email=${student.email}`}>
                     <FaEdit className="icon" /> Edit
                   </Link>
-                  <Link
-                    href={`/students/delete/${student.email}`}
+                  <button
                     className="delete"
+                    onClick={() => handleDelete(student.email)}
                   >
                     <FaTrash className="icon" /> Delete
-                  </Link>
+                  </button>
                 </td>
               </tr>
             ))
