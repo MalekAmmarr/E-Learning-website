@@ -1,130 +1,111 @@
-/* General Reset */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  /* Body Styling */
-  body {
-    font-family: 'Montserrat', sans-serif;
-    background-color: #f4f6f9;
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
-  
-  /* Certificate Container Styling */
-  #certificate {
-    width: 1000px; /* Increased width */
-    background-image: url('https://png.pngtree.com/png-vector/20221206/ourmid/pngtree-golden-blue-certificate-border-folio-f4-size-transparent-png-image_6514169.png');
-    background-size: cover;
-    padding: 40px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    position: relative;
-    background-color: white;
-  }
-  
-  /* Heading Styling */
-  h1 {
-    text-align: center;
-    font-size: 2.5rem;
-    color: #2a4d67;
-    margin-bottom: 20px;
-    font-family: 'Georgia', serif;
-  }
-  
-  h2 {
-    text-align: center;
-    font-size: 2rem;
-    color: #2a4d67;
-    margin-bottom: 10px;
-  }
-  
-  h3 {
-    text-align: center;
-    font-size: 1.5rem;
-    color: #4b6d8e;
-    margin-bottom: 15px;
-  }
-  
-  p {
-    text-align: center;
-    font-size: 1rem;
-    color: #4b6d8e;
-    margin-bottom: 10px;
-  }
-  
-  strong {
-    color: #f95959;
-  }
-  
-  /* Form Styling */
-  .field {
-    margin-bottom: 15px;
-    text-align: center;
-  }
-  
-  label {
-    display: block;
-    font-size: 1.1rem;
-    color: #4b6d8e;
-    margin-bottom: 5px;
-  }
-  
-  input {
-    width: 70%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 1rem;
-    color: #333;
-    margin-top: 5px;
-    text-align: center;
-  }
-  
-  input:focus {
-    border-color: #2a4d67;
-    outline: none;
-  }
-  
-  /* Button Styling */
-  .btn {
-    display: block;
-    width: 200px;
-    padding: 12px;
-    background-color: #2a4d67;
-    color: white;
-    font-size: 1.2rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin: 20px auto;
-    transition: background-color 0.3s ease;
-  }
-  
-  .btn:hover {
-    background-color: #1a3a50;
-  }
-  
-  /* Seal Icon Styling */
-  #seal {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    color: #b80257;
-    font-size: 3rem;
-    opacity: 0.1;
-  }
-  
-  /* QR Code Styling (optional if used) */
-  #qr-code {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-  }
-  
+/* page.css */
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f7f9fc;
+  color: #333;
+}
+
+#certificateForm {
+  width: 50%;
+  margin: 50px auto;
+  background-color: #fff;
+  padding: 20px 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+#certificateForm h1 {
+  text-align: center;
+  color: #003366;
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.field {
+  margin-bottom: 15px;
+}
+
+.field label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+.field input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  transition: border-color 0.3s;
+}
+
+.field input:focus {
+  border-color: #0073e6;
+  outline: none;
+}
+
+.btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  background-color: #0073e6;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn:hover {
+  background-color: #005bb5;
+}
+
+#generatedCertificate {
+  width: 800px;
+  margin: 50px auto;
+  background-color: #fff;
+  background-image: url('https://png.pngtree.com/png-vector/20221206/ourmid/pngtree-golden-blue-certificate-border-folio-f4-size-transparent-png-image_6514169.png');
+  background-size: cover;
+  background-position: center;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  padding: 60px 40px;
+  text-align: center;
+}
+
+#generatedCertificate h1 {
+  font-size: 36px;
+  color: #003366;
+  margin-bottom: 10px;
+}
+
+#generatedCertificate p {
+  font-size: 18px;
+  color: #333;
+  margin: 10px 0;
+}
+
+#generatedCertificate h2 {
+  font-size: 28px;
+  color: #005bb5;
+  margin: 10px 0;
+}
+
+#generatedCertificate h3 {
+  font-size: 22px;
+  color: #0073e6;
+  margin: 10px 0;
+}
+
+#generatedCertificate strong {
+  font-weight: bold;
+  color: #333;
+}

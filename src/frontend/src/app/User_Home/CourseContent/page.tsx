@@ -90,7 +90,7 @@ const CourseContent: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Add token if needed
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`, // Add token if needed
         },
         body: JSON.stringify({ courseTitle }),
       });
@@ -133,7 +133,7 @@ const CourseContent: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Include token if required
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`, // Include token if required
         },
         body: JSON.stringify(body),
       });
@@ -161,8 +161,8 @@ const CourseContent: React.FC = () => {
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    const accessToken = localStorage.getItem('authToken');
-    const user = localStorage.getItem('userData');
+    const accessToken = sessionStorage.getItem('authToken');
+    const user = sessionStorage.getItem('userData');
     if (user) {
       if (accessToken) {
         const parsedUser = JSON.parse(user);

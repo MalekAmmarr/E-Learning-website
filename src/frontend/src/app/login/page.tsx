@@ -29,9 +29,9 @@ const LoginPage = () => {
         // If the login is successful, redirect to the home page
         const data = await response.json();
         // Save the token (if needed)
-        localStorage.setItem('authToken', data.accessToken);
+        sessionStorage.setItem('authToken', data.accessToken);
         // Store the user data in sessionStorage to use on another page
-        localStorage.setItem('userData', JSON.stringify(data.user));
+        sessionStorage.setItem('userData', JSON.stringify(data.user));
         router.push('/User_Home');
       } else {
         // Handle login failure (e.g., wrong email or password)
