@@ -19,12 +19,6 @@ export class DiscussionService {
     return newThread.save();
   }
 
-  // Create a new reply to a thread
-  async createReply(threadId: string, content: string, createdBy: string) {
-    const newReply = new this.replyModel({ threadId, content, createdBy });
-    return newReply.save();
-  }
-
   // Get all threads for a course
   async getThreadsByCourse(courseId: string) {
     return this.threadModel.find({ courseId }).sort({ createdAt: -1 }).exec();
@@ -42,11 +36,40 @@ export class DiscussionService {
   // Save Announcement
   async saveAnnouncement(courseId: string, title: string, content: string, createdBy: string) {
     const announcement = new this.announcementModel({
+      courseId,
       title,
       content,
+      createdBy,
       createdAt: new Date(),
     });
     return announcement.save();
   }
+  async getAnnouncementsByCourse(courseId: string) {
+    return this.threadModel.find({ courseId }).sort({ createdAt: -1 }).exec();
+  }
+
+  async saveReply(courseId: string, threadId: string, content: string, createdBy: string) {
+    const reply = new this.replyModel({
+      courseId,
+      threadId,
+      content,
+      createdBy,
+      createdAt: new Date(),
+    });
+    return reply.save();
+  }
+  async saveThread(courseId: string, title: string, content: string, createdBy: string) {
+    const thread = new this.threadModel({
+      courseId,
+      title,
+      content,
+      createdBy,
+      createdAt: new Date(),
+    });
+    return thread.save();
+  }
+ 
+  
+    
  
 }

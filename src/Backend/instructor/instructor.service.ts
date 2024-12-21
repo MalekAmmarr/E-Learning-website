@@ -42,7 +42,8 @@ export class InstructorService {
     );
   }
   async findInstructorById(instructorId: string): Promise<Instructor | null> {
-    return this.InstructorModel.findById(instructorId).exec();
+    const instructor = await this.InstructorModel.findOne({ _id: instructorId }).exec();
+    return instructor;
   }
 
 
