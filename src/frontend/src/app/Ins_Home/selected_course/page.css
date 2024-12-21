@@ -36,6 +36,8 @@ body {
   margin-bottom: 20px;
   text-align: center;
   font-family: 'Georgia', serif;
+  word-wrap: break-word; /* Ensures that long titles will wrap into the next line */
+  line-height: 1.4; /* Adjusts line height for better readability */
 }
 
 /* Meta Information Section */
@@ -161,7 +163,8 @@ body {
 }
 
 /* Loading and Error Messages */
-.loading, .error {
+.loading,
+.error {
   color: #f95959;
   text-align: center;
   font-size: 1.2rem;
@@ -176,10 +179,10 @@ body {
   }
 
   .course-title {
-    font-size: 2rem;
+    font-size: 2rem; /* Adjusts course title size for smaller screens */
   }
 
   .action-button {
-    font-size: 1rem;
+    font-size: 1rem; /* Adjusts action button size */
   }
 }

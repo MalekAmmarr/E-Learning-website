@@ -14,7 +14,9 @@ const AddCourseContentPage = () => {
   const [instructorEmail, setInstructorEmail] = useState<string>('');
 
   // Decode and validate course title from params
-  const courseTitle = Array.isArray(params.title) ? params.title[0] : params.title;
+  const courseTitle = Array.isArray(params.title)
+    ? params.title[0]
+    : params.title;
   if (!courseTitle) {
     throw new Error('Invalid course title');
   }
@@ -53,7 +55,7 @@ const AddCourseContentPage = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ newContent: [newContent] }), // Wrap content in an array
-        }
+        },
       );
 
       if (!response.ok) {
@@ -63,12 +65,10 @@ const AddCourseContentPage = () => {
       setSuccess('Content added successfully!');
       setNewContent(''); // Clear input
 
-      // Redirect after successful submission
-      setTimeout(() => {
-        router.push(`/Ins_Home/selected_course/${encodeURIComponent(decodedTitle)}`);
-      }, 1500);
+      router.refresh();
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'An unknown error occurred';
       setError(errorMessage);
     }
   };
@@ -88,7 +88,9 @@ const AddCourseContentPage = () => {
             className="input"
           />
         </label>
-        <button type="submit" className="submit-btn">Add Content</button>
+        <button type="submit" className="submit-btn">
+          Add Content
+        </button>
       </form>
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}

@@ -235,18 +235,13 @@ export class InstructorController {
     return course;
   }
 
-
   @Get(':email/students-progress')
   async getStudentsAndProgressByEmail(@Param('email') email: string) {
     return this.instructorService.getStudentsBycourses(email);
   }
 
-
-@Get('students/:email/progress')
-async getStudentProgress(@Param('email') studentEmail: string) {
-  return this.instructorService.getStudentProgressByEmail(studentEmail);
-}
-
-
-
+  @Get('students/:email/progress')
+  async getStudentProgress(@Param('email') studentEmail: string) {
+    return this.instructorService.getStudentProgressByEmail(studentEmail);
+  }
 }

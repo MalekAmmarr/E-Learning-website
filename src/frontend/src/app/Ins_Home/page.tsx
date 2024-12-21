@@ -43,7 +43,7 @@ export default function Home() {
         const accessToken = sessionStorage.getItem('Ins_Token'); // Updated to match token naming convention
         const storedInstructor = sessionStorage.getItem('instructorData'); // Updated to match instructor data storage key
         console.log('Access Token:', accessToken);
-        
+
         if (storedInstructor && accessToken) {
           const parsedInstructor = JSON.parse(storedInstructor);
           setInsData(parsedInstructor);
@@ -51,7 +51,6 @@ export default function Home() {
           console.log('Access Token:', accessToken);
           console.log('Instructor Email:', parsedInstructor?.email);
 
-  
           // Fetch courses for the instructor using the email
           const response = await fetch(
             `http://localhost:3000/instructor/courses?email=${parsedInstructor?.email}`,
@@ -61,9 +60,9 @@ export default function Home() {
                 Authorization: `Bearer ${accessToken}`, // Add the token to the Authorization header
                 'Content-Type': 'application/json',
               },
-            }
+            },
           );
-  
+
           if (response.ok) {
             const data = await response.json(); // Parse the response body only once
             console.log('API Response:', data); // Log the parsed response
@@ -80,7 +79,7 @@ export default function Home() {
         console.error('Error fetching courses:', error);
       }
     };
-  
+
     fetchCourses(); // Call the fetchCourses function
     setTimeout(() => {
       setIsLoading(false);
@@ -95,11 +94,8 @@ export default function Home() {
         );
 
   const handleCourseTitleClick = (title: string) => {
-    router.push(
-      `/Ins_Home/selected_course?title=${encodeURIComponent(title)}`,
-    );
+    router.push(`/Ins_Home/selected_course?title=${encodeURIComponent(title)}`);
   };
-
 
   const handleCreateCourse = () => {
     router.push('/Ins_Home/create-course');
@@ -187,7 +183,7 @@ export default function Home() {
                     <a href="#courses">Courses</a>
                   </li>
                   <li>
-                  <Link href="/Ins_Home/Profile">
+                    <Link href="/Ins_Home/Profile">
                       {insdata?.profilePictureUrl ? (
                         <img
                           src={`http://localhost:3000/files/${insdata.profilePictureUrl}`}
@@ -330,7 +326,10 @@ export default function Home() {
                 </div>
                 <div className="main-content">
                   <h4>Give Certificates</h4>
-                  <p>You can give Certificates for the students with their final grade from here</p>
+                  <p>
+                    You can give Certificates for the students with their final
+                    grade from here
+                  </p>
                   <div className="main-button">
                     <a href="/Ins_Home/Certificates">Add</a>
                   </div>
@@ -409,25 +408,27 @@ export default function Home() {
       </section>
       {/* Display filtered courses or message */}
       <div className="main-content">
-      <section className="section courses" id="courses">
-  <div className="container">
-    {/* Course Categories Filter */}
-    <ul className="event_filter">
-      {filteredAcceptedCourses.map((course) => (
-        <li key={course.title} onClick={() => handleCourseTitleClick(course.title)}>
-          <div className="course-card">
-            <Image src={course.image} alt={course.title} width={300} height={200} />
-            <h3>{course.title}</h3>
-            <p>Instructor: {course.instructor_name}</p>
-            <p>Price: ${course.price}</p>
-            <p>Category: {course.category}</p>
+        <section className="section courses" id="courses">
+          <div className="container">
+            {/* Course Categories Filter */}
+            <ul className="event_filter">
+              {filteredAcceptedCourses.map((course) => (
+                <li
+                  key={course.title}
+                  onClick={() => handleCourseTitleClick(course.title)}
+                >
+                  <div className="course-card">
+                    <h3>{course.title}</h3>
+                    <p>Instructor: {course.instructor_name}</p>
+                    <p>Price: ${course.price}</p>
+                    <p>Category: {course.category}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
-        </li>
-      ))}
-    </ul>
-  </div>
-</section>
-<div className="row">
+        </section>
+        <div className="row">
           <div className="col-lg-12 text-center">
             <button className="btn btn-primary" onClick={handleCreateCourse}>
               Create Course
@@ -435,23 +436,20 @@ export default function Home() {
           </div>
         </div>
 
-
-
-  <footer className="footer-spacing">
-    <div className="container">
-      <div className="col-lg-12">
-        <p>
-          Copyright © Omar Hossam. All rights reserved To Intifada Team
-          &nbsp;&nbsp;&nbsp; Design:{' '}
-          <a href="https://templatemo.com" rel="nofollow" target="_blank">
-            Hossam & Behziouni
-          </a>
-        </p>
+        <footer className="footer-spacing">
+          <div className="container">
+            <div className="col-lg-12">
+              <p>
+                Copyright © Omar Hossam. All rights reserved To Intifada Team
+                &nbsp;&nbsp;&nbsp; Design:{' '}
+                <a href="https://templatemo.com" rel="nofollow" target="_blank">
+                  Hossam & Behziouni
+                </a>
+              </p>
+            </div>
+          </div>
+        </footer>
       </div>
-    </div>
-  </footer>
-</div>
-
 
       {/* Scripts */}
       {/* Bootstrap core JavaScript */}

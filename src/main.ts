@@ -4,10 +4,14 @@ import mongoose from 'mongoose';
 import * as dotenv from 'dotenv';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
+import * as bodyParser from 'body-parser';
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Increase payload size limit
+  app.use(bodyParser.json({ limit: '10mb' })); // Adjust the size as needed
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
   // Enable CORS with specific configuration
   app.enableCors({
@@ -16,7 +20,6 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization', // specify the headers you expect from the frontend
     credentials: true, // Allow sending cookies or authorization headers
   });
-
 
   await app.listen(process.env.PORT ?? 3000);
 

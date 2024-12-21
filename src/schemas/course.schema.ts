@@ -42,10 +42,10 @@ export class Course extends Document {
 
   // Add price and image properties
   @Prop({ required: true })
-  price: number;  // Price of the course
+  price: number; // Price of the course
 
   @Prop({ required: true })
-  image: string;  // URL or path to the course image
+  image: string; // URL or path to the course image
 }
 
 export const CourseSchema = SchemaFactory.createForClass(Course);
