@@ -38,7 +38,7 @@ import { ChatModule } from './Backend/chat/chat.module';
       },
     ),
     ServeStaticModule.forRoot({
-      rootPath: join('C:', 'Users', 'Omar Hossam', 'Downloads'), // Folder where PDFs are stored
+      rootPath: join('D:', 'ahmed', 'Downloads', 'files'), // Folder where PDFs are stored
       serveRoot: '/files', // URL path prefix for accessing the PDFs
     }),
     UsersModule,

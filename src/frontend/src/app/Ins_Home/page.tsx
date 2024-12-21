@@ -31,7 +31,7 @@ interface Course {
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
-  const [instructor, setInstructor] = useState<Instructor | null>(null);
+  const [insdata, setInsData] = useState<any>(null);
   const [activeCategory, setActiveCategory] = React.useState('All');
   const [Teach_Courses, setTeachCourses] = useState<Course[]>([]);
   const router = useRouter();
@@ -39,31 +39,48 @@ export default function Home() {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        // Fetch instructor data and set the instructor state
-        const accessToken = localStorage.getItem('Ins_Token');
-        const storedInstructor = localStorage.getItem('instructorData');
-        if (storedInstructor) {
+        // Retrieve the access token and instructor data from session storage
+        const accessToken = sessionStorage.getItem('Ins_Token'); // Updated to match token naming convention
+        const storedInstructor = sessionStorage.getItem('instructorData'); // Updated to match instructor data storage key
+        console.log('Access Token:', accessToken);
+        
+        if (storedInstructor && accessToken) {
           const parsedInstructor = JSON.parse(storedInstructor);
-          setInstructor(parsedInstructor);
+          setInsData(parsedInstructor);
+
+          console.log('Access Token:', accessToken);
+          console.log('Instructor Email:', parsedInstructor?.email);
+
+  
+          // Fetch courses for the instructor using the email
           const response = await fetch(
             `http://localhost:3000/instructor/courses?email=${parsedInstructor?.email}`,
-          ); // Replace with your API endpoint
+            {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${accessToken}`, // Add the token to the Authorization header
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+  
           if (response.ok) {
-            const data = await response.json();
-            console.log('API Response:', data); // Log the response
+            const data = await response.json(); // Parse the response body only once
+            console.log('API Response:', data); // Log the parsed response
             setTeachCourses(data); // Set the fetched courses into the state
           } else {
-            console.error('Failed to fetch courses');
+            const errorText = await response.text(); // Log the error body (not JSON parsing again)
+            console.error('Failed to fetch courses:', errorText);
           }
-          // Set userData state only if data exists
         } else {
+          // Redirect to login if instructor data or token is missing
           router.push('/Ins_login');
         }
       } catch (error) {
         console.error('Error fetching courses:', error);
       }
     };
-
+  
     fetchCourses(); // Call the fetchCourses function
     setTimeout(() => {
       setIsLoading(false);
@@ -171,9 +188,9 @@ export default function Home() {
                   </li>
                   <li>
                   <Link href="/Ins_Home/Profile">
-                      {instructor?.profilePictureUrl ? (
+                      {insdata?.profilePictureUrl ? (
                         <img
-                          src={`http://localhost:3000/files/${instructor.profilePictureUrl}`}
+                          src={`http://localhost:3000/files/${insdata.profilePictureUrl}`}
                           alt="Profile"
                           style={{
                             width: '90px',
