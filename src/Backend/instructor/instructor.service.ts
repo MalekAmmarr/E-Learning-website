@@ -143,22 +143,27 @@ export class InstructorService {
       throw new Error('Instructor not found');
     }
   
-    // Step 2: Create the course with instructor's email and data
+    // Step 2: Add the base URL for the course image
+    const imageUrl = `http://localhost:3000/files/${createCourseDto.image}`;
+  
+    // Step 3: Create the course with instructor's email and data
     const newCourse = new this.courseModel({
       ...createCourseDto, // All course data except instructor email
       instructormail: instructor.email, // Link course to instructor via email
       instructorName: instructor.name, // Optional: Add instructor's name to course
+      image: imageUrl, // Set the full image URL
     });
   
-    // Step 3: Save the course to the database
+    // Step 4: Save the course to the database
     const savedCourse = await newCourse.save();
   
-    // Step 4: Add the new course to the instructor's Teach_Courses array
+    // Step 5: Add the new course to the instructor's Teach_Courses array
     instructor.Teach_Courses.push(savedCourse.title); // You can use the course title or ID here
     await instructor.save(); // Save the updated instructor document
   
     return savedCourse;
   }
+  
   
 
   // Method to update a course, excluding the courseContent array

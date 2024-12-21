@@ -1,22 +1,52 @@
 'use client';
 import React from "react";
+import html2canvas from "html2canvas"; // Library to capture screenshot
 import "./page.css";
 
 const Page: React.FC = () => {
-  const generateCertificate = () => {
+
+  // Function to compress the captured image
+  const compressImage = (canvas: HTMLCanvasElement) => {
+    return new Promise<string>((resolve) => {
+      const compressedCanvas = document.createElement("canvas");
+      const context = compressedCanvas.getContext("2d");
+
+      if (!context) {
+        throw new Error("Failed to get 2D context");
+      }
+
+      const maxWidth = 800; // Adjust the size here
+      const maxHeight = 600;
+
+      const img = new Image();
+      img.onload = () => {
+        const ratio = Math.min(maxWidth / img.width, maxHeight / img.height);
+        compressedCanvas.width = img.width * ratio;
+        compressedCanvas.height = img.height * ratio;
+        context.drawImage(img, 0, 0, compressedCanvas.width, compressedCanvas.height);
+        
+        // Resolve with the base64 string for the compressed image
+        resolve(compressedCanvas.toDataURL("image/jpeg", 0.8)); // Compress to 80% quality
+      };
+      img.src = canvas.toDataURL("image/jpeg"); // Create base64 image
+    });
+  };
+
+  const generateCertificate = async () => {
     const institute = (document.getElementById("institute") as HTMLInputElement).value;
     const participant = (document.getElementById("participant") as HTMLInputElement).value;
     const grade = (document.getElementById("grade") as HTMLInputElement).value;
     const course = (document.getElementById("course") as HTMLInputElement).value;
     const certificateNumber = Math.floor(Math.random() * 1000000);
 
+    // Certificate content
     const certificateContent = `
       <h1>Certificate of Achievement</h1>
       <p>This is to certify that</p>
       <h2>${participant}</h2>
       <p>has successfully completed the course</p>
       <h3>${course}</h3>
-      <p>at</p>
+      <p>with prof: </p>
       <h3>${institute}</h3>
       <p>with a grade of <strong>${grade}</strong></p>
       <p>Given this day, ${new Date().toLocaleDateString()}</p>
@@ -24,69 +54,75 @@ const Page: React.FC = () => {
       <p>Best wishes for your future endeavors!</p>
     `;
 
-    const printWindow = window.open("", "_blank");
-    printWindow?.document.open();
-    printWindow?.document.write(`
-      <html>
-      <head>
-        <title>Certificate</title>
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-        <style>
-          body {
-            font-family: 'Montserrat', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: transparent;
-          }
-          #certificate {
-            width: 800px;
-            margin: 20px auto;
-            background-image: url('https://png.pngtree.com/png-vector/20221206/ourmid/pngtree-golden-blue-certificate-border-folio-f4-size-transparent-png-image_6514169.png');
-            background-size: cover;
-            padding: 100px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-          }
-          #certificate h1, h2, h3 {
-            text-align: center;
-            color: #b80257;
-          }
-          #certificate p {
-            text-align: center;
-            color: #233142;
-          }
-          #certificate strong {
-            color: #f95959;
-          }
-          #seal {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: #b80257;
-            font-size: 36px;
-          }
-          #qr-code {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-          }
-        </style>
-      </head>
-      <body>
-        <div id="certificate">${certificateContent}</div>
-        <div id="seal">
-          <i class="fas fa-seal"></i>
-        </div>
-      </body>
-      </html>
-    `);
-    printWindow?.document.close();
-    printWindow?.print();
+    // Create a certificate in a div for rendering
+    const certificateDiv = document.createElement("div");
+    certificateDiv.id = "generatedCertificate";
+    certificateDiv.innerHTML = certificateContent;
+    certificateDiv.style.cssText = `
+      width: 800px;
+      margin: 20px auto;
+      background-image: url('/assets/images/certificate-border.jpeg');
+      background-size: cover;
+      padding: 100px;
+      text-align: center;
+      font-family: 'Montserrat', sans-serif;
+    `;
+
+    // Append it to the body (hidden)
+    document.body.appendChild(certificateDiv);
+
+    // Capture the screenshot using html2canvas
+    const canvas = await html2canvas(certificateDiv, {
+      useCORS: true, // Enable cross-origin resource sharing for the background image
+    });
+
+    // Compress the image before sending it
+    const compressedImage = await compressImage(canvas);
+
+    // Remove the hidden certificate div after capturing the image
+    document.body.removeChild(certificateDiv);
+
+    // Extract base64 string (remove the "data:image/jpeg;base64," part)
+    const base64Image = compressedImage.split(',')[1]; // Get the base64 part without the data URI prefix
+    console.log("Base64 Image Data:", base64Image);  // Debugging log for base64 data
+
+    // Prepare data for the backend
+    const certificateData = {
+      name: participant,
+      courseTitle: course,
+      certificateImage: `data:image/jpeg;base64,${base64Image}`, // Send only the base64 string
+    };
+
+    // Send the data to the backend using fetch
+    try {
+      const response = await fetch("http://localhost:3000/certificate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json", // Sending JSON data
+        },
+        body: JSON.stringify(certificateData), // Send JSON payload with certificate data
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save certificate.");
+      }
+
+      alert("Certificate saved successfully!");
+    } catch (error) {
+      console.error("Error saving certificate:", error);
+      alert("Failed to save certificate.");
+    }
+
+    // Provide a download option for the user
+    const link = document.createElement("a");
+    link.href = compressedImage; // Use the compressed image for download
+    link.download = `${participant}_Certificate.jpeg`;
+    link.click();
   };
 
   return (
     <body>
-      <div id="certificate">
+      <div id="certificateForm">
         <h1>Certificate of Achievement</h1>
         <div className="field">
           <label htmlFor="institute">Institute Name:</label>
@@ -107,10 +143,6 @@ const Page: React.FC = () => {
         <button className="btn" onClick={generateCertificate}>
           Generate Certificate
         </button>
-      </div>
-
-      <div id="seal">
-        <i className="fas fa-seal"></i>
       </div>
     </body>
   );

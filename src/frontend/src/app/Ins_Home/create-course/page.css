@@ -1,90 +1,103 @@
-/* General Styles */
+/* page.css */
+
+/* General Body Styles */
 body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
-  }
-  
-  h2 {
-    text-align: center;
-    color: #4a90e2;
-    margin-bottom: 20px;
-  }
-  
-  /* Container */
-  .create-course-container {
-    max-width: 600px;
-    margin: 40px auto;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f6f9;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Container for the form */
+div {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Heading Styles */
+h1 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 30px;
+  font-size: 28px;
+}
+
+/* Form Styles */
+form {
+  display: grid;
+  gap: 15px;
+}
+
+/* Label Styles */
+label {
+  font-size: 16px;
+  color: #555;
+  font-weight: 500;
+}
+
+/* Input and Textarea Styles */
+input,
+textarea,
+select {
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input[type="file"] {
+  padding: 5px;
+}
+
+/* Button Styles */
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  div {
     padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
-  
-  /* Form Styles */
-  form {
-    display: flex;
-    flex-direction: column;
+
+  h1 {
+    font-size: 24px;
   }
-  
+
   label {
-    margin-bottom: 15px;
-    font-weight: bold;
-    color: #555;
+    font-size: 14px;
   }
-  
-  input[type="text"],
-  input[type="email"],
-  input[type="number"],
+
+  input,
   textarea,
   select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    box-sizing: border-box;
+    font-size: 14px;
   }
-  
-  textarea {
-    resize: vertical;
-    min-height: 80px;
-  }
-  
-  /* Button Styles */
+
   button {
-    background-color: #4a90e2;
-    color: #fff;
     padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
+    font-size: 14px;
   }
-  
-  button:hover {
-    background-color: #357abd;
-  }
-  
-  /* Placeholder Styling */
-  input::placeholder,
-  textarea::placeholder {
-    color: #aaa;
-  }
-  
-  /* Responsive Design */
-  @media (max-width: 768px) {
-    .create-course-container {
-      padding: 15px;
-    }
-  
-    button {
-      font-size: 14px;
-    }
-  }
-  
+}
