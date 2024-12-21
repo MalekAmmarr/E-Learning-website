@@ -79,12 +79,12 @@ const StudentListPage: React.FC = () => {
                   <Link href={`/students/edit?email=${student.email}`}>
                     <FaEdit className="icon" /> Edit
                   </Link>
-                  <button
+                  <a
                     className="delete"
                     onClick={() => handleDelete(student.email)}
                   >
                     <FaTrash className="icon" /> Delete
-                  </button>
+                  </a>
                 </td>
               </tr>
             ))
