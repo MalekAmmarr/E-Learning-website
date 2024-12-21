@@ -27,11 +27,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private rooms: { [courseId: string]: string[] } = {};
 
   handleConnection(client: Socket) {
-    console.log(`Client connected: ${client.id}`);
+    console.log(`Client: ${client.id} connected to chat`);
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    console.log(`Client: ${client.id} disconnectedy`);
     Object.keys(this.rooms).forEach((courseId) => {
       this.rooms[courseId] = this.rooms[courseId].filter((id) => id !== client.id);
       this.server.to(courseId).emit("systemMessage", `User ${client.id} has left the chat.`);

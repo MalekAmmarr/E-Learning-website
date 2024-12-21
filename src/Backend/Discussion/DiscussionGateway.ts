@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import {
   WebSocketGateway,
   WebSocketServer,
@@ -9,26 +10,32 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { DiscussionService } from './DiscussionService';
-import { UsersService } from '../users/users.service';
-import { InstructorService } from '../instructor/instructor.service';
-import { Inject } from '@nestjs/common';
+import { UsersService } from 'src/Backend/users/users.service';
+import { InstructorService } from 'src/Backend/instructor/instructor.service';
 
-@WebSocketGateway(3003, { cors: { origin: '*' } })
+@WebSocketGateway(3003, { cors: { origin: "*" } })
 export class DiscussionGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  @WebSocketServer() server: Server;
-
   constructor(
     @Inject(UsersService) private readonly userService: UsersService, // Inject UserService
     @Inject(InstructorService) private readonly instructorService: InstructorService,
     @Inject(DiscussionService) private readonly discussionService: DiscussionService // Inject CourseService
   ) {}
 
-  async handleConnection(client: Socket) {
-    console.log(`Client connected to forum: ${client.id}`);
+  @WebSocketServer() server: Server;
+
+    // Track active users in course-specific rooms
+    private rooms: { [courseId: string]: string[] } = {};
+
+  handleConnection(client: Socket) {
+    console.log(`Client: ${client.id} connected to forum`);
   }
 
-  async handleDisconnect(client: Socket) {
-    console.log(`Client disconnected from forum: ${client.id}`);
+  handleDisconnect(client: Socket) {
+    console.log(`Client: ${client.id} disconnected from forum`);
+    Object.keys(this.rooms).forEach((courseId) => {
+      this.rooms[courseId] = this.rooms[courseId].filter((id) => id !== client.id);
+      this.server.to(courseId).emit("systemMessage", `User ${client.id} has left the chat.`);
+    });
   }
 
   // Join a course room

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { Thread } from 'src/schemas/threads.schema';
 import { Reply } from 'src/schemas/reply.schema';
 import { Announcement } from 'src/schemas/announcement.schema';
@@ -8,9 +8,9 @@ import { Announcement } from 'src/schemas/announcement.schema';
 @Injectable()
 export class DiscussionService {
   constructor(
-    @InjectModel(Thread.name) private threadModel: Model<Thread>,
-    @InjectModel(Reply.name) private replyModel: Model<Reply>,
-    @InjectModel(Announcement.name) private announcementModel: Model<Announcement>,
+    @InjectModel(Thread.name, "eLearningDB") private readonly threadModel: mongoose.Model<Thread>,
+    @InjectModel(Reply.name, "eLearningDB") private readonly replyModel: mongoose.Model<Reply>,
+    @InjectModel(Announcement.name, "eLearningDB") private readonly announcementModel: mongoose.Model<Announcement>,
   ) {}
 
   // Create a new thread

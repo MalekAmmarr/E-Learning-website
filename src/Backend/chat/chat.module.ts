@@ -14,7 +14,8 @@ import { Instructor, InstructorSchema } from 'src/schemas/instructor.schema';
 
 @Module({
     imports: [
-        MongooseModule.forFeature( [{ name: Message.name, schema: MessageSchema },
+        MongooseModule.forFeature([
+          {name: Message.name, schema: MessageSchema },
           { name: admin.name, schema: AdminSchema },
           { name: Instructor.name, schema: InstructorSchema }
         ],
@@ -23,9 +24,7 @@ import { Instructor, InstructorSchema } from 'src/schemas/instructor.schema';
         CoursesModule,
         UsersModule,
         AdminsModule
-        
-      
       ],
-    providers: [ChatGateway, ChatService, CoursesService, UsersService,AuthService]
+    providers: [ChatGateway, ChatService, CoursesService, UsersService, AuthService]
 })
 export class ChatModule {}
