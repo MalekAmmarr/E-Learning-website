@@ -606,7 +606,7 @@ const CourseContent: React.FC = () => {
                           )
                         }
                       >
-                        {course}
+                        {course.split('.')[0]}
                       </h4>
                     </div>
                   </div>

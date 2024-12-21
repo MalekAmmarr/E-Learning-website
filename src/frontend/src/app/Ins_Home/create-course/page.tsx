@@ -14,13 +14,17 @@ const CreateCourse = () => {
     totalClasses: 0,
     courseContent: [],
     price: 0,
-    image: null as File | null,
   });
+  const [profilePictureUrl, setprofilePictureUrl] = useState<string | null>(
+    null,
+  );
 
   const router = useRouter(); // Correct usage inside a page component
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -29,14 +33,17 @@ const CreateCourse = () => {
     }));
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files ? e.target.files[0] : null;
-    setFormData((prevData) => ({
-      ...prevData,
-      image: file,
-    }));
+  // Handle image selection
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setprofilePictureUrl(reader.result as string); // Convert image to Base64 URL
+      };
+      reader.readAsDataURL(file);
+    }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -45,11 +52,18 @@ const CreateCourse = () => {
 
       const { email } = JSON.parse(storedInstructor);
 
-      const res = await fetch(`http://localhost:3000/instructor/${email}/create-course`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, instructormail: email }),
-      });
+      const res = await fetch(
+        `http://localhost:3000/instructor/${email}/create-course`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...formData,
+            image: profilePictureUrl,
+            instructormail: email,
+          }),
+        },
+      );
 
       if (!res.ok) {
         throw new Error(`Failed to create course: ${res.statusText}`);
@@ -149,6 +163,7 @@ const CreateCourse = () => {
           <input
             type="file"
             name="image"
+            accept="image/*"
             onChange={handleImageChange}
             required
           />
@@ -161,4 +176,3 @@ const CreateCourse = () => {
 };
 
 export default CreateCourse;
-

@@ -33,7 +33,9 @@ const CourseDetailsPage = () => {
   useEffect(() => {
     const fetchCourseDetails = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/instructor/course?title=${encodeURIComponent(courseTitle)}`);
+        const res = await fetch(
+          `http://localhost:3000/instructor/course?title=${encodeURIComponent(courseTitle)}`,
+        );
         if (!res.ok) {
           throw new Error(`Failed to fetch course details: ${res.statusText}`);
         }
@@ -66,10 +68,18 @@ const CourseDetailsPage = () => {
     <div className="course-details-container">
       <h1 className="course-title">{course?.title}</h1>
       <div className="course-meta">
-        <p><strong>Instructor:</strong> {course?.instructorName || 'Unknown'}</p>
-        <p><strong>Category:</strong> {course?.category}</p>
-        <p><strong>Difficulty Level:</strong> {course?.difficultyLevel}</p>
-        <p><strong>Total Classes:</strong> {course?.totalClasses}</p>
+        <p>
+          <strong>Instructor:</strong> {course?.instructorName || 'Unknown'}
+        </p>
+        <p>
+          <strong>Category:</strong> {course?.category}
+        </p>
+        <p>
+          <strong>Difficulty Level:</strong> {course?.difficultyLevel}
+        </p>
+        <p>
+          <strong>Total Classes:</strong> {course?.totalClasses}
+        </p>
       </div>
       <div className="course-description">
         <h3>Description</h3>
@@ -78,34 +88,40 @@ const CourseDetailsPage = () => {
       <div className="course-content">
         <h3>Course Content</h3>
         <ul>
-          {course?.courseContent.map((content, index) => (
-            <li key={index} className="course-content-item">
-              {/* Display course image above each lecture */}
-              <div className="course-image-container">
-                <img src={course?.image} alt={`Lecture ${index + 1}`} className="course-image" />
-              </div>
-              <a href={content} target="_blank" rel="noopener noreferrer">
-                <button className="pdf-button">View PDF {index + 1}</button>
-              </a>
-            </li>
-          ))}
+          {course?.courseContent &&
+          Array.isArray(course?.courseContent) &&
+          course?.courseContent.length > 0 ? (
+            course?.courseContent.map((content, index) => (
+              <li key={index} className="course-content-item">
+                <strong>
+                  {index + 1} - {content.split('.')[0]}
+                </strong>
+
+                <a href={content} target="_blank" rel="noopener noreferrer">
+                  <button className="pdf-button">View PDF {index + 1}</button>
+                </a>
+              </li>
+            ))
+          ) : (
+            <p>No course content available</p>
+          )}
         </ul>
       </div>
       <div className="course-notes">
         <h3>Notes</h3>
         <ul>
-          {course?.notes.map((note, index) => (
-            <li key={index}>{note}</li>
-          ))}
+          {course?.notes.map((note, index) => <li key={index}>{note}</li>)}
         </ul>
       </div>
       <div className="action-buttons-container">
-        <Link href={`/Ins_Home/selected_course/${encodeURIComponent(courseTitle)}/add-course-content`}>
-          <button className="action-button add-button">
-            Add Content
-          </button>
+        <Link
+          href={`/Ins_Home/selected_course/${encodeURIComponent(courseTitle)}/add-course-content`}
+        >
+          <button className="action-button add-button">Add Content</button>
         </Link>
-        <Link href={`/Ins_Home/selected_course/${courseTitle}/delete-course-content`}>
+        <Link
+          href={`/Ins_Home/selected_course/${courseTitle}/delete-course-content`}
+        >
           <button className="action-button update-button">
             Delete Content
           </button>

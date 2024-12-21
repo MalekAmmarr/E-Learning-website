@@ -9,64 +9,50 @@ import React from 'react';
 import { User } from './Notes/page';
 
 interface Course {
-  name: string;
+  courseId: string;
+  title: string;
+  instructormail: string;
+  instructorName?: string;
+  description: string;
   category: string;
+  difficultyLevel: 'Beginner' | 'Intermediate' | 'Advanced';
+  isArchived: boolean;
+  totalClasses: number;
+  courseContent: string[]; // Array of PDF URLs/paths
+  notes: string[]; // Array of note IDs or content (you can adjust depending on the structure of the notes)
   price: number;
-  image: string;
-  intructor_name: string;
+  image: string; // URL or path to the course image
 }
+
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = React.useState('All');
   const [userData, setUserData] = useState<any>(null);
   const [appliedCourses, setAppliedCourses] = useState<Course[]>([]);
   const [acceptedCourses, setAcceptedCourses] = useState<Course[]>([]);
+  const [Courses, setCourses] = useState<Course[]>([]);
 
   const router = useRouter();
-  const courses = [
-    {
-      name: 'Machine Learning',
-      category: 'Data Science',
-      price: 160,
-      image: '/assets/images/ML.jpg',
-      intructor_name: 'Prof.Omar Hossam',
-    },
-    {
-      name: 'Data Engineering and visualization',
-      category: 'Data Science',
-      price: 340,
-      image: '/assets/images/Visualization.jpg',
-      intructor_name: 'Prof.Omar Hossam',
-    },
-    {
-      name: 'Programming 1',
-      category: 'Programming',
-      price: 320,
-      image: '/assets/images/Prog_1.jpg',
-      intructor_name: 'Dr.Boudy marley',
-    },
-    {
-      name: 'Programming 2',
-      category: 'Programming',
-      price: 450,
-      image: '/assets/images/Prog_2.jpg',
-      intructor_name: 'Dr.Malek Lukasy',
-    },
-    {
-      name: 'English Beginner',
-      category: 'English',
-      price: 600,
-      image: '/assets/images/English (2).jpg',
-      intructor_name: 'Dr.Ali 3elwa',
-    },
-    {
-      name: 'English Advanced',
-      category: 'English',
-      price: 240,
-      image: '/assets/images/English (2).jpg',
-      intructor_name: 'Dr.Behziouni',
-    },
-  ];
+
+  const fetchCourses = async (): Promise<Course[]> => {
+    try {
+      const response = await fetch(`http://localhost:3000/courses/Courses`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const courses = await response.json();
+      console.log('Fetched courses details:', courses); // Debugging: Log the fetched user details
+      setCourses(courses);
+      return courses; // Update state with user data
+    } catch (error) {
+      console.error('Error fetching user details', error);
+      throw error; // Propagate the error for the caller to handle
+    }
+  };
   // Filter courses based on the active category
   const filteredAppliedCourses =
     activeCategory === 'All'
@@ -87,7 +73,7 @@ export default function Home() {
       setTimeout(() => {
         setIsLoading(false);
       }, 1000);
-
+      const Coursat = await fetchCourses();
       const accessToken = sessionStorage.getItem('authToken');
       const user = sessionStorage.getItem('userData');
 
@@ -101,12 +87,13 @@ export default function Home() {
               accessToken,
             );
 
-            // Filter applied and accepted courses based on user data
-            const userAppliedCourses = courses.filter((course) =>
-              updatedUser?.appliedCourses.includes(course.name),
+            // Filter applied courses based on user data
+            const userAppliedCourses = Coursat.filter(
+              (course) => updatedUser?.appliedCourses.includes(course.title), // Ensure course.title is correct
             );
-            const userAcceptedCourses = courses.filter((course) =>
-              updatedUser?.acceptedCourses.includes(course.name),
+
+            const userAcceptedCourses = Coursat.filter((course) =>
+              updatedUser?.acceptedCourses.includes(course.title),
             );
 
             setAppliedCourses(userAppliedCourses);
@@ -638,7 +625,7 @@ export default function Home() {
                     <a href="#">
                       <img
                         src={appliedCourses.image}
-                        alt={appliedCourses.name}
+                        alt={appliedCourses.title}
                       />
                     </a>
                     <span className="category">{appliedCourses.category}</span>
@@ -651,9 +638,9 @@ export default function Home() {
                   </div>
                   <div className="down-content">
                     <span className="author">
-                      {appliedCourses.intructor_name}
+                      {appliedCourses.instructorName}
                     </span>
-                    <h4>{appliedCourses.name}</h4>
+                    <h4>{appliedCourses.title}</h4>
                   </div>
                 </div>
               </div>
@@ -735,12 +722,12 @@ export default function Home() {
                     <div className="thumb">
                       <a
                         onClick={() =>
-                          handleCourseTitleClick(acceptedCourses.name)
+                          handleCourseTitleClick(acceptedCourses.title)
                         }
                       >
                         <img
                           src={acceptedCourses.image}
-                          alt={acceptedCourses.name}
+                          alt={acceptedCourses.title}
                         />
                       </a>
                       <span className="category">
@@ -755,9 +742,9 @@ export default function Home() {
                     </div>
                     <div className="down-content">
                       <span className="author">
-                        {acceptedCourses.intructor_name}
+                        {acceptedCourses.instructorName}
                       </span>
-                      <h4>{acceptedCourses.name}</h4>
+                      <h4>{acceptedCourses.title}</h4>
                     </div>
                   </div>
                 </div>
