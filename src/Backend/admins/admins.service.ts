@@ -33,7 +33,10 @@ export class AdminsService {
     private readonly authService: AuthService, // Inject AuthService
 
   ) {}
-
+  
+  async DeleteCourse(courseId: string) {
+    return await this.courseModel.findOneAndDelete({ courseId });
+  }
   // Register a new Admin
   async registerAdmin(createAdminDto: CreateAdminDto) {
     return await this.authService.registerUser(createAdminDto, 'admin');
