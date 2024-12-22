@@ -82,6 +82,29 @@ export class AdminsController {
       throw new BadRequestException('Course archiving failed');
     }
   }
+
+  @UseGuards(AuthorizationGuard)
+@Patch('restoreCourse')
+@Roles('admin')
+async restoreCourse(@Body() body: { courseId: string }) {
+  const { courseId } = body;
+  if (!courseId) {
+    throw new BadRequestException('courseId is required.');
+  }
+
+  try {
+    const restoredCourse = await this.coursesService.restoreCourse(courseId);
+
+    return {
+      message: 'Course restored successfully',
+      restoredCourse,
+    };
+  } catch (error) {
+    console.error('Error during course restoring:', error.message);
+    throw new BadRequestException('Course restoring failed.');
+  }
+}
+
   
 
   @UseGuards(AuthorizationGuard)
