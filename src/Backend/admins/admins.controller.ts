@@ -208,8 +208,9 @@ export class AdminsController {
       throw new BadRequestException('Failed to update student');
     }
   }
-
+  @UseGuards(AuthorizationGuard)
   @Delete('students/deleteByEmail/:email')
+  @Roles('admin')
   async deleteStudentByEmail(@Param('email') email: string) {
     try {
       return await this.adminsService.deleteStudentByEmail(email);
@@ -249,7 +250,9 @@ export class AdminsController {
     }
   }
   //Calls deleteInstructor to remove a specific instructor account.
+  @UseGuards(AuthorizationGuard)
   @Delete('instructors/:email')
+  @Roles('admin')
   async deleteInstructor(@Param('email') email: string) {
     try {
       return await this.adminsService.deleteInstructor(email);
