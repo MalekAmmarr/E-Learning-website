@@ -41,17 +41,11 @@ export class InstructorService {
       'instructor',
     );
   }
-  async findInstructorById(instructorId: string): Promise<Instructor | null> {
-    const instructor = await this.InstructorModel.findOne({ _id: instructorId }).exec();
-    return instructor;
-  }
-
 
   // Login Intructor
   async loginInstructor(email: string, password: string) {
     return await this.authService.login(email, password, 'instructor');
   }
-
 
   // Method to get all users applied to courses taught by an instructor
   async getUsersAppliedToCourses(email: string) {
@@ -503,6 +497,19 @@ export class InstructorService {
 
     return formattedProgress;
   }
+
+  // Method to find an instructor by their ID
+async findInstructorById(instructorId: string): Promise<Instructor> {
+  // Find the instructor by their ID
+  const instructor = await this.InstructorModel.findById(instructorId).exec();
+
+  if (!instructor) {
+    throw new NotFoundException(`Instructor with ID ${instructorId} not found`);
+  }
+
+  return instructor;
+}
+
 
 
 }
