@@ -35,10 +35,22 @@ const StudentListPage: React.FC = () => {
 
   const handleDelete = async (email: string) => {
     try {
+      // Retrieve the token from sessionStorage
+      const token = sessionStorage.getItem('accessToken');
+
+      if (!token) {
+        throw new Error('No token found. Please log in again.');
+      }
+
+      // Send delete request to the backend API
       const response = await fetch(
         `http://localhost:3000/admins/students/deleteByEmail/${email}`,
         {
           method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`, // Send token for authorization
+          },
         }
       );
 

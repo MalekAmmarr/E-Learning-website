@@ -231,8 +231,9 @@ async restoreCourse(@Body() body: { courseId: string }) {
       throw new BadRequestException('Failed to update student');
     }
   }
-
+  @UseGuards(AuthorizationGuard)
   @Delete('students/deleteByEmail/:email')
+  @Roles('admin')
   async deleteStudentByEmail(@Param('email') email: string) {
     try {
       return await this.adminsService.deleteStudentByEmail(email);
@@ -272,7 +273,9 @@ async restoreCourse(@Body() body: { courseId: string }) {
     }
   }
   //Calls deleteInstructor to remove a specific instructor account.
+  @UseGuards(AuthorizationGuard)
   @Delete('instructors/:email')
+  @Roles('admin')
   async deleteInstructor(@Param('email') email: string) {
     try {
       return await this.adminsService.deleteInstructor(email);
