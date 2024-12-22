@@ -130,26 +130,24 @@ async restoreCourse(@Body() body: { courseId: string }) {
   }
 
   @UseGuards(AuthorizationGuard)
-  @Post('createAnnouncement')
-  @Roles('admin')
-  async createAnnouncement(@Body() body: { title: string; content: string }) {
-    const { title, content } = body;
+@Post('createAnnouncement')
+@Roles('admin')
+async createAnnouncement(@Body() body: { courseId: string; title: string; content: string ;createdBy:string}) {
+  const { courseId, title, content ,createdBy} = body;
 
-    try {
-      const announcement = await this.adminsService.createAnnouncement({
-        title,
-        content,
-      });
+  try {
+    const announcement = await this.adminsService.createAnnouncement(courseId, title, content,createdBy);
 
-      return {
-        message: 'Announcement created successfully',
-        announcement,
-      };
-    } catch (error) {
-      console.error('Error during announcement creation:', error);
-      throw new BadRequestException('Failed to create announcement');
-    }
+    return {
+      message: 'Announcement created successfully',
+      announcement,
+    };
+  } catch (error) {
+    console.error('Error during announcement creation:', error);
+    throw new BadRequestException('Failed to create announcement');
   }
+}
+
 
   @UseGuards(AuthorizationGuard)
   @Patch('editAnnouncement')
