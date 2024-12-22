@@ -82,15 +82,7 @@ export class AdminsController {
       throw new BadRequestException('Course archiving failed');
     }
   }
-  // @Delete('deleteCourse')
-  // async deletecourse(@Param('courseId') courseId: string) {
-  //   try {
-  //     return await this.adminsService.DeleteCourse(courseId);
-  //   } catch (error) {
-  //     console.error('Error deleting course :', error);
-  //     throw new BadRequestException('Failed to delete course');
-  //   }
-  // }
+  
 
   @UseGuards(AuthorizationGuard)
   @Delete('deleteCourse')
