@@ -4,6 +4,7 @@ import mongoose, { Model } from 'mongoose';
 import { Thread } from 'src/schemas/threads.schema';
 import { Reply } from 'src/schemas/reply.schema';
 import { Announcement } from 'src/schemas/announcement.schema';
+import { threadId } from 'worker_threads';
 
 @Injectable()
 export class DiscussionService {
@@ -67,6 +68,23 @@ export class DiscussionService {
       createdAt: new Date(),
     });
     return thread.save();
+  }
+  async getThreadbyId(threadId: string){
+    const course = await this.threadModel.findOne({ _id: threadId }).exec();
+    return course;
+  }
+  // Update a forum
+  async updateThread(threadId: string, title: string, content: string) {
+    const updatedThread = await this.threadModel.findByIdAndUpdate(
+      threadId,
+      { title, content, updatedAt: new Date() },
+      { new: true },
+    );
+    return updatedThread;
+  }
+
+  async deleteThread(threadId: string) {
+    return this.threadModel.findByIdAndDelete(threadId).exec();
   }
  
   

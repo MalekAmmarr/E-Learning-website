@@ -13,6 +13,7 @@ import { DiscussionService } from './DiscussionService';
 import { UsersService } from 'src/Backend/users/users.service';
 import { InstructorService } from 'src/Backend/instructor/instructor.service';
 import { CoursesService } from "src/Backend/courses/courses.service";
+import { threadId } from 'worker_threads';
 
 
 @WebSocketGateway(3003, { cors: { origin: "*" } })
@@ -242,4 +243,83 @@ async handleAnnounce(
 
     
   }
+  @SubscribeMessage('editThread')
+async handleEditThread(
+  @MessageBody() data: any,
+  @ConnectedSocket() client: Socket,
+) {
+  try {
+    if (typeof data === "string") {
+      data = JSON.parse(data);
+    }
+    // const courseId = data?.courseId?.trim();
+    const threadId = data?.threadId?.trim();
+    const title = data?.title?.trim();
+    const description = data?.description?.trim();
+    const userId = data?.userId?.trim();
+
+    // Fetch forum and validate permissions
+    const thread = await this.discussionService.getThreadbyId(threadId)
+    if (!thread) {
+      throw new Error('Thread not found.');
+    }
+
+    if (thread.createdBy !== userId) {
+      const instructor = await this.instructorService.findInstructorById(userId);
+      if (!instructor) {
+        throw new Error('You do not have permission to edit this Thread.');
+      }
+    }
+
+    // Update forum
+    const updatedThread = await this.discussionService.updateThread(threadId, title, description);
+    this.server.to(`room:${thread.courseId}`).emit('forumUpdated', {
+      forumId: updatedThread._id,
+      title: updatedThread.title,
+      description: updatedThread.content,
+      updatedAt: updatedThread.updatedAt,
+    });
+  } catch (error) {
+    console.error('Error in editForum:', error.message);
+    client.emit('error', { message: error.message });
+  }
 }
+
+
+@SubscribeMessage('deleteThread')
+async handleDeleteForum(
+  @MessageBody() data: any,
+  @ConnectedSocket() client: Socket,
+) {
+  try {
+    if (typeof data === "string") {
+      data = JSON.parse(data);
+    }
+
+    const threadId = data?.threadId?.trim();
+    const userId = data?.userId?.trim();
+
+    // Fetch thread and validate permissions
+    const thread = await this.discussionService.getThreadbyId(threadId);
+    if (!thread) {
+      throw new Error('Thread not found.');
+    }
+
+    if (thread.createdBy !== userId) {
+      const instructor = await this.instructorService.findInstructorById(userId);
+      if (!instructor) {
+        throw new Error('You do not have permission to delete this forum.');
+      }
+    }
+
+    // Delete thread
+    await this.discussionService.deleteThread(threadId);
+    this.server.to(`room:${thread.courseId}`).emit('forumDeleted', { threadId });
+  } catch (error) {
+    console.error('Error in deleteForum:', error.message);
+    client.emit('error', { message: error.message });
+  }
+}
+
+}
+
