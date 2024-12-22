@@ -7,7 +7,7 @@ import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import './page.css';
-import { User } from '.././Notes/page';
+import { User } from '../Notes/page';
 export interface ChatHistory {
   Title: string; // The title of the chat group
   Admin: string; // The admin of the chat group
