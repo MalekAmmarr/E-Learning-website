@@ -77,6 +77,22 @@ const Profile = () => {
       router.push('/login');
     }
   }, [router]);
+  const handleDelete = async (email: string) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/admins/students/deleteByEmail/${email}`,
+        {
+          method: 'DELETE',
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete student. Status: ${response.status}`);
+      }
+    } catch (error: any) {
+      console.error('Error deleting student:', error);
+    }
+  };
 
   if (!user) return <div>Loading...</div>;
 
@@ -86,30 +102,35 @@ const Profile = () => {
       <div
         className="img"
         style={{
-          width: '150px', // Set the width of the circle
-          height: '150px', // Set the height of the circle
-          borderRadius: '50%', // Make it circular
+          width: '150px',
+          height: '150px',
+          borderRadius: '50%',
           backgroundImage: user.profilePictureUrl
             ? `url(${user.profilePictureUrl})`
             : `url(/assets/images/Default.jpg)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           display: 'flex',
-          alignItems: 'center', // Center the image vertically
-          justifyContent: 'center', // Center the image horizontally
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '20px', // Added margin for spacing
         }}
       ></div>
 
       {/* Profile Info */}
-      <div className="info">
-        <span className="name">{user.name}</span>
-        <p className="job">{`Email: ${user.email}`}</p>
+      <div className="info" style={{ marginBottom: '20px' }}>
+        <span className="name" style={{ fontSize: '24px', fontWeight: 'bold' }}>
+          {user.name}
+        </span>
+        <p className="job" style={{ fontStyle: 'italic' }}>
+          {`Email: ${user.email}`}
+        </p>
         <p>{`Age: ${user.age}`}</p>
         <p>{`GPA: ${user.GPA.toFixed(2)}`}</p>
       </div>
 
       {/* Applied and Accepted Courses */}
-      <div className="courses">
+      <div className="courses" style={{ marginBottom: '20px' }}>
         <h3>Applied Courses</h3>
         <ul>
           {user.appliedCourses.length > 0 ? (
@@ -133,7 +154,7 @@ const Profile = () => {
       </div>
 
       {/* Course Scores */}
-      <div className="courses">
+      <div className="courses" style={{ marginBottom: '20px' }}>
         <h3>Course Scores</h3>
         <ul>
           {user.courseScores.length > 0 ? (
@@ -148,10 +169,34 @@ const Profile = () => {
         </ul>
       </div>
 
-      {/* Button */}
-      <a href="/User_Home" className="button">
-        Return Home
-      </a>
+      {/* Buttons */}
+      <div
+        className="button-container"
+        style={{ display: 'flex', justifyContent: 'space-between' }}
+      >
+        <a
+          href="/User_Home"
+          className="button"
+          style={{ flex: 1, marginRight: '10px' }}
+        >
+          Return Home
+        </a>
+        <a
+          href="/User_Home/Profile/EditProfile"
+          className="button edit-button"
+          style={{ flex: 1, marginRight: '10px' }}
+        >
+          Edit Profile
+        </a>
+        <a
+          href="/login"
+          className="button delete-button"
+          onClick={() => handleDelete(user?.email)}
+          style={{ flex: 1 }}
+        >
+          Delete Account
+        </a>
+      </div>
     </div>
   );
 };

@@ -115,4 +115,11 @@ export class CoursesService {
   async getAllCourses(): Promise<Course[]> {
     return this.courseModel.find();
   }
+  async getAllCoursesTitle(): Promise<string[]> {
+    const courses = await this.courseModel.find().select('title -_id').exec();
+    return courses.map((course) => course.title);
+  }
+  async getAllCoursesByTitle(title: string): Promise<Course> {
+    return await this.courseModel.findOne({ title });
+  }
 }

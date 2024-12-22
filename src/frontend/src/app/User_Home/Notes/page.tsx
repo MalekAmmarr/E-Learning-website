@@ -81,7 +81,7 @@ const Notes: React.FC = () => {
       }
     } catch (err) {
       console.error(
-        'Failed to retrieve or parse user data from localStorage',
+        'Failed to retrieve or parse user data from sessionstorage',
         err,
       );
       router.push('/login');
@@ -94,7 +94,7 @@ const Notes: React.FC = () => {
           method: 'POST', // Assuming your API uses POST to accept email in the body
           headers: {
             'Content-Type': 'application/json', // Specify the content type
-            Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Add the Bearer token
+            Authorization: `Bearer ${sessionStorage.getItem('authToken')}`, // Add the Bearer token
           },
           body: JSON.stringify({ studentEmail: user?.email }), // Send the email in the request body
         });
@@ -138,7 +138,7 @@ const Notes: React.FC = () => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
         },
         body: JSON.stringify({
           studentEmail: studentEmail,

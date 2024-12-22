@@ -33,6 +33,48 @@ export default function Home() {
   const [Courses, setCourses] = useState<Course[]>([]);
 
   const router = useRouter();
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission behavior
+
+    const searchInput = document.getElementById(
+      'searchText',
+    ) as HTMLInputElement | null;
+
+    if (!searchInput) {
+      console.error('Search input element not found');
+      return;
+    }
+
+    const searchKeyword = searchInput.value.trim();
+
+    if (!searchKeyword) {
+      alert('Please enter a course name to search.');
+      return;
+    }
+
+    // Create a mapping of normalized course titles to original titles
+    const normalizedCourseMap = new Map<string, string>();
+    userData?.acceptedCourses.forEach((course: string) => {
+      const normalized = course.toLowerCase().replace(/\s+/g, '');
+      normalizedCourseMap.set(normalized, course);
+    });
+
+    // Normalize the search keyword for comparison
+    const normalizedSearchKeyword = searchKeyword
+      .toLowerCase()
+      .replace(/\s+/g, '');
+
+    // Check if the normalized search keyword matches any normalized course title
+    if (normalizedCourseMap.has(normalizedSearchKeyword)) {
+      const originalTitle = normalizedCourseMap.get(normalizedSearchKeyword); // Get the original title
+      handleCourseTitleClick(originalTitle!); // Use the original title for redirection
+    } else {
+      // Display an error message
+      alert(
+        `The course "${searchKeyword}" is not available. Please select an accepted course.`,
+      );
+    }
+  };
 
   const fetchCourses = async (): Promise<Course[]> => {
     try {
@@ -212,10 +254,10 @@ export default function Home() {
                 {/* ***** Logo End ***** */}
                 {/* ***** Serach Start ***** */}
                 <div className="search-input">
-                  <form id="search" action="#">
+                  <form id="search" onSubmit={(e) => handleSearch(e)}>
                     <input
                       type="text"
-                      placeholder="Type Something"
+                      placeholder="Search For Courses"
                       id="searchText"
                       name="searchKeyword"
                     />
@@ -744,7 +786,13 @@ export default function Home() {
                       <span className="author">
                         {acceptedCourses.instructorName}
                       </span>
-                      <h4>{acceptedCourses.title}</h4>
+                      <h4
+                        onClick={() =>
+                          handleCourseTitleClick(acceptedCourses.title)
+                        }
+                      >
+                        {acceptedCourses.title}
+                      </h4>
                     </div>
                   </div>
                 </div>

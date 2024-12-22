@@ -46,7 +46,6 @@ export class UsersController {
       throw error; // Rethrow or handle the error appropriately
     }
   }
-
   // Login a user
   @Post('login')
   async login(
@@ -70,6 +69,7 @@ export class UsersController {
 
     return user;
   }
+
   // Route to get notifications by email
   @UseGuards(AuthorizationGuard)
   @Get('notifications')
