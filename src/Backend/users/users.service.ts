@@ -18,6 +18,7 @@ import { FeedbackService } from '../feedback/feedback.service';
 
 @Injectable()
 export class UsersService {
+  [x: string]: any;
   // Inject UserModel and AuthenticationLogService into the constructor
   constructor(
     @InjectModel(User.name, 'eLearningDB')

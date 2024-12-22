@@ -5,6 +5,7 @@ import { Course, CourseSchema } from 'src/schemas/course.schema';
 
 @Injectable()
 export class CoursesService {
+  [x: string]: any;
   constructor(
     @InjectModel(Course.name, 'eLearningDB')
     private readonly courseModel: Model<Course>,

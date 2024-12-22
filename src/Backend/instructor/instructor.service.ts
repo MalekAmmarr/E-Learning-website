@@ -499,5 +499,4 @@ export class InstructorService {
     return formattedProgress;
   }
 
-  
 }
