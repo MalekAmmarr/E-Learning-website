@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
 
@@ -31,27 +31,29 @@ export default function CourseManagement() {
     fetchCourses();
   }, []);
 
-  const deleteCourse = async (courseId: number) => {
+  // Wrap deleteCourse in useCallback to prevent re-renders
+  const deleteCourse = useCallback(async (courseId: number) => {
     if (!confirm('Are you sure you want to delete this course?')) return;
-  
-    console.log('Attempting to delete course with ID:', courseId);
-  
+
     try {
-      const response = await axios.delete(`http://localhost:3000/admins/deleteCourse/${courseId}`, {
+      const token = 'YOUR_ACCESS_TOKEN'; // Replace with your method of getting a token
+      await axios.delete(`http://localhost:3000/admins/deleteCourse/${courseId}`, {
         headers: {
-          Authorization: `Bearer YOUR_ACCESS_TOKEN`, // Add this if your backend requires authentication
+          Authorization: `Bearer ${token}`,
         },
       });
-      console.log('Delete response:', response.data);
-  
+
+      console.log('Course deleted:', courseId);
+
+      // State update is done only after deleting the course
       setCourses((prevCourses) => prevCourses.filter((course) => course.id !== courseId));
+
       alert('Course deleted successfully.');
     } catch (err: any) {
       console.error('Error deleting course:', err.response?.data || err.message);
       alert('Failed to delete the course. Please check the logs for details.');
     }
-  };
-  
+  }, []); // Empty dependency array ensures the function is memoized
 
   if (loading) {
     return <div className="p-8 text-center text-gray-600">Loading courses...</div>;
@@ -108,7 +110,7 @@ export default function CourseManagement() {
                       Edit
                     </Link>
                     <button
-                      onClick={() => deleteCourse(course.id)}
+                      onClick={() => deleteCourse(course.id)} // Trigger delete function here
                       className="text-red-600 hover:underline font-medium"
                     >
                       Delete
