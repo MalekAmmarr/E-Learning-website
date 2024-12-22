@@ -70,8 +70,12 @@ export class DiscussionService {
     return thread.save();
   }
   async getThreadbyId(threadId: string){
-    const course = await this.threadModel.findOne({ _id: threadId }).exec();
-    return course;
+    const thread = await this.threadModel.findOne({ _id: threadId }).exec();
+    return thread;
+  }
+  async getReplybyId(replyId: string){
+    const reply = await this.replyModel.findOne({ _id: replyId }).exec();
+    return reply;
   }
   // Update a forum
   async updateThread(threadId: string, title: string, content: string) {
@@ -85,6 +89,9 @@ export class DiscussionService {
 
   async deleteThread(threadId: string) {
     return this.threadModel.findByIdAndDelete(threadId).exec();
+  }
+  async deleteReply(replyId: string) {
+    return this.replyModel.findByIdAndDelete(replyId).exec();
   }
  
   

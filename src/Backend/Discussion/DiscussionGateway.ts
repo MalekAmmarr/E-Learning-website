@@ -14,6 +14,7 @@ import { UsersService } from 'src/Backend/users/users.service';
 import { InstructorService } from 'src/Backend/instructor/instructor.service';
 import { CoursesService } from "src/Backend/courses/courses.service";
 import { threadId } from 'worker_threads';
+import { repl } from '@nestjs/core';
 
 
 @WebSocketGateway(3003, { cors: { origin: "*" } })
@@ -287,7 +288,7 @@ async handleEditThread(
 
 
 @SubscribeMessage('deleteThread')
-async handleDeleteForum(
+async handleDeleteThread(
   @MessageBody() data: any,
   @ConnectedSocket() client: Socket,
 ) {
@@ -314,9 +315,44 @@ async handleDeleteForum(
 
     // Delete thread
     await this.discussionService.deleteThread(threadId);
-    this.server.to(`room:${thread.courseId}`).emit('forumDeleted', { threadId });
+    this.server.to(`room:${thread.courseId}`).emit('Thread Deleted', { threadId });
   } catch (error) {
-    console.error('Error in deleteForum:', error.message);
+    console.error('Error in deleteThread:', error.message);
+    client.emit('error', { message: error.message });
+  }
+}
+@SubscribeMessage('deleteReply')
+async handleDeleteReply(
+  @MessageBody() data: any,
+  @ConnectedSocket() client: Socket,
+) {
+  try {
+    if (typeof data === "string") {
+      data = JSON.parse(data);
+    }
+
+    const replyId = data?.replyId?.trim();
+    const userId = data?.userId?.trim();
+
+    // Fetch Reply and validate permissions
+    const reply = await this.discussionService.getReplybyId(replyId);
+    if (!reply) {
+      throw new Error('Reply not found.');
+    }
+
+    if (reply.createdBy !== userId) {
+      const instructor = await this.instructorService.findInstructorById(userId);
+      if (!instructor) {
+        throw new Error('You do not have permission to delete this reply.');
+      }
+    }
+    const thread = await this.discussionService.getThreadbyId(reply.threadId)
+
+    // Delete Reply
+    await this.discussionService.deleteReply(replyId);
+    this.server.to(`room:${thread.courseId}`).emit('ReplyDeleted', { threadId });
+  } catch (error) {
+    console.error('Error in deleteReply:', error.message);
     client.emit('error', { message: error.message });
   }
 }
