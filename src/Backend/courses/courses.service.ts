@@ -77,10 +77,10 @@ export class CoursesService {
   }
 
   //Delete outdated Course
-  async DeleteCourse(courseId: string): Promise<Course> {
+  async DeleteCourse(title: string): Promise<Course> {
     try {
       const deletedCourse = await this.courseModel.findOneAndDelete({
-        courseId: courseId,
+        title: title,
       });
 
       if (!deletedCourse) {

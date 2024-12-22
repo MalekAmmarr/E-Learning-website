@@ -14,7 +14,7 @@ const AdminLoginNotification = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch('http://localhost:3000/Admin/login', {
+      const response = await fetch('http://localhost:3000/admins/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -27,7 +27,7 @@ const AdminLoginNotification = () => {
       }
 
       const data = await response.json();
-      sessionStorage.setItem('authToken', data.token);
+      sessionStorage.setItem('accessToken', data.accessToken);
       router.push('/Admin_Home');
     } catch (err: any) {
       setError(err.message || 'An error occurred during login');

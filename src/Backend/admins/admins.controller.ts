@@ -82,31 +82,32 @@ export class AdminsController {
       throw new BadRequestException('Course archiving failed');
     }
   }
-  @Delete('deleteCourse')
-  async deletecourse(@Param('courseId') courseId: string) {
-    try {
-      return await this.adminsService.DeleteCourse(courseId);
-    } catch (error) {
-      console.error('Error deleting course :', error);
-      throw new BadRequestException('Failed to delete course');
-    }
-  }
+  // @Delete('deleteCourse')
+  // async deletecourse(@Param('courseId') courseId: string) {
+  //   try {
+  //     return await this.adminsService.DeleteCourse(courseId);
+  //   } catch (error) {
+  //     console.error('Error deleting course :', error);
+  //     throw new BadRequestException('Failed to delete course');
+  //   }
+  // }
 
- // @Delete('deleteCourse')
-  //@Roles('admin')
-  //async deleteCourse(@Body() body: { courseId: string }) {
-    //const { courseId } = body;
-   // try {
-    //  const deletedCourse = await this.coursesService.DeleteCourse(courseId);
-     // return {
-       // message: 'Course deleted successfully',
-      //  deletedCourse,
-     // };
-    //} catch (error) {
-     // console.error('Error during course deletion:', error);
-     // throw new BadRequestException('Course deletion failed');
-   // }
- // }
+  @UseGuards(AuthorizationGuard)
+  @Delete('deleteCourse')
+  @Roles('admin')
+  async deleteCourse(@Body() body: { title: string }) {
+    const { title } = body;
+   try {
+     const deletedCourse = await this.coursesService.DeleteCourse(title);
+     return {
+       message: 'Course deleted successfully',
+       deletedCourse,
+     };
+    } catch (error) {
+     console.error('Error during course deletion:', error);
+     throw new BadRequestException('Course deletion failed');
+   }
+ }
 
   @Get('getAnnouncement')
   async getAllAnnouncements() {
