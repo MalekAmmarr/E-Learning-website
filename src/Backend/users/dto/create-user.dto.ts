@@ -20,6 +20,8 @@ export class CreateUserDto {
 
   @IsEmail()
   email: string;
+  @IsEmail()
+  oldEmail: string;
 
   @IsString()
   passwordHash: string;

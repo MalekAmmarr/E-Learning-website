@@ -7,6 +7,8 @@ import { Progress } from './progress.schema';
 export class User extends Document {
   @Prop({ required: true, unique: true })
   email: string;
+  @Prop({ required: false, default: null })
+  oldEmail: string;
 
   @Prop({ required: true })
   name: string;

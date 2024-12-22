@@ -7,11 +7,12 @@ html {
   justify-content: center;
   align-items: center;
   background-color: #f0f0f0;
+  font-family: 'Arial', sans-serif;
 }
 
 .card {
-  width: 450px; /* Increased card size */
-  min-height: 500px; /* Ensure it is tall enough to hold content */
+  width: 450px;
+  min-height: 550px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -19,13 +20,22 @@ html {
   border-radius: 12px;
   box-shadow:
     inset 5px 5px 10px #a9a9aa77,
-    inset -5px -5px 10px #ffffff7e;
-  padding: 20px; /* Added padding for inner spacing */
+    inset -5px -5px 10px #ffffff7e,
+    3px 3px 15px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .card .img {
-  width: 200px; /* Larger profile image */
-  height: 200px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   background: #f2f2f3;
   margin-bottom: 20px;
@@ -37,25 +47,17 @@ html {
 .card .info {
   text-align: center;
   margin-top: 10px;
-  background: linear-gradient(
-    120deg,
-    rgba(0, 194, 255, 1) 0%,
-    rgba(0, 86, 255, 1) 100%
-  );
-  background-clip: border-box;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
 }
 
 .card .info > span {
   font-weight: bold;
-  font-size: 1.6em; /* Increased font size */
-  display: block;
+  font-size: 1.8em;
+  color: #0056ff;
 }
 
 .card p {
-  font-size: 1.1em; /* Adjusted font size */
-  color: #333;
+  font-size: 1.1em;
+  color: #555;
   margin: 5px 0;
 }
 
@@ -68,14 +70,33 @@ html {
     rgba(0, 194, 255, 1) 0%,
     rgba(0, 86, 255, 1) 100%
   );
-  padding: 0.5em 2em;
+  padding: 0.7em 2em;
   border-radius: 0.7em;
+  font-weight: bold;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  box-shadow:
+    0 4px 6px rgba(0, 86, 255, 0.4),
+    0 -4px 6px rgba(0, 194, 255, 0.4);
+}
+
+.card a:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 86, 255, 1) 0%,
+    rgba(0, 194, 255, 1) 100%
+  );
+  box-shadow:
+    0 6px 10px rgba(0, 86, 255, 0.6),
+    0 -6px 10px rgba(0, 194, 255, 0.6);
+  transform: scale(1.05);
 }
 
 .card a:active {
   box-shadow:
     inset 3px 3px 3px #0056ff,
     inset -3px -3px 3px #00c2ff;
+  transform: scale(0.95);
 }
 
 .courses,
@@ -87,7 +108,7 @@ html {
 
 .courses h3,
 .notifications h3 {
-  font-size: 1.2em;
+  font-size: 1.3em;
   margin-bottom: 0.5em;
   color: #0056ff;
 }
@@ -102,4 +123,56 @@ html {
 .notifications li {
   font-size: 1em;
   color: #333;
+  line-height: 1.5em;
+  padding: 5px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.courses li:last-child,
+.notifications li:last-child {
+  border-bottom: none;
+}
+
+/* Button Container */
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; /* Adds space between the buttons */
+  width: 100%;
+}
+
+/* Ensures the buttons don't overlap and are spaced nicely */
+.button-container .button {
+  margin: 0 auto;
+  padding: 0.7em 2em;
+  font-size: 1em;
+  width: auto;
+}
+
+.edit-button {
+  background: #f0ad4e; /* Edit button color */
+  box-shadow:
+    0 4px 6px rgba(240, 173, 78, 0.4),
+    0 -4px 6px rgba(240, 173, 78, 0.4);
+}
+
+.delete-button {
+  background: #d9534f; /* Delete button color */
+  box-shadow:
+    0 4px 6px rgba(217, 83, 79, 0.4),
+    0 -4px 6px rgba(217, 83, 79, 0.4);
+}
+
+.edit-button:hover,
+.delete-button:hover {
+  transform: scale(1.05);
+}
+
+.edit-button:active,
+.delete-button:active {
+  box-shadow:
+    inset 3px 3px 3px #f0ad4e,
+    inset -3px -3px 3px #d9534f;
+  transform: scale(0.95);
 }

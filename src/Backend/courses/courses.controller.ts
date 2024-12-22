@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { CoursesService } from './courses.service';
 import { Course } from 'src/schemas/course.schema';
 
@@ -17,5 +17,13 @@ export class CoursesController {
   @Get('Courses')
   async getCourses(): Promise<Course[]> {
     return this.coursesService.getAllCourses();
+  }
+  @Get('CoursesTitle')
+  async getCoursesTitle(): Promise<string[]> {
+    return this.coursesService.getAllCoursesTitle();
+  }
+  @Get('CoursesTitle/:title')
+  async getCoursesByTitle(@Param('title') title: string): Promise<Course> {
+    return this.coursesService.getAllCoursesByTitle(title);
   }
 }

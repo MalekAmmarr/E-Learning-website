@@ -33,7 +33,19 @@ export class UsersService {
 
   // Register a new Student
   async registerUser(createUserDto: CreateUserDto) {
-    return await this.authService.registerUser(createUserDto, 'student');
+    const user = await this.userModel.findOne({
+      email: createUserDto.oldEmail,
+    });
+    if (user) {
+      const passwordHashed = await bcrypt.hash(createUserDto.passwordHash, 10);
+      console.log('passwordHashed : ', passwordHashed);
+      createUserDto.passwordHash = passwordHashed;
+      return await this.userModel.updateOne(
+        { email: createUserDto.oldEmail },
+        createUserDto,
+        { $set: { passwordHash: passwordHashed } },
+      );
+    } else return await this.authService.registerUser(createUserDto, 'student');
   }
 
   // Login Student

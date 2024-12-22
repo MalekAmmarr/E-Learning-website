@@ -46,8 +46,8 @@ const Quiz = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const accessToken = localStorage.getItem('authToken');
-    const user = localStorage.getItem('userData');
+    const accessToken = sessionStorage.getItem('authToken');
+    const user = sessionStorage.getItem('userData');
     if (user && accessToken) {
       const parsedUser = JSON.parse(user);
       setUserData(parsedUser);
@@ -66,7 +66,7 @@ const Quiz = () => {
     try {
       const queryParams = new URLSearchParams(window.location.search);
       const courseTitle = queryParams.get('title');
-      const user = localStorage.getItem('userData');
+      const user = sessionStorage.getItem('userData');
       const quizId = queryParams.get('quiz_id');
 
       let email = 'Nothing';
@@ -85,7 +85,7 @@ const Quiz = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
         },
         body: JSON.stringify({
           email,
@@ -157,7 +157,7 @@ const Quiz = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`,
         },
         body: JSON.stringify({
           email,
