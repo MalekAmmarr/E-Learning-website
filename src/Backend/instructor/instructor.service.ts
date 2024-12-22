@@ -498,4 +498,16 @@ export class InstructorService {
 
     return formattedProgress;
   }
+  // Method to find an instructor by their ID
+  async findInstructorById(instructorId: string): Promise<Instructor> {
+    // Find the instructor by their ID
+    const instructor = await this.InstructorModel.findById(instructorId).exec();
+  
+    if (!instructor) {
+      throw new NotFoundException(`Instructor with ID ${instructorId} not found`);
+    }
+  
+    return instructor;
+  }
+
 }

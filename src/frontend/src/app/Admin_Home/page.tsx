@@ -36,9 +36,9 @@ const AdminHome = () => {
           <p className="text-gray-600 mb-4">
             Create, edit, or delete announcements for the platform.
           </p>
-          <Link href="/admin/announcements" passHref>
+          <Link href="/Admin_Home/Announcments" passHref>
             <button className="text-blue-500 hover:underline">
-              Manage Announcements
+              Manage Announcments
             </button>
           </Link>
         </div>
@@ -62,7 +62,7 @@ const AdminHome = () => {
           <p className="text-gray-600 mb-4">
             View, update, or delete instructor accounts registered on the platform.
           </p>
-          <Link href="/admin/instructors" passHref>
+          <Link href="/Admin_Home/Instructors" passHref>
             <button className="text-blue-500 hover:underline">
               Manage Instructors
             </button>
@@ -79,6 +79,19 @@ const AdminHome = () => {
             <button className="text-blue-500 hover:underline">
               View Logs
             </button>
+          </Link>
+        </div>
+
+        {/* Card 6 - Admin register */}
+        <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+          <h2 className="text-xl font-semibold mb-2">Create Admin</h2>
+          <p className="text-gray-600 mb-4">
+            Create new admin
+          </p>
+          <Link href="/Admin_Home/Register" passHref>
+            <button className="text-blue-500 hover:underline">
+              Register
+              </button>
           </Link>
         </div>
       </main>

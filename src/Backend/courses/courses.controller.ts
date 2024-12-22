@@ -26,4 +26,6 @@ export class CoursesController {
   async getCoursesByTitle(@Param('title') title: string): Promise<Course> {
     return this.coursesService.getAllCoursesByTitle(title);
   }
+
+  
 }
