@@ -445,7 +445,7 @@ export default function Home() {
                     insights to enhance your learning experience.
                   </p>
                   <div className="main-button">
-                    <a href="#!">Start Chat</a>
+                    <a href="/User_Home/Chat">Start Chat</a>
                   </div>
                 </div>
               </div>
@@ -965,6 +965,41 @@ export default function Home() {
                     <li>
                       <a
                         href="https://www.instagram.com/bhaa_92/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-instagram" />
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="team section" id="team">
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-3 col-md-6">
+              <div className="team-member">
+                <div className="main-content">
+                  <img src="assets\images\Gee.jpg" alt="" />
+                  <span className="category">Germen Instructor</span>
+                  <h4>Youssef Galal</h4>
+                  <ul className="social-icons">
+                    <li>
+                      <a
+                        href="https://www.facebook.com/share/aSGMuz3T3WPDbWUz/?mibextid=wwXIfr"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-facebook" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.instagram.com/yousssefgalal/profilecard"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
