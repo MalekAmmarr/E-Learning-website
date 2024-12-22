@@ -36,9 +36,9 @@ const AdminHome = () => {
           <p className="text-gray-600 mb-4">
             Create, edit, or delete announcements for the platform.
           </p>
-          <Link href="/admin/announcements" passHref>
+          <Link href="/Admin_Home/Announcments" passHref>
             <button className="text-blue-500 hover:underline">
-              Manage Announcements
+              Manage Announcments
             </button>
           </Link>
         </div>
