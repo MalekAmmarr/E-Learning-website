@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import './page.css'; // Import the CSS file
+import Cookies from 'js-cookie';
 
 interface Announcement {
   title: string;
@@ -35,7 +36,11 @@ const AnnouncementsPage: React.FC = () => {
 
   const handleDelete = async (title: string) => {
     try {
-      const token = sessionStorage.getItem('authToken');
+
+
+      // Retrieve the token from sessionStorage
+      const token = sessionStorage.getItem('accessToken');
+
 
       if (!token) {
         throw new Error('No token found. Please log in again.');
@@ -49,6 +54,8 @@ const AnnouncementsPage: React.FC = () => {
         },
         body: JSON.stringify({ title }),
       });
+
+      
 
       if (!response.ok) {
         throw new Error(`Failed to delete announcement. Status: ${response.status}`);

@@ -6,66 +6,95 @@ import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import { User } from './Notes/page';
 
 interface Course {
-  name: string;
+  courseId: string;
+  title: string;
+  instructormail: string;
+  instructorName?: string;
+  description: string;
   category: string;
+  difficultyLevel: 'Beginner' | 'Intermediate' | 'Advanced';
+  isArchived: boolean;
+  totalClasses: number;
+  courseContent: string[]; // Array of PDF URLs/paths
+  notes: string[]; // Array of note IDs or content (you can adjust depending on the structure of the notes)
   price: number;
-  image: string;
-  intructor_name: string;
+  image: string; // URL or path to the course image
 }
+
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeCategory, setActiveCategory] = React.useState('All');
   const [userData, setUserData] = useState<any>(null);
   const [appliedCourses, setAppliedCourses] = useState<Course[]>([]);
   const [acceptedCourses, setAcceptedCourses] = useState<Course[]>([]);
+  const [Courses, setCourses] = useState<Course[]>([]);
 
   const router = useRouter();
-  const courses = [
-    {
-      name: 'Machine Learning',
-      category: 'Data Science',
-      price: 160,
-      image: '/assets/images/ML.jpg',
-      intructor_name: 'Prof.Omar Hossam',
-    },
-    {
-      name: 'Data Engineering and visualization',
-      category: 'Data Science',
-      price: 340,
-      image: '/assets/images/Visualization.jpg',
-      intructor_name: 'Prof.Omar Hossam',
-    },
-    {
-      name: 'Programming 1',
-      category: 'Programming',
-      price: 320,
-      image: '/assets/images/Prog_1.jpg',
-      intructor_name: 'Dr.Boudy marley',
-    },
-    {
-      name: 'Programming 2',
-      category: 'Programming',
-      price: 450,
-      image: '/assets/images/Prog_2.jpg',
-      intructor_name: 'Dr.Malek Lukasy',
-    },
-    {
-      name: 'English Beginner',
-      category: 'English',
-      price: 600,
-      image: '/assets/images/English (2).jpg',
-      intructor_name: 'Dr.Ali 3elwa',
-    },
-    {
-      name: 'English Advanced',
-      category: 'English',
-      price: 240,
-      image: '/assets/images/English (2).jpg',
-      intructor_name: 'Dr.Behziouni',
-    },
-  ];
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission behavior
+
+    const searchInput = document.getElementById(
+      'searchText',
+    ) as HTMLInputElement | null;
+
+    if (!searchInput) {
+      console.error('Search input element not found');
+      return;
+    }
+
+    const searchKeyword = searchInput.value.trim();
+
+    if (!searchKeyword) {
+      alert('Please enter a course name to search.');
+      return;
+    }
+
+    // Create a mapping of normalized course titles to original titles
+    const normalizedCourseMap = new Map<string, string>();
+    userData?.acceptedCourses.forEach((course: string) => {
+      const normalized = course.toLowerCase().replace(/\s+/g, '');
+      normalizedCourseMap.set(normalized, course);
+    });
+
+    // Normalize the search keyword for comparison
+    const normalizedSearchKeyword = searchKeyword
+      .toLowerCase()
+      .replace(/\s+/g, '');
+
+    // Check if the normalized search keyword matches any normalized course title
+    if (normalizedCourseMap.has(normalizedSearchKeyword)) {
+      const originalTitle = normalizedCourseMap.get(normalizedSearchKeyword); // Get the original title
+      handleCourseTitleClick(originalTitle!); // Use the original title for redirection
+    } else {
+      // Display an error message
+      alert(
+        `The course "${searchKeyword}" is not available. Please select an accepted course.`,
+      );
+    }
+  };
+
+  const fetchCourses = async (): Promise<Course[]> => {
+    try {
+      const response = await fetch(`http://localhost:3000/courses/Courses`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const courses = await response.json();
+      console.log('Fetched courses details:', courses); // Debugging: Log the fetched user details
+      setCourses(courses);
+      return courses; // Update state with user data
+    } catch (error) {
+      console.error('Error fetching user details', error);
+      throw error; // Propagate the error for the caller to handle
+    }
+  };
   // Filter courses based on the active category
   const filteredAppliedCourses =
     activeCategory === 'All'
@@ -82,31 +111,47 @@ export default function Home() {
         );
 
   useEffect(() => {
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 1000);
-    const accessToken = localStorage.getItem('authToken');
-    const user = localStorage.getItem('userData');
-    if (user) {
-      if (accessToken) {
-        const parsedUser = JSON.parse(user);
-        setUserData(parsedUser);
+    const initialize = async () => {
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 1000);
+      const Coursat = await fetchCourses();
+      const accessToken = sessionStorage.getItem('authToken');
+      const user = sessionStorage.getItem('userData');
 
-        // Filter applied and accepted courses based on user data
-        const userAppliedCourses = courses.filter((course) =>
-          parsedUser?.appliedCourses.includes(course.name),
-        );
-        const userAcceptedCourses = courses.filter((course) =>
-          parsedUser?.acceptedCourses.includes(course.name),
-        );
+      if (user) {
+        if (accessToken) {
+          const parsedUser = JSON.parse(user);
+          try {
+            // Fetch updated user details
+            const updatedUser = await fetchUserDetails(
+              parsedUser.email,
+              accessToken,
+            );
 
-        setAppliedCourses(userAppliedCourses);
-        setAcceptedCourses(userAcceptedCourses);
-      } // Set userData state only if data exists}
-    } else {
-      router.push('/login');
-    }
+            // Filter applied courses based on user data
+            const userAppliedCourses = Coursat.filter(
+              (course) => updatedUser?.appliedCourses.includes(course.title), // Ensure course.title is correct
+            );
+
+            const userAcceptedCourses = Coursat.filter((course) =>
+              updatedUser?.acceptedCourses.includes(course.title),
+            );
+
+            setAppliedCourses(userAppliedCourses);
+            setAcceptedCourses(userAcceptedCourses);
+          } catch (error) {
+            console.error('Error fetching user details:', error);
+          }
+        }
+      } else {
+        router.push('/login');
+      }
+    };
+
+    initialize();
   }, []);
+
   console.log(appliedCourses);
   console.log(acceptedCourses);
   // Function to handle note title click
@@ -115,6 +160,37 @@ export default function Home() {
       `/User_Home/CourseContent?title=${encodeURIComponent(courseTitle)}`,
     );
   };
+  const fetchUserDetails = async (
+    email: string,
+    accessToken: string,
+  ): Promise<User> => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/users/getUser/${email}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const data: User = await response.json();
+      console.log('Fetched user details:', data); // Debugging: Log the fetched user details
+      setUserData(data); // Update state with user data
+      return data; // Return the fetched user data
+    } catch (error) {
+      console.error('Error fetching user details', error);
+      throw error; // Propagate the error for the caller to handle
+    }
+  };
+
+  const getCourses = async (user: User) => {};
 
   return (
     <>
@@ -178,10 +254,10 @@ export default function Home() {
                 {/* ***** Logo End ***** */}
                 {/* ***** Serach Start ***** */}
                 <div className="search-input">
-                  <form id="search" action="#">
+                  <form id="search" onSubmit={(e) => handleSearch(e)}>
                     <input
                       type="text"
-                      placeholder="Type Something"
+                      placeholder="Search For Courses"
                       id="searchText"
                       name="searchKeyword"
                     />
@@ -369,7 +445,7 @@ export default function Home() {
                     insights to enhance your learning experience.
                   </p>
                   <div className="main-button">
-                    <a href="#!">Start Chat</a>
+                    <a href="/User_Home/Chat">Start Chat</a>
                   </div>
                 </div>
               </div>
@@ -591,7 +667,7 @@ export default function Home() {
                     <a href="#">
                       <img
                         src={appliedCourses.image}
-                        alt={appliedCourses.name}
+                        alt={appliedCourses.title}
                       />
                     </a>
                     <span className="category">{appliedCourses.category}</span>
@@ -604,9 +680,9 @@ export default function Home() {
                   </div>
                   <div className="down-content">
                     <span className="author">
-                      {appliedCourses.intructor_name}
+                      {appliedCourses.instructorName}
                     </span>
-                    <h4>{appliedCourses.name}</h4>
+                    <h4>{appliedCourses.title}</h4>
                   </div>
                 </div>
               </div>
@@ -614,6 +690,17 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* Want  A Space here  */}
+
+      <div
+        style={{
+          height: '500px',
+          backgroundColor: 'white',
+          marginTop: '30px',
+          marginBottom: '30px',
+        }}
+      ></div>
+
       <div className="section courses" id="courses">
         <div className="container">
           <div className="row">
@@ -677,12 +764,12 @@ export default function Home() {
                     <div className="thumb">
                       <a
                         onClick={() =>
-                          handleCourseTitleClick(acceptedCourses.name)
+                          handleCourseTitleClick(acceptedCourses.title)
                         }
                       >
                         <img
                           src={acceptedCourses.image}
-                          alt={acceptedCourses.name}
+                          alt={acceptedCourses.title}
                         />
                       </a>
                       <span className="category">
@@ -697,9 +784,15 @@ export default function Home() {
                     </div>
                     <div className="down-content">
                       <span className="author">
-                        {acceptedCourses.intructor_name}
+                        {acceptedCourses.instructorName}
                       </span>
-                      <h4>{acceptedCourses.name}</h4>
+                      <h4
+                        onClick={() =>
+                          handleCourseTitleClick(acceptedCourses.title)
+                        }
+                      >
+                        {acceptedCourses.title}
+                      </h4>
                     </div>
                   </div>
                 </div>
@@ -872,6 +965,41 @@ export default function Home() {
                     <li>
                       <a
                         href="https://www.instagram.com/bhaa_92/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-instagram" />
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="team section" id="team">
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-3 col-md-6">
+              <div className="team-member">
+                <div className="main-content">
+                  <img src="assets\images\Gee.jpg" alt="" />
+                  <span className="category">Germen Instructor</span>
+                  <h4>Youssef Galal</h4>
+                  <ul className="social-icons">
+                    <li>
+                      <a
+                        href="https://www.facebook.com/share/aSGMuz3T3WPDbWUz/?mibextid=wwXIfr"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-facebook" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.instagram.com/yousssefgalal/profilecard"
                         target="_blank"
                         rel="noopener noreferrer"
                       >

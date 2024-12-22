@@ -46,7 +46,6 @@ export class UsersController {
       throw error; // Rethrow or handle the error appropriately
     }
   }
-
   // Login a user
   @Post('login')
   async login(
@@ -58,7 +57,7 @@ export class UsersController {
   }
   // Get user by email
   @Post('getUser/:email')
-  async getUserByEmail(@Param('email') email: string) {
+  async getUserByEmail(@Param('email') email: string): Promise<User | null> {
     if (!email) {
       throw new BadRequestException('Email query parameter is required');
     }
@@ -70,6 +69,7 @@ export class UsersController {
 
     return user;
   }
+
   // Route to get notifications by email
   @UseGuards(AuthorizationGuard)
   @Get('notifications')

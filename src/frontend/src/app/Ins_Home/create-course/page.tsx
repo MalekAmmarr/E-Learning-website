@@ -1,8 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import './page.css';
-
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation'; // Correct import for Next.js 13+ app directory
 
 const CreateCourse = () => {
   const [formData, setFormData] = useState({
@@ -14,24 +13,37 @@ const CreateCourse = () => {
     difficultyLevel: 'Beginner',
     totalClasses: 0,
     courseContent: [],
+    price: 0,
   });
+  const [profilePictureUrl, setprofilePictureUrl] = useState<string | null>(
+    null,
+  );
 
-  const router = useRouter();
+  const router = useRouter(); // Correct usage inside a page component
 
-  useEffect(() => {
-    // Automatically set the instructor email from localStorage
-    const storedInstructor = localStorage.getItem('instructorData');
-    if (storedInstructor) {
-      const { email } = JSON.parse(storedInstructor);
-      setFormData((prevData) => ({ ...prevData, instructormail: email }));
-    }
-  }, []);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >,
+  ) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
+  // Handle image selection
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setprofilePictureUrl(reader.result as string); // Convert image to Base64 URL
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -40,47 +52,34 @@ const CreateCourse = () => {
 
       const { email } = JSON.parse(storedInstructor);
 
-      const res = await fetch(`http://localhost:3000/instructor/${email}/create-course`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, instructormail: email }),
-      });
+      const res = await fetch(
+        `http://localhost:3000/instructor/${email}/create-course`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...formData,
+            image: profilePictureUrl,
+            instructormail: email,
+          }),
+        },
+      );
 
       if (!res.ok) {
         throw new Error(`Failed to create course: ${res.statusText}`);
       }
 
       alert('Course created successfully!');
-      router.push('/Ins_Home/Add_content');
+      router.push('/Ins_Home');
     } catch (err: any) {
       alert(err.message || 'An unknown error occurred');
     }
   };
 
   return (
-    <div className="create-course-container">
-      <h2>Create New Course</h2>
+    <div>
+      <h1>Create Course</h1>
       <form onSubmit={handleSubmit}>
-        <label>
-          Course ID (Optional):
-          <input
-            type="text"
-            name="courseId"
-            value={formData.courseId}
-            onChange={handleInputChange}
-            placeholder="Leave blank to auto-generate"
-          />
-        </label>
-        <label>
-          Instructor Email:
-          <input
-            type="email"
-            name="instructormail"
-            value={formData.instructormail}
-            readOnly
-            placeholder="Logged-in email"
-          />
-        </label>
         <label>
           Title:
           <input
@@ -91,6 +90,7 @@ const CreateCourse = () => {
             required
           />
         </label>
+
         <label>
           Description:
           <textarea
@@ -100,6 +100,7 @@ const CreateCourse = () => {
             required
           />
         </label>
+
         <label>
           Category:
           <input
@@ -110,18 +111,21 @@ const CreateCourse = () => {
             required
           />
         </label>
+
         <label>
           Difficulty Level:
           <select
             name="difficultyLevel"
             value={formData.difficultyLevel}
             onChange={handleInputChange}
+            required
           >
             <option value="Beginner">Beginner</option>
             <option value="Intermediate">Intermediate</option>
             <option value="Advanced">Advanced</option>
           </select>
         </label>
+
         <label>
           Total Classes:
           <input
@@ -132,9 +136,40 @@ const CreateCourse = () => {
             required
           />
         </label>
-        <button type="submit" className="btn btn-primary">
-          Create Course
-        </button>
+
+        <label>
+          Price:
+          <input
+            type="number"
+            name="price"
+            value={formData.price}
+            onChange={handleInputChange}
+            required
+          />
+        </label>
+
+        <label>
+          Course ID:
+          <input
+            type="text"
+            name="courseId"
+            value={formData.courseId}
+            onChange={handleInputChange}
+          />
+        </label>
+
+        <label>
+          Image:
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleImageChange}
+            required
+          />
+        </label>
+
+        <button type="submit">Create Course</button>
       </form>
     </div>
   );

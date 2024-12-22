@@ -1,4 +1,3 @@
-// user.schema.ts
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import mongoose from 'mongoose';
 import { Document } from 'mongoose';
@@ -8,6 +7,8 @@ import { Progress } from './progress.schema';
 export class User extends Document {
   @Prop({ required: true, unique: true })
   email: string;
+  @Prop({ required: false, default: null })
+  oldEmail: string;
 
   @Prop({ required: true })
   name: string;
@@ -28,13 +29,13 @@ export class User extends Document {
   HaveEnteredMid?: boolean;
 
   @Prop({ type: [String], default: [] })
-  appliedCourses: string[]; // Array of courses the user wants to apply to
+  appliedCourses: string[];
 
   @Prop({ type: [String], default: [] })
-  acceptedCourses: string[]; // Array of courses the user has been accepted into
+  acceptedCourses: string[];
 
   @Prop({ type: [{ courseTitle: String, score: Number }], default: [] })
-  courseScores: { courseTitle: string; score: number }[]; // Array of objects with course title and score
+  courseScores: { courseTitle: string; score: number }[];
 
   @Prop({ type: [String], default: [] })
   Notifiction: string[];
@@ -51,11 +52,11 @@ export class User extends Document {
       {
         quizId: String,
         courseTitle: String,
-        isfeedbacked: Boolean, // New attribute added here
+        isfeedbacked: Boolean,
         feedback: [
           {
             question: String,
-            studentAnswer: String, // Add student answer
+            studentAnswer: String,
             feedback: String,
           },
         ],
@@ -66,28 +67,35 @@ export class User extends Document {
   feedback: Array<{
     quizId: string;
     courseTitle: string;
-    isfeedbacked: boolean; // Include isfeedbacked as a boolean
+    isfeedbacked: boolean;
     feedback: Array<{
       question: string;
-      studentAnswer: string; // Include student answer
+      studentAnswer: string;
       feedback: string;
     }>;
   }>;
 
-  // Notes tied to specific courses
   @Prop({ type: [String], default: [] })
   Notes: string[];
 
-  // Virtual field to calculate GPA
   @Prop({ default: 0 })
   GPA: number;
 
-  // Virtual function to calculate the GPA
-  /*getGPA(): number {
-  if (this.courseScores.length === 0) return 0;
-  const total = this.courseScores.reduce((acc, scoreObj) => acc + scoreObj.score, 0);
-  return total / this.courseScores.length;
-}*/
+  @Prop({
+    type: [
+      {
+        name: String,
+        courseTitle: String,
+        certificateImageUrl: String,
+      },
+    ],
+    default: [],
+  })
+  certificates: Array<{
+    name: string;
+    courseTitle: string;
+    certificateImageUrl: string;
+  }>;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

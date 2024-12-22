@@ -22,6 +22,7 @@ import { AuthModule } from './Backend/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import path, { join } from 'path';
 import { ChatModule } from './Backend/chat/chat.module';
+import { DiscussionModule } from './Backend/Discussion/DiscussionModule';
 
 @Module({
   imports: [
@@ -38,7 +39,7 @@ import { ChatModule } from './Backend/chat/chat.module';
       },
     ),
     ServeStaticModule.forRoot({
-      rootPath: join('D:', 'ahmed', 'Downloads', 'files'), // Folder where PDFs are stored
+      rootPath: join('C:', 'Users', 'Omar Hossam', 'Downloads'), // Folder where PDFs are stored
       serveRoot: '/files', // URL path prefix for accessing the PDFs
     }),
     UsersModule,
@@ -63,6 +64,7 @@ import { ChatModule } from './Backend/chat/chat.module';
     ProgressModule,
     AuthModule,
     ChatModule,
+    DiscussionModule
   ],
   controllers: [AppController],
   providers: [AppService],

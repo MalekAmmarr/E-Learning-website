@@ -17,8 +17,26 @@ interface Course {
   price: number;
   image: string; // URL or path to the course image
 }
+export interface User {
+  email: string;
+  name: string;
+  age: string;
+  passwordHash: string;
+  profilePictureUrl?: string;
+  appliedCourses: string[];
+  acceptedCourses: string[];
+  courseScores: { courseTitle: string; score: number }[];
+  Notifiction: string[];
+  feedback: Array<{
+    quizId: string;
+    courseTitle: string;
+    feedback: Array<{ question: string; feedback: string }>;
+  }>;
+  Notes: string[];
+  GPA: number;
+}
 
-const RegisterPage = () => {
+const EditPage = () => {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [email, setEmail] = useState('');
@@ -31,10 +49,48 @@ const RegisterPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [Courses, setCourses] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [userData, setUserData] = useState<User>();
   const router = useRouter();
   useEffect(() => {
     fetchCourses();
+    const accessToken = sessionStorage.getItem('authToken');
+    const user = sessionStorage.getItem('userData');
+    if (accessToken) {
+      if (user) {
+        const parsedUser = JSON.parse(user);
+        fetchUserDetails(parsedUser?.email, accessToken);
+      } else router.push('/login');
+    } else router.push('/login');
   }, []);
+  const fetchUserDetails = async (
+    email: string,
+    accessToken: string,
+  ): Promise<User> => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/users/getUser/${email}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const data: User = await response.json();
+      console.log('Fetched user details:', data); // Debugging: Log the fetched user details
+      setUserData(data); // Update state with user data
+      return data; // Return the fetched user data
+    } catch (error) {
+      console.error('Error fetching user details', error);
+      throw error; // Propagate the error for the caller to handle
+    }
+  };
   // Handle course selection
   const handleCourseChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value;
@@ -96,6 +152,21 @@ const RegisterPage = () => {
       setError('Passwords do not match');
       return;
     }
+    if (userData) {
+      // Check if any course in selectedCourses has already been applied for or accepted
+      const hasAppliedOrAccepted = selectedCourses.some(
+        (course) =>
+          userData.appliedCourses.includes(course) ||
+          userData.acceptedCourses.includes(course),
+      );
+
+      if (hasAppliedOrAccepted) {
+        setError(
+          `You have already applied for or been accepted to one of the selected courses.`,
+        );
+        return;
+      }
+    }
 
     try {
       // API call to register
@@ -110,7 +181,8 @@ const RegisterPage = () => {
           email,
           passwordHash: password,
           appliedCourses: selectedCourses,
-          profilePictureUrl, // Send the Base64 URL of the image
+          profilePictureUrl,
+          oldEmail: userData?.email, // Send the Base64 URL of the image
         }),
       });
 
@@ -125,11 +197,19 @@ const RegisterPage = () => {
       setError(err.message || 'An error occurred');
     }
   };
-
+  // Ensure userData is loaded before rendering the form
+  if (!userData) {
+    return (
+      // Loading spinner or animation
+      <div className="loading-container">
+        <i className="loading-icon" />
+        <strong>Loading courses, please wait...</strong>
+      </div>
+    );
+  }
   return (
     <form className="form" onSubmit={handleSubmit}>
-      <p className="title">Register</p>
-      <p className="message">Signup now and get full access to our app.</p>
+      <p className="title">Updtae Profile</p>
 
       <div className="flex">
         {/* Name and Age Fields */}
@@ -141,7 +221,7 @@ const RegisterPage = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <span>Name</span>
+          <span>Old Name:{userData.name}</span>
         </label>
         <label>
           <input
@@ -151,7 +231,7 @@ const RegisterPage = () => {
             value={age}
             onChange={(e) => setAge(e.target.value)}
           />
-          <span>Age</span>
+          <span>old Age :{userData.age}</span>
         </label>
       </div>
 
@@ -164,7 +244,7 @@ const RegisterPage = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <span>Email</span>
+        <span>old Email :{userData.email}</span>
       </label>
       <label>
         <input
@@ -174,7 +254,7 @@ const RegisterPage = () => {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <span>Password</span>
+        <span>New Password </span>
       </label>
       <label>
         <input
@@ -184,13 +264,13 @@ const RegisterPage = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <span>Confirm Password</span>
+        <span>Confirm New Password</span>
       </label>
 
       {/* Profile Picture Upload */}
       <label className="file-upload">
         <input type="file" accept="image/*" onChange={handleImageChange} />
-        <span>Upload Profile Picture</span>
+        <span>Upload new Profile Picture</span>
       </label>
       {profilePictureUrl && (
         <div className="image-preview">
@@ -211,7 +291,7 @@ const RegisterPage = () => {
           // Loading spinner or animation
           <div className="loading-container">
             <i className="loading-icon" />
-            <strong>Loading , please wait...</strong>
+            <strong>Loading courses, please wait...</strong>
           </div>
         ) : (
           // Render courses when loading is complete
@@ -236,13 +316,8 @@ const RegisterPage = () => {
       <button type="submit" className="submit">
         Submit
       </button>
-
-      {/* Signin Link */}
-      <p className="signin">
-        Already have an account? <a href="/login">Signin</a>
-      </p>
     </form>
   );
 };
 
-export default RegisterPage;
+export default EditPage;

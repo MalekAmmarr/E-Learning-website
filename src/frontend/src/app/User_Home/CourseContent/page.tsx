@@ -7,13 +7,22 @@ import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import './page.css';
+import { Spinner } from 'react-bootstrap';
 
 interface Course {
-  name: string;
+  courseId: string;
+  title: string;
+  instructormail: string;
+  instructorName?: string;
+  description: string;
   category: string;
+  difficultyLevel: 'Beginner' | 'Intermediate' | 'Advanced';
+  isArchived: boolean;
+  totalClasses: number;
+  courseContent: string[]; // Array of PDF URLs/paths
+  notes: string[]; // Array of note IDs or content (you can adjust depending on the structure of the notes)
   price: number;
-  image: string;
-  intructor_name: string;
+  image: string; // URL or path to the course image
 }
 const CourseContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,57 +31,45 @@ const CourseContent: React.FC = () => {
   const [appliedCourses, setAppliedCourses] = useState<Course[]>([]);
   const [acceptedCourses, setAcceptedCourses] = useState<Course[]>([]);
   const [courseContent, setCourseContent] = useState<string[]>([]);
-  const [courseinfo, setCourseInfo] = useState<Course[]>([]);
+  const [courseinfo, setCourseInfo] = useState<Course>();
   const [error, setError] = useState<string | null>(null);
+  const [Courses, setCourses] = useState<Course[]>([]);
 
   const router = useRouter();
-  const courses = [
-    {
-      name: 'Machine Learning',
-      category: 'Data Science',
-      price: 160,
-      image: '/assets/images/ML.jpg',
-      intructor_name: 'Prof.Omar Hossam',
-    },
-    {
-      name: 'Data Engineering and visualization',
-      category: 'Data Science',
-      price: 340,
-      image: '/assets/images/Visualization.jpg',
-      intructor_name: 'Prof.Omar Hossam',
-    },
-    {
-      name: 'Programming 1',
-      category: 'Programming',
-      price: 320,
-      image: '/assets/images/Prog_1.jpg',
-      intructor_name: 'Dr.Boudy marley',
-    },
-    {
-      name: 'Programming 2',
-      category: 'Programming',
-      price: 450,
-      image: '/assets/images/Prog_2.jpg',
-      intructor_name: 'Dr.Malek Lukasy',
-    },
-    {
-      name: 'English Beginner',
-      category: 'English',
-      price: 600,
-      image: '/assets/images/English (2).jpg',
-      intructor_name: 'Dr.Ali 3elwa',
-    },
-    {
-      name: 'English Advanced',
-      category: 'English',
-      price: 240,
-      image: '/assets/images/English (2).jpg',
-      intructor_name: 'Dr.Behziouni',
-    },
-  ];
-  // Method to filter courses based on the title
-  const getCourse = (title: string) => {
-    return courses.filter((course) => course.name === title);
+
+  const getCourse = async (title: string): Promise<Course> => {
+    const response = await fetch(
+      `http://localhost:3000/courses/CoursesTitle/${title}`,
+      {
+        method: 'GET',
+      },
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user details:`);
+    }
+    return response.json();
+  };
+  const fetchCourses = async (): Promise<Course[]> => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(`http://localhost:3000/courses/Courses`, {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const courses = await response.json();
+      console.log('Fetched courses details:', courses); // Debugging: Log the fetched user details
+      setCourses(courses);
+      return courses; // Update state with user data
+    } catch (error) {
+      console.error('Error fetching user details', error);
+      throw error; // Propagate the error for the caller to handle
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const fetchContent = async () => {
@@ -90,7 +87,7 @@ const CourseContent: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Add token if needed
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`, // Add token if needed
         },
         body: JSON.stringify({ courseTitle }),
       });
@@ -101,7 +98,9 @@ const CourseContent: React.FC = () => {
 
       const data = await response.json();
       setCourseContent(data.content);
-      setCourseInfo(getCourse(courseTitle));
+      const course = await getCourse(courseTitle);
+      console.log('Course : ', course);
+      setCourseInfo(course);
       console.log('content : ', data.content); // Assuming the response is an array of strings
     } catch (error) {
       console.error('Error fetching content:', error);
@@ -115,6 +114,7 @@ const CourseContent: React.FC = () => {
     pdfUrl: String,
   ) => {
     try {
+      setIsLoading(true);
       // Ensure all required parameters are provided
       if (!userEmail || !courseTitle || !pdfUrl) {
         console.error('Missing required parameters');
@@ -133,7 +133,7 @@ const CourseContent: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`, // Include token if required
+          Authorization: `Bearer ${sessionStorage.getItem('authToken')}`, // Include token if required
         },
         body: JSON.stringify(body),
       });
@@ -161,8 +161,9 @@ const CourseContent: React.FC = () => {
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    const accessToken = localStorage.getItem('authToken');
-    const user = localStorage.getItem('userData');
+    fetchCourses();
+    const accessToken = sessionStorage.getItem('authToken');
+    const user = sessionStorage.getItem('userData');
     if (user) {
       if (accessToken) {
         const parsedUser = JSON.parse(user);
@@ -254,55 +255,7 @@ const CourseContent: React.FC = () => {
       //alert(`An error occurred while processing your request: ${error}`);
     }
   };
-  const HandleStartMid = async () => {
-    const queryParams = new URLSearchParams(window.location.search);
-    const courseTitle = queryParams.get('title'); // Get 'title' from query params
-    const studentEmail = userData.email;
-    try {
-      // Step 1: Get the student's progress from the backend using fetch
-      const response = await fetch(
-        `http://localhost:3000/progress/getProgress/${courseTitle}/${studentEmail}`,
-      );
-      const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.message || 'Error fetching progress data');
-      }
-
-      const score = data.score; // Assuming the score is in the response
-      // Step 3: Create quiz by calling the backend API
-      const quizResponse = await fetch('http://localhost:3000/quizzes/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          instructorEmail: 'omar.hossam3@gmail.com', // Replace with the actual instructor's email
-          quizId: `midterm`, // Dynamic quiz ID based on course title
-          quizType: 'Midterm', // Set based on score
-          numberOfQuestions: 15, // Example number of questions
-          studentEmail: studentEmail, // Student email
-          courseTitle: courseTitle, // Course title
-        }),
-      });
-
-      const quizData = await quizResponse.json();
-
-      if (!quizResponse.ok) {
-        throw new Error(quizData.message || 'Error creating quiz');
-      }
-
-      // Step 4: Handle the successful quiz creation (e.g., redirect to the quiz page)
-      console.log('Quiz : ', quizData);
-      console.log('Quiz_Id :', quizData.data.quiz_id);
-      if (courseTitle)
-        window.location.href = `/User_Home/CourseContent/Quiz?title=${encodeURIComponent(courseTitle)}&quiz_id=${quizData.data.quiz_id}`;
-      else throw new Error('Course Not Found');
-    } catch (error) {
-      console.error('An error occurred:', error);
-      //alert(`An error occurred while processing your request: ${error}`);
-    }
-  };
   return (
     <>
       <meta charSet="utf-8" />
@@ -566,7 +519,7 @@ const CourseContent: React.FC = () => {
 
           {/* Display filtered courses or message */}
           <div className="row event_box">
-            {courseContent.length > 0 ? (
+            {courseinfo && courseContent.length > 0 ? (
               courseContent.map((course, index) => (
                 <div
                   key={index}
@@ -577,46 +530,53 @@ const CourseContent: React.FC = () => {
                     <div className="thumb">
                       <a
                         onClick={() =>
-                          downloadPDF(
-                            userData?.email,
-                            courseinfo[0].name,
-                            course,
-                          )
+                          downloadPDF(userData?.email, courseinfo.title, course)
                         }
                       >
                         <img
-                          src={courseinfo[0].image} // Correct usage of the current course image
-                          alt={courseinfo[0].name} // Correct usage of the current course name
+                          src={courseinfo.image} // Correct usage of the current course image
+                          alt={courseinfo.title} // Correct usage of the current course name
                         />
                       </a>
-                      <span className="category">{courseinfo[0].category}</span>
+                      <span className="category">{courseinfo.category}</span>
                     </div>
 
                     {/* Course Instructor and Title */}
                     <div className="down-content">
                       <span className="author">
-                        {courseinfo[0].intructor_name}
+                        {courseinfo.instructorName}
                       </span>
                       <h4
-                        onClick={() =>
+                        onClick={() => {
+                          setIsLoading(true); // Set loading to true
                           downloadPDF(
                             userData?.email,
-                            courseinfo[0].name,
+                            courseinfo.title,
                             course,
-                          )
-                        }
+                          ).finally(() => setIsLoading(false)); // Reset loading after operation
+                        }}
                       >
-                        {course}
+                        {isLoading ? (
+                          <div className="loading-overlay">
+                            <div className="loading-content">
+                              <div className="loading-spinner"></div>
+                              <p>Downloading...</p>
+                            </div>
+                          </div>
+                        ) : (
+                          course.split('.')[0]
+                        )}
                       </h4>
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="col-12 text-center">
-                <p className="waiting-message">
-                  Your application is awaiting instructor acceptance.
-                </p>
+              <div className="loading-overlay">
+                <div className="loading-content">
+                  <Spinner animation="border" variant="primary" />
+                  <p>Loading content, please wait...</p>
+                </div>
               </div>
             )}
           </div>
