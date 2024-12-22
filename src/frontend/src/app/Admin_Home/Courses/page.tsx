@@ -3,17 +3,26 @@
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Link from 'next/link';
+import React from 'react';
 
 interface Course {
-  id: number;
+  courseId: number;
   title: string;
-  instructor: string;
+  instructorName: string;
 }
 
 export default function CourseManagement() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // States for editing
+  const [editRow, setEditRow] = useState<number | null>(null);
+  const [editValues, setEditValues] = useState({
+    courseId: '',
+    title: '',
+    instructorName: '',
+  });
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -31,29 +40,109 @@ export default function CourseManagement() {
     fetchCourses();
   }, []);
 
-  // Wrap deleteCourse in useCallback to prevent re-renders
-  const deleteCourse = useCallback(async (courseId: number) => {
-    if (!confirm('Are you sure you want to delete this course?')) return;
 
+  const handleEditClick = (course: Course) => {
+    setEditRow(course.courseId);
+    setEditValues({
+      courseId: course.courseId.toString(),
+      title: course.title,
+      instructorName: course.instructorName,
+    });
+  };
+
+  
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditValues((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const cancelEditing = () => {
+    setEditRow(null);
+  };
+
+  // Wrap deleteCourse in useCallback to prevent re-renders
+  const deleteCourse = useCallback(async (title: string) => {
+    if (!confirm('Are you sure you want to delete this course?')) return;
+  
     try {
-      const token = 'YOUR_ACCESS_TOKEN'; // Replace with your method of getting a token
-      await axios.delete(`http://localhost:3000/admins/deleteCourse/${courseId}`, {
+      const token = sessionStorage.getItem('accessToken');
+      console.log('Retrieved token:', token);
+  
+      if (!token) {
+        alert('No access token found. Please log in again.');
+        return;
+      }
+  
+      // Make the DELETE request with courseId in the body
+      const response = await axios.delete('http://localhost:3000/admins/deleteCourse', {
         headers: {
           Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json', // Explicitly set the content type
         },
+        data: { title }, // Pass courseId in the request body
       });
-
-      console.log('Course deleted:', courseId);
-
-      // State update is done only after deleting the course
-      setCourses((prevCourses) => prevCourses.filter((course) => course.id !== courseId));
-
+  
+      console.log('Response from server:', response.data);
+  
+      // Update the state after successful deletion
+      setCourses((prevCourses) => prevCourses.filter((course) => course.title !== title));
+  
       alert('Course deleted successfully.');
     } catch (err: any) {
       console.error('Error deleting course:', err.response?.data || err.message);
       alert('Failed to delete the course. Please check the logs for details.');
     }
-  }, []); // Empty dependency array ensures the function is memoized
+  }, []);
+
+  const saveCourse = async () => {
+    try {
+      const token = sessionStorage.getItem('accessToken');
+
+      if (!token) {
+        alert('No access token found. Please log in again.');
+        return;
+      }
+
+      const updates = {
+        
+        title: editValues.title,
+        instructorName: editValues.instructorName,
+      };
+
+      const response = await axios.patch(
+        'http://localhost:3000/admins/updateCourse',
+        {
+          courseId: editValues.courseId,
+          updates,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const updatedCourse = response.data.updatedCourse;
+
+      setCourses((prevCourses) =>
+        prevCourses.map((course) =>
+          course.courseId.toString() === updatedCourse.courseId
+            ? { ...course, ...updates }
+            : course
+        )
+      );
+
+      alert('Course updated successfully.');
+      setEditRow(null);
+    } catch (err: any) {
+      console.error('Error updating course:', err.response?.data || err.message);
+      alert('Failed to update the course. Please check the logs for details.');
+    }
+  };
+
+   // Empty dependency array ensures the function is memoized
 
   if (loading) {
     return <div className="p-8 text-center text-gray-600">Loading courses...</div>;
@@ -87,7 +176,7 @@ export default function CourseManagement() {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-blue-600 text-white">
-                <th className="py-4 px-6 text-sm font-medium">ID</th>
+                <th className="py-4 px-6 text-sm font-medium">Course ID</th>
                 <th className="py-4 px-6 text-sm font-medium">Title</th>
                 <th className="py-4 px-6 text-sm font-medium">Instructor</th>
                 <th className="py-4 px-6 text-sm font-medium">Actions</th>
@@ -95,47 +184,78 @@ export default function CourseManagement() {
             </thead>
             <tbody>
               {courses.map((course, index) => (
-                <tr
-                  key={course.id}
-                  className={index % 2 === 0 ? 'bg-gray-50' : 'bg-gray-100'}
-                >
-                  <td className="py-4 px-6 text-gray-800 font-medium">{course.id}</td>
-                  <td className="py-4 px-6 text-gray-800 font-medium">{course.title}</td>
-                  <td className="py-4 px-6 text-gray-800 font-medium">{course.instructor}</td>
-                  <td className="py-4 px-6 flex items-center space-x-4">
-                    <Link
-                      href={`/admin/courses/edit/${course.id}`}
-                      className="text-blue-600 hover:underline font-medium"
-                    >
-                      Edit
-                    </Link>
-                    <button
-                      onClick={() => deleteCourse(course.id)} // Trigger delete function here
-                      className="text-red-600 hover:underline font-medium"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
+                <React.Fragment key={course.courseId}>
+                  <tr className={index % 2 === 0 ? 'bg-gray-50' : 'bg-gray-100'}>
+                    <td className="py-4 px-6 text-gray-800 font-medium">{course.courseId}</td>
+                    <td className="py-4 px-6 text-gray-800 font-medium">{course.title}</td>
+                    <td className="py-4 px-6 text-gray-800 font-medium">{course.instructorName}</td>
+                    <td className="py-4 px-6 flex items-center space-x-4">
+                      <button
+                        onClick={() => handleEditClick(course)}
+                        className="text-blue-600 hover:underline font-medium"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteCourse(course.title)}
+                        className="text-red-600 hover:underline font-medium"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+
+                  {/* Editable row */}
+                  {editRow === course.courseId && (
+                    <tr className="bg-gray-100">
+                      <td className="py-4 px-6">
+                        <input
+                          type="text"
+                          name="courseId"
+                          value={editValues.courseId}
+                          onChange={handleInputChange}
+                          className="w-full p-2 border-2 border-blue-500 rounded bg-gradient-to-r from-blue-50 to-blue-100 text-black focus:ring focus:ring-blue-300 focus:outline-none"
+                          disabled
+                        />
+                      </td>
+                      <td className="py-4 px-6">
+                        <input
+                          type="text"
+                          name="title"
+                          value={editValues.title}
+                          onChange={handleInputChange}
+                          className="w-full p-2 border-2 border-blue-500 rounded bg-gradient-to-r from-blue-50 to-blue-100 text-black focus:ring focus:ring-blue-300 focus:outline-none"
+                        />
+                      </td>
+                      <td className="py-4 px-6">
+                        <input
+                          type="text"
+                          name="instructorName"
+                          value={editValues.instructorName}
+                          onChange={handleInputChange}
+                          className="w-full p-2 border-2 border-blue-500 rounded bg-gradient-to-r from-blue-50 to-blue-100 text-black  focus:ring focus:ring-blue-300 focus:outline-none"
+                        />
+                      </td>
+                      <td className="py-4 px-6 flex items-center space-x-2">
+                        <button
+                          onClick={saveCourse}
+                          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                        >
+                          Cancel
+                        </button>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
-        </div>
-
-        {/* Pagination */}
-        <div className="flex justify-center mt-6">
-          <button
-            className="px-4 py-2 mx-2 bg-gray-300 text-gray-600 rounded-md disabled:opacity-50"
-            disabled
-          >
-            Previous
-          </button>
-          <button
-            className="px-4 py-2 mx-2 bg-gray-300 text-gray-600 rounded-md disabled:opacity-50"
-            disabled
-          >
-            Next
-          </button>
         </div>
       </div>
     </div>

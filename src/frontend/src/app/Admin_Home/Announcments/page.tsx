@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import './page.css'; // Import the CSS file
+import Cookies from 'js-cookie';
 
 interface Announcement {
   title: string;
@@ -35,8 +36,11 @@ const AnnouncementsPage: React.FC = () => {
 
   const handleDelete = async (title: string) => {
     try {
+
+
       // Retrieve the token from sessionStorage
-      const token = sessionStorage.getItem('authToken');
+      const token = sessionStorage.getItem('accessToken');
+
 
       if (!token) {
         throw new Error('No token found. Please log in again.');
@@ -46,16 +50,17 @@ const AnnouncementsPage: React.FC = () => {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Include the token here
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ title }),
       });
+
+      
 
       if (!response.ok) {
         throw new Error(`Failed to delete announcement. Status: ${response.status}`);
       }
 
-      // Remove the deleted announcement from the UI
       setAnnouncements((prev) => prev.filter((announcement) => announcement.title !== title));
     } catch (error: any) {
       console.error('Error deleting announcement:', error);
@@ -67,6 +72,11 @@ const AnnouncementsPage: React.FC = () => {
     <div className="page-container">
       <h1 className="page-header">Announcements</h1>
       {error && <div className="error-message">{error}</div>}
+      <div className="top-actions">
+        <Link href="/announcements/create">
+          <button className="create-button">Create Announcement</button>
+        </Link>
+      </div>
       <table className="table">
         <thead>
           <tr>
