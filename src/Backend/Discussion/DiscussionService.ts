@@ -4,7 +4,7 @@ import mongoose, { Model } from 'mongoose';
 import { Thread } from 'src/schemas/threads.schema';
 import { Reply } from 'src/schemas/reply.schema';
 import { Announcement } from 'src/schemas/announcement.schema';
-import { threadId } from 'worker_threads';
+import { Forum } from 'src/schemas/forum.schema';
 
 @Injectable()
 export class DiscussionService {
@@ -12,17 +12,68 @@ export class DiscussionService {
     @InjectModel(Thread.name, "eLearningDB") private readonly threadModel: mongoose.Model<Thread>,
     @InjectModel(Reply.name, "eLearningDB") private readonly replyModel: mongoose.Model<Reply>,
     @InjectModel(Announcement.name, "eLearningDB") private readonly announcementModel: mongoose.Model<Announcement>,
+    @InjectModel(Forum.name, "eLearningDB") private readonly forumModel: mongoose.Model<Forum>
   ) {}
 
-  // Create a new thread
-  async createThread(courseId: string, title: string, content: string, createdBy: string) {
-    const newThread = new this.threadModel({ courseId, title, content, createdBy });
-    return newThread.save();
+  //Create Forum
+  async createForum(courseId: string, createdBy: string){
+    const existingForum = await this.forumModel.findOne({courseId});
+    if(existingForum){
+      throw new Error('Group ID already exists.');
+    }
+
+    const newForum = new this.forumModel({courseId, createdBy});
+
+    return await newForum.save();
+
+    
+  }
+  async deleteForumWithThreadsAndReplies(courseId: string) {
+    try {
+      // Fetch all threads associated with the forum
+      const threads = await this.threadModel.find({ courseId }).exec();
+  
+      // Extract thread IDs
+      const threadIds = threads.map(thread => thread._id);
+  
+      // Delete all replies associated with the threads
+      await this.replyModel.deleteMany({ threadId: { $in: threadIds } }).exec();
+  
+      // Delete all threads associated with the forum
+      await this.threadModel.deleteMany({ courseId }).exec();
+  
+      // Finally, delete the forum
+      const forum = await this.threadModel.findOne({ courseId }).exec();
+      await this.forumModel.findByIdAndDelete(forum._id).exec();
+    } catch (error) {
+      throw new Error(`Error deleting forum and its associated data: ${error.message}`);
+    }
+  }
+  //get forum by courseId
+  async getForumByCourseId(courseId: string) {
+    try {
+      return this.threadModel.findOne({ courseId }).exec();
+    } catch (error) {
+      throw new Error(`Error retrieving forum by courseId: ${error.message}`);
+    }
+  }
+  //get forum by id
+  async getForumById(forumId: string) {
+    try {
+      const forum = await this.forumModel.findById(forumId).exec();
+      if (!forum) {
+        throw new Error('Forum not found.');
+      }
+      return forum;
+    } catch (error) {
+      throw new Error(`Error retrieving forum: ${error.message}`);
+    }
   }
 
+ 
   // Get all threads for a course
-  async getThreadsByCourse(courseId: string) {
-    return this.threadModel.find({ courseId }).sort({ createdAt: -1 }).exec();
+  async getThreadsByForum(forumId: string) {
+    return this.threadModel.find({ forumId }).sort({ createdAt: -1 }).exec();
   }
 
   // Get all replies for a thread
@@ -49,9 +100,9 @@ export class DiscussionService {
     return this.threadModel.find({ courseId }).sort({ createdAt: -1 }).exec();
   }
 
-  async saveReply(courseId: string, threadId: string, content: string, createdBy: string) {
+  async saveReply( threadId: string, content: string, createdBy: string) {
     const reply = new this.replyModel({
-      courseId,
+      
       threadId,
       content,
       createdBy,
@@ -70,14 +121,14 @@ export class DiscussionService {
     return thread.save();
   }
   async getThreadbyId(threadId: string){
-    const thread = await this.threadModel.findOne({ _id: threadId }).exec();
+    const thread = await this.threadModel.findById( threadId ).exec();
     return thread;
   }
   async getReplybyId(replyId: string){
     const reply = await this.replyModel.findOne({ _id: replyId }).exec();
     return reply;
   }
-  // Update a forum
+  // Update a Thread
   async updateThread(threadId: string, title: string, content: string) {
     const updatedThread = await this.threadModel.findByIdAndUpdate(
       threadId,
@@ -88,7 +139,15 @@ export class DiscussionService {
   }
 
   async deleteThread(threadId: string) {
-    return this.threadModel.findByIdAndDelete(threadId).exec();
+    try {
+      // Delete all replies associated with the thread
+      await this.replyModel.deleteMany({ threadId }).exec();
+  
+      // Delete the thread itself
+      return this.threadModel.findByIdAndDelete(threadId).exec();
+    } catch (error) {
+      throw new Error(`Error deleting thread and its associated replies: ${error.message}`);
+    }
   }
   async deleteReply(replyId: string) {
     return this.replyModel.findByIdAndDelete(replyId).exec();

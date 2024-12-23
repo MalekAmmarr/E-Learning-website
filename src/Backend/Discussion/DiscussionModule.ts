@@ -14,6 +14,8 @@ import { AdminsModule } from '../admins/admins.module';
 import { admin, AdminSchema } from 'src/schemas/admin.schema';
 import { CoursesModule } from '../courses/courses.module';
 import { UsersModule } from '../users/users.module';
+import { Forum, ForumSchema } from 'src/schemas/forum.schema';
+
 
 @Module({
   imports: [
@@ -24,6 +26,7 @@ import { UsersModule } from '../users/users.module';
         { name: Announcement.name, schema: AnnouncementSchema },
         { name: admin.name, schema: AdminSchema }, // Add Announcement schema
         { name: Instructor.name, schema: InstructorSchema },
+        {name : Forum.name, schema : ForumSchema }
       ],
       'eLearningDB'
     ),
