@@ -107,6 +107,20 @@ const AdminHome = () => {
             </button>
           </Link>
         </div>
+
+        {/* Card - Backups */}
+        <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+          <h2 className="text-xl font-semibold mb-2">Backups</h2>
+          <p className="text-gray-600 mb-4">
+            Manage scheduled backups and restore critical data.
+          </p>
+          <Link href="/Admin_Home/Backups" passHref>
+            <button className="text-blue-500 hover:underline">
+              Manage Backups
+            </button>
+          </Link>
+        </div>
+
       </main>
     </div>
   );
