@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 @Schema({ timestamps: true })
 export class Thread extends Document {
   @Prop({ required: true })
-  courseId: string; // ID of the course this thread belongs to
+  courseId: string; // courseID of the forum this thread belongs to
 
   @Prop({ required: true })
   title: string; // Thread title

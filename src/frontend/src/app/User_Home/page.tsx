@@ -469,6 +469,22 @@ export default function Home() {
                 </div>
               </div>
             </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img src="/assets/images/service-02.png" alt="web experts" />
+                </div>
+                <div className="main-content">
+                  <h4>Discussion Forum</h4>
+                  <p>
+                    Join discussion Forums to start discussions with your peers and Instructors.
+                  </p>
+                  <div className="main-button">
+                    <a href="/User_Home/DiscussionForum">Join Discussion Forums</a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

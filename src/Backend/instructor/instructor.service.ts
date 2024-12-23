@@ -539,4 +539,18 @@ export class InstructorService {
     return instructor;
   }
 
+
+// Method to find an instructor by their Email
+async findInstructorByEmail(instructorEmail: string): Promise<Instructor> {
+  // Find the instructor by their Email
+  const instructor = await this.InstructorModel.findOne({instructorEmail}).exec();
+
+  if (!instructor) {
+    throw new NotFoundException(`Instructor with email ${instructorEmail} not found`);
+  }
+
+  return instructor;
+}
+
+
 }
