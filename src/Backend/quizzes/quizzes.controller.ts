@@ -125,28 +125,46 @@ export class QuizzesController {
     return this.quizService.giveFeedback(quizId, studentEmail, feedback);
   }
 
+  @UseGuards(AuthorizationGuard)
   @Get('by-course')
+  @Roles('instructor')
   async getQuizzesByCourseTitle(
     @Query('courseTitle') courseTitle: string,
   ): Promise<Quiz[]> {
     return this.quizService.getQuizzesByCourseTitle(courseTitle);
   }
 
-  // Endpoint to fetch only quiz IDs by course title
-  @Get('ids-by-course')
-  async getQuizIdsByCourseTitle(
-    @Query('courseTitle') courseTitle: string,
-  ): Promise<string[]> {
-    return this.quizService.getQuizIdsByCourseTitle(courseTitle);
+  // Method for fetching quiz IDs and course titles by instructor email
+  @UseGuards(AuthorizationGuard)
+  @Get('by-instructor')
+  @Roles('instructor')
+  async getQuizIdsAndCourseTitlesByInstructorEmailforQuizzes(
+    @Query('email') instructorEmail: string
+  ): Promise<{ quizId: string; courseTitle: string }[]> {
+    if (!instructorEmail) {
+      throw new BadRequestException('Instructor email is required');
+    }
+
+    try {
+      return await this.quizService.getQuizIdsAndCourseTitlesByInstructorEmail(
+        instructorEmail
+      );
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   // Endpoint to fetch the quiz content by quizId
+  @UseGuards(AuthorizationGuard)
   @Get(':quizId')
+  @Roles('instructor')
   async getQuizById(@Param('quizId') quizId: string): Promise<Quiz> {
     return this.quizService.getQuizById(quizId);
   }
 
+  @UseGuards(AuthorizationGuard)
   @Get('instructor/by-instructor')
+  @Roles('instructor')
   async getQuizzesByInstructor(
     @Query('email') email: string,
   ): Promise<string[]> {
@@ -157,12 +175,16 @@ export class QuizzesController {
     return this.quizService.getQuizzesByInstructor(email);
   }
 
+  @UseGuards(AuthorizationGuard)
   @Get(':quizId/student-answers')
+  @Roles('instructor')
   async getStudentAnswers(@Param('quizId') quizId: string) {
     return this.quizService.getStudentAnswers(quizId);
   }
 
+  @UseGuards(AuthorizationGuard)
   @Get(':quizId/slecetedstudent-answers')
+  @Roles('instructor')
   async getselectedStudentAnswers(
     @Param('quizId') quizId: string,
     @Query('studentEmail') studentEmail: string, // Accept `studentEmail` as a query parameter

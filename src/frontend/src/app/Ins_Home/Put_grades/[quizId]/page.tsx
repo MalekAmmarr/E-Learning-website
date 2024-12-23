@@ -22,8 +22,16 @@ const StudentAnswers = () => {
 
     const fetchStudentEmails = async () => {
       try {
+        const accessToken = sessionStorage.getItem('Ins_Token');
         const res = await fetch(
-          `http://localhost:3000/quizzes/${quizId}/student-answers`, // Update API endpoint
+          `http://localhost:3000/quizzes/${quizId}/student-answers`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+            },
+          },// Update API endpoint
         );
         if (!res.ok)
           throw new Error(`Failed to fetch student emails: ${res.statusText}`);

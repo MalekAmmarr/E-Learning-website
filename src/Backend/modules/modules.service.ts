@@ -4,12 +4,15 @@ import { Model } from 'mongoose';
 import { Module, ModuleSchema } from 'src/schemas/module.schema';
 import { CreateModuleDto } from './dto/CreateModuleDto';
 import { UpdateModuleDto } from './dto/UpdateModuleDto';
+import { Instructor } from 'src/schemas/instructor.schema';
 
 @Injectable()
 export class ModulesService {
   constructor(
     @InjectModel(Module.name, 'eLearningDB')
     private readonly userinteractionModel: Model<Module>,
+    @InjectModel(Instructor.name, 'eLearningDB')
+    private readonly instructorModel: Model<Instructor>,
   ) {}
 
 
@@ -62,4 +65,47 @@ export class ModulesService {
 
     return await module.save();
   }
+
+  async getQuizIdAndCourseTitleByInstructorEmail(
+    instructorEmail: string
+  ): Promise<{ quizId: string; courseTitle: string }[]> {
+    // Fetch the instructor's Teach_Courses based on their email
+    const instructor = await this.instructorModel
+      .findOne({ email: instructorEmail }, { Teach_Courses: 1, _id: 0 })
+      .exec();
+  
+    if (!instructor) {
+      throw new Error('Instructor not found');
+    }
+  
+    const { Teach_Courses } = instructor;
+  
+    // Fetch quizzes for the courses the instructor teaches
+    const quizzes = await this.userinteractionModel
+      .find(
+        { courseTitle: { $in: Teach_Courses } }, // Filter by courses the instructor teaches
+        { quizId: 1, courseTitle: 1, _id: 0 } // Projection to return quizId and courseTitle
+      )
+      .exec();
+  
+    return quizzes.map((quiz) => ({
+      quizId: quiz.quizId,
+      courseTitle: quiz.courseTitle,
+    }));
+  }
+
+  async getModuleDetailsByQuizId(quizId: string): Promise<Module> {
+    if (!quizId) {
+      throw new NotFoundException('Quiz ID is required');
+    }
+
+    const moduleDetails = await this.userinteractionModel.findOne({ quizId });
+
+    if (!moduleDetails) {
+      throw new NotFoundException(`Module with Quiz ID ${quizId} not found`);
+    }
+
+    return moduleDetails;
+  }
+  
 }

@@ -314,13 +314,36 @@ export class QuizzesService {
     return this.quizModel.find({ courseTitle }).exec();
   }
 
-  // Method to fetch only quiz IDs for a specific course
-  async getQuizIdsByCourseTitle(courseTitle: string): Promise<string[]> {
-    const quizzes = await this.quizModel
-      .find({ courseTitle }, { quizId: 1, _id: 0 }) // Projection to return only quizId
+  async getQuizIdsAndCourseTitlesByInstructorEmail(
+    instructorEmail: string
+  ): Promise<{ quizId: string; courseTitle: string }[]> {
+    // Fetch the instructor's Teach_Courses based on their email
+    const instructor = await this.instructorModel
+      .findOne({ email: instructorEmail }, { Teach_Courses: 1, _id: 0 })
       .exec();
-    return quizzes.map((quiz) => quiz.quizId); // Extract quizId from each quiz
+  
+    if (!instructor) {
+      throw new Error('Instructor not found');
+    }
+  
+    const { Teach_Courses } = instructor;
+  
+    // Fetch quizzes for the courses the instructor teaches
+    const quizzes = await this.quizModel
+      .find(
+        { courseTitle: { $in: Teach_Courses } }, // Filter by courses the instructor teaches
+        { quizId: 1, courseTitle: 1, _id: 0 } // Projection to return quizId and courseTitle
+      )
+      .exec();
+  
+    return quizzes.map((quiz) => ({
+      quizId: quiz.quizId,
+      courseTitle: quiz.courseTitle,
+    }));
   }
+  
+  
+  
 
   // Method to fetch the full quiz content by quizId
   async getQuizById(quizId: string): Promise<Quiz> {
