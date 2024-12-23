@@ -244,4 +244,6 @@ export class InstructorController {
   async getStudentProgress(@Param('email') studentEmail: string) {
     return this.instructorService.getStudentProgressByEmail(studentEmail);
   }
+
+  
 }
