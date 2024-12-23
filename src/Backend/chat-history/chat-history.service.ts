@@ -14,7 +14,6 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { group } from 'console';
 
-
 @Injectable()
 export class ChatHistoryService {
   constructor(
@@ -26,7 +25,6 @@ export class ChatHistoryService {
     private readonly ChatHistoryModel: Model<ChatHistory>,
     @InjectModel(Message.name, 'eLearningDB')
     private readonly MessageModel: Model<Message>,
-   
   ) {}
 
   // Method to search a student by email and return the student info and their course progress
@@ -41,6 +39,7 @@ export class ChatHistoryService {
       CourseTitle,
     } = CreateGroupDto;
     // Step 2: Validate members' eligibility
+    MembersEmail.push(Admin);
     const eligibleMembers = [];
     for (const email of MembersEmail) {
       const member = await this.userModel.findOne({ email });
@@ -63,7 +62,7 @@ export class ChatHistoryService {
     const newGroup = new this.ChatHistoryModel({
       Title,
       Admin,
-      MembersEmail,
+      MembersEmail: eligibleMembers,
       MembersName,
       ProfilePictureUrl,
       messages,
@@ -84,7 +83,7 @@ export class ChatHistoryService {
       throw new NotFoundException(`Member with email ${Admin} not found.`);
     }
     const Groups = await this.ChatHistoryModel.find(
-      { Admin, CourseTitle: title },
+      { MembersEmail: { $in: [Admin] }, CourseTitle: title },
       '-messages', // Exclude the 'messages' field
     ).exec();
 
@@ -98,7 +97,7 @@ export class ChatHistoryService {
   }
   async getGroupChat(Admin: string, title: string) {
     const Groups = await this.ChatHistoryModel.findOne(
-      { Admin, Title: title },
+      { MembersEmail: { $in: [Admin] }, Title: title },
       'messages', // Include only the 'messages' field
     ).exec();
 
@@ -122,7 +121,6 @@ export class ChatHistoryService {
       Group.messages.push(message);
       await Group.save();
       // After saving the message, broadcast it to all connected clients
-      
     } else throw new Error('No Group to Add on it your message');
   }
 }
