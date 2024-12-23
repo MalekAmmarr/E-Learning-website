@@ -18,7 +18,7 @@ export class AuthService {
     @InjectModel(User.name, 'eLearningDB') private readonly userModel: Model<User>,
     @InjectModel(Logs.name, 'eLearningDB') private readonly LogsModel: Model<Logs>,
     @InjectModel(Instructor.name, 'eLearningDB') private readonly instructorModel: Model<Instructor>,
-    @InjectModel(Note.name,'eLearningDB') private readonly NoteModel: Model<Note>
+    @InjectModel(Note.name, 'eLearningDB') private readonly NoteModel: Model<Note>
     // private jwtService:JwtService,
   ) { }
 
