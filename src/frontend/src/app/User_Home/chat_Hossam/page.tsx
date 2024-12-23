@@ -25,7 +25,7 @@ export interface Message {
   senderEmail: string; // Email of the sender
   senderName?: string; // Optional name of the sender
   message: string; // The content of the message
-  ProfilePictureUrl: string; // URL of the sender's profile picture
+  ProfilePictureUrl?: string; // URL of the sender's profile picture
   timestamp: Date; // Timestamp of when the message was sent
 }
 const chat = () => {
@@ -42,6 +42,7 @@ const chat = () => {
   const [GroupMembers, SetGroupMembers] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState('');
+  const [Privacy, setPrivacy] = useState('');
 
   const [userData, setUserData] = useState<User>();
   const router = useRouter();
@@ -53,11 +54,15 @@ const chat = () => {
   //     setError('Failed to create group: ' + err.message);
   //   }
   // };
-  const handleGetGroups = async (admin: string, title: string) => {
+  const handleGetGroups = async (
+    admin: string,
+    title: string,
+    privacy: string,
+  ) => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `http://localhost:3000/chat-history/getGroups/${admin}/${title}`,
+        `http://localhost:3000/chat-history/getGroups/${admin}/${title}/${privacy}`,
       );
       const groupsInfo = await response.json();
       if (groupsInfo) {
@@ -80,6 +85,8 @@ const chat = () => {
       setIsLoadingGroupChat(true);
       SetGroupTitle(title);
       SetGroupMembers(GroupMembers);
+      console.log('title : ', title);
+      console.log('admin: ', admin);
       const response = await fetch(
         `http://localhost:3000/chat-history/getGroupChat/${admin}/${title}`,
       );
@@ -101,6 +108,7 @@ const chat = () => {
     timestamp: Date,
     CourseTitle: string,
     Title: string,
+    privacy: string,
   ) => {
     try {
       const response = await fetch(
@@ -116,7 +124,8 @@ const chat = () => {
             ProfilePictureUrl,
             CourseTitle,
             Title,
-            timestamp: timestamp || new Date(), // Defaults to current date/time if not provided
+            timestamp: timestamp || new Date(),
+            privacy: Privacy, // Defaults to current date/time if not provided
           }),
         },
       );
@@ -178,8 +187,13 @@ const chat = () => {
             accessToken,
           );
           if (courseTitle) {
+            const queryParams = new URLSearchParams(window.location.search);
+            const privacy = queryParams.get('privacy');
             setCourseTitle(courseTitle);
-            await handleGetGroups(UpdatedUser.email, courseTitle);
+            if (privacy) {
+              setPrivacy(privacy);
+              await handleGetGroups(UpdatedUser.email, courseTitle, privacy);
+            }
           }
         }
       }
@@ -239,8 +253,11 @@ const chat = () => {
     console.log('Add icon clicked');
     // const queryParams = new URLSearchParams(window.location.search);
     // const courseTitle = queryParams.get('title');
-    // if (courseTitle)
-    router.push(`/User_Home/chat_Hossam/CreateGroup?title=Machine Learning`);
+    if (CourseTitle && Privacy) {
+      router.push(
+        `/User_Home/chat_Hossam/CreateGroup?title=${encodeURIComponent(CourseTitle)}&privacy=${encodeURIComponent(Privacy)}`,
+      );
+    }
     // else console.log('no course title available');
   };
 
@@ -413,10 +430,11 @@ const chat = () => {
                         GroupMembers.map((member, index) => (
                           <div key={index} className="member">
                             {/* Conditionally show the email for the first member */}
-                            {userData && userData?.email === member ? (
+                            {index === GroupMembers.length - 1 ? (
                               <>
                                 <div className="member-name">
-                                  Admin : {userData?.email}
+                                  Admin :{' '}
+                                  {GroupMembers[GroupMembers.length - 1]}
                                 </div>
                               </>
                             ) : (
@@ -541,7 +559,8 @@ const chat = () => {
                           userData.profilePictureUrl || '', // Provide a fallback value
                           new Date(),
                           CourseTitle || 'Default Course', // Provide fallback if CourseTitle is undefined
-                          GroupTitle || 'Default Group', // Provide fallback if GroupTitle is undefined
+                          GroupTitle || 'Default Group',
+                          Privacy, // Provide fallback if GroupTitle is undefined
                         );
                       }}
                       className="pull-right btn btn-success"

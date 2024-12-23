@@ -13,6 +13,8 @@ import { User } from 'src/schemas/user.schema';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { group } from 'console';
+import { Instructor } from 'src/schemas/instructor.schema';
+import { ST } from 'next/dist/shared/lib/utils';
 
 @Injectable()
 export class ChatHistoryService {
@@ -25,10 +27,15 @@ export class ChatHistoryService {
     private readonly ChatHistoryModel: Model<ChatHistory>,
     @InjectModel(Message.name, 'eLearningDB')
     private readonly MessageModel: Model<Message>,
+    @InjectModel(Instructor.name, 'eLearningDB')
+    private readonly InstructorModel: Model<Instructor>,
   ) {}
 
   // Method to search a student by email and return the student info and their course progress
-  async CreateGroup(CreateGroupDto: CreateGroupDto) {
+  async CreateGroup(
+    CreateGroupDto: CreateGroupDto,
+    StudentOrInstructor: string,
+  ) {
     const {
       Title,
       Admin,
@@ -37,55 +44,117 @@ export class ChatHistoryService {
       ProfilePictureUrl,
       messages,
       CourseTitle,
+      privacy,
     } = CreateGroupDto;
-    // Step 2: Validate members' eligibility
-    MembersEmail.push(Admin);
-    const eligibleMembers = [];
-    for (const email of MembersEmail) {
-      const member = await this.userModel.findOne({ email });
-      if (!member) {
-        throw new NotFoundException(`Member with email ${email} not found.`);
+    if (privacy === 'public') {
+      // Step 2: Validate members' eligibility
+      MembersEmail.push(Admin);
+      const eligibleMembers = [];
+      for (const email of MembersEmail) {
+        const member = await this.userModel.findOne({ email });
+        if (!member) {
+          throw new NotFoundException(`Member with email ${email} not found.`);
+        }
+
+        if (!member.acceptedCourses.includes(CourseTitle)) {
+          throw new BadRequestException(
+            `Member ${email} is not enrolled in the ${CourseTitle} course as the creator.`,
+          );
+        }
+
+        eligibleMembers.push(email);
       }
-
-      if (!member.acceptedCourses.includes(CourseTitle)) {
-        throw new BadRequestException(
-          `Member ${email} is not enrolled in the ${CourseTitle} course as the creator.`,
-        );
+      if (eligibleMembers.length != MembersEmail.length) {
+        throw new Error(`Members must take the ${CourseTitle} course  also`);
       }
+      // Step 3: Create and save the group
+      const newGroup = new this.ChatHistoryModel({
+        Title,
+        Admin,
+        MembersEmail: eligibleMembers,
+        MembersName,
+        ProfilePictureUrl,
+        messages,
+        CourseTitle,
+        timestamp: new Date(),
+        privacy: 'public',
+      });
+      await newGroup.save();
 
-      eligibleMembers.push(email);
+      return {
+        message: `${Title} Group created successfully`,
+        group: newGroup,
+        eligibleMembers,
+      };
+    } else {
+      // Step 2: Validate members' eligibility
+      MembersEmail.push(Admin);
+      console.log('INstructor or student : ', StudentOrInstructor);
+      if (StudentOrInstructor == 'Student') {
+        const user = await this.userModel.findOne({ email: MembersEmail[0] });
+        if (!user) {
+          throw new Error(`user must take the ${CourseTitle} course  also`);
+        } // Step 3: Create and save the group
+        const newGroup = new this.ChatHistoryModel({
+          Title: user.name,
+          Admin,
+          MembersEmail,
+          MembersName,
+          ProfilePictureUrl: user?.profilePictureUrl,
+          messages,
+          CourseTitle,
+          timestamp: new Date(),
+          privacy: 'private',
+        });
+        await newGroup.save();
+        return {
+          message: `${Title} Group created successfully`,
+          group: newGroup,
+        };
+      } else {
+        const Instructor = await this.InstructorModel.findOne({
+          email: MembersEmail[0],
+        });
+        if (!Instructor) {
+          throw new Error(
+            `Instructor must Teach the ${CourseTitle} course  also`,
+          );
+        }
+        const TeachCourse = Instructor?.Teach_Courses.includes(CourseTitle);
+        if (TeachCourse) {
+          const newGroup = new this.ChatHistoryModel({
+            Title: Instructor.name,
+            Admin,
+            MembersEmail,
+            MembersName,
+            ProfilePictureUrl: Instructor.profilePictureUrl,
+            messages,
+            CourseTitle,
+            timestamp: new Date(),
+            privacy: 'private',
+          }); // Step 3: Create and save the group
+          await newGroup.save();
+          return {
+            message: `${Title} Group created successfully`,
+            group: newGroup,
+          };
+        } else
+          throw new Error(
+            `Instructor must Teach the ${CourseTitle} course  also`,
+          );
+      }
     }
-    if (eligibleMembers.length != MembersEmail.length) {
-      throw new Error(`Members must take the ${CourseTitle} course  also`);
-    }
-    // Step 3: Create and save the group
-    const newGroup = new this.ChatHistoryModel({
-      Title,
-      Admin,
-      MembersEmail: eligibleMembers,
-      MembersName,
-      ProfilePictureUrl,
-      messages,
-      CourseTitle,
-      timestamp: new Date(),
-    });
-    await newGroup.save();
-
-    return {
-      message: `${Title} Group created successfully`,
-      group: newGroup,
-      eligibleMembers,
-    };
   }
-  async getGroups(Admin: string, title: string) {
+  async getGroups(Admin: string, title: string, privacy: string) {
     const user = this.userModel.findOne({ email: Admin });
     if (!user) {
       throw new NotFoundException(`Member with email ${Admin} not found.`);
     }
     const Groups = await this.ChatHistoryModel.find(
-      { MembersEmail: { $in: [Admin] }, CourseTitle: title },
+      { MembersEmail: { $in: [Admin] }, CourseTitle: title, privacy: privacy },
       '-messages', // Exclude the 'messages' field
     ).exec();
+    console.log(Admin, '  ', title, ' ', privacy);
 
     if (!Groups || Groups.length === 0) {
       throw new BadRequestException(
@@ -100,7 +169,9 @@ export class ChatHistoryService {
       { MembersEmail: { $in: [Admin] }, Title: title },
       'messages', // Include only the 'messages' field
     ).exec();
-
+    console.log(Admin);
+    console.log('Groups : ', Groups);
+    console.log(title);
     return { Groups };
   }
   async sendMessage(

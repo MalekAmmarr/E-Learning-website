@@ -17,6 +17,9 @@ export class CreateGroupDto {
   @IsString()
   Admin: string;
   @IsString()
+  @IsOptional()
+  privacy: string;
+  @IsString()
   CourseTitle: string;
 
   @IsArray()
@@ -29,6 +32,7 @@ export class CreateGroupDto {
 
   @IsString()
   @IsUrl()
+  @IsOptional()
   ProfilePictureUrl: string;
 
   @IsArray()
