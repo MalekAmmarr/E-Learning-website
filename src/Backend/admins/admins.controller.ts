@@ -132,15 +132,12 @@ async restoreCourse(@Body() body: { courseId: string }) {
   @UseGuards(AuthorizationGuard)
   @Post('createAnnouncement')
   @Roles('admin')
-  async createAnnouncement(@Body() body: { title: string; content: string }) {
-    const { title, content } = body;
-
+  async createAnnouncement(@Body() body: {  title: string; content: string ;createdBy:string}) {
+    const {  title, content ,createdBy} = body;
+  
     try {
-      const announcement = await this.adminsService.createAnnouncement({
-        title,
-        content,
-      });
-
+      const announcement = await this.adminsService.createAnnouncement( title, content,createdBy);
+  
       return {
         message: 'Announcement created successfully',
         announcement,

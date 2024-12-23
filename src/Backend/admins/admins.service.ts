@@ -34,9 +34,7 @@ export class AdminsService {
 
   ) {}
   
-  // async DeleteCourse(courseId: string) {
-  //   return await this.courseModel.findOneAndDelete({ courseId });
-  // }
+ 
   // Register a new Admin
   async registerAdmin(createAdminDto: CreateAdminDto) {
     return await this.authService.registerUser(createAdminDto, 'admin');
@@ -47,11 +45,15 @@ export class AdminsService {
     return await this.authService.login(email, password, 'admin');
   } 
 
-  async createAnnouncement(createAnnouncementDto: any): Promise<Announcement> {
-    const newAnnouncement = new this.AnnouncementModel(createAnnouncementDto);
-    return newAnnouncement.save();
+  async createAnnouncement( title: string, content: string,createdBy:string): Promise<Announcement> {
+    try {
+      const newAnnouncement = new this.AnnouncementModel({  title, content ,createdBy});
+      return await newAnnouncement.save();
+    } catch (error) {
+      console.error('Error during announcement creation:', error);
+      throw new Error('Failed to create announcement');
+    }
   }
-
   async getAllAnnouncements() {
     return await this.AnnouncementModel.find(); // Retrieves all announcements
   }

@@ -3,8 +3,7 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Announcement extends Document {
-  @Prop({ required: true })
-  courseId: string; // courseId of the announcement
+  
   
   @Prop({ required: true })
   title: string; // Title of the announcement

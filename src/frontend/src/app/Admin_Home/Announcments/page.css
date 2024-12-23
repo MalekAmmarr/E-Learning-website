@@ -16,6 +16,7 @@ html, body {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Page header styling */
 .page-header {
     text-align: center;
     margin-bottom: 30px;
@@ -31,29 +32,6 @@ html, body {
     background-color: #ffecec;
     padding: 10px;
     border-radius: 5px;
-}
-
-/* Top actions container */
-.top-actions {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 15px;
-}
-
-/* Create Announcement button styling */
-.create-button {
-    background-color: #007bff; /* Bright blue */
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.create-button:hover {
-    background-color: #0056b3; /* Darker blue on hover */
 }
 
 /* Table styling */
@@ -80,6 +58,11 @@ html, body {
     color: #333;
 }
 
+/* New column added for Created By */
+.table th.created-by, .table td.created-by {
+    width: 20%; /* Adjust the width of the Created By column */
+}
+
 /* Action buttons styling */
 .table .actions button {
     margin-right: 10px;
@@ -90,11 +73,6 @@ html, body {
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-}
-
-.table .edit-button {
-    background-color: #007bff;
-    color: white;
 }
 
 .table .delete-button {
@@ -108,4 +86,58 @@ html, body {
     padding: 20px;
     color: #999;
     font-size: 16px;
+}
+
+/* Container for the create announcement button */
+.create-button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Create Announcement button styling */
+.create-button {
+    background-color: #0464ff; /* blue */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.create-button:hover {
+    background-color: #5a6268; /* Darker gray on hover */
+}
+
+/* Add-row styling */
+.add-row input {
+    width: 90%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.add-button {
+    background-color: #28a745; /* Green */
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+/* Adjust input fields for Add Announcement row */
+.add-row input:disabled {
+    background-color: #f0f0f0;
+    color: #888;
 }
