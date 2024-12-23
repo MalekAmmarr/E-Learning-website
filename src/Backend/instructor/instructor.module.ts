@@ -13,6 +13,7 @@ import { LogsModule } from '../logs/logs.module';
 import { Feedback, FeedbackSchema } from 'src/schemas/feedback.schema';
 import { FeedbackService } from '../feedback/feedback.service';
 import { Progress, ProgressSchema } from 'src/schemas/progress.schema';
+import { UsersService } from '../users/users.service';
 
 @Module({
   imports: [
@@ -30,6 +31,6 @@ import { Progress, ProgressSchema } from 'src/schemas/progress.schema';
     forwardRef(() => AuthModule), // Import AuthModule for authentication services
   ],
   controllers: [InstructorController],
-  providers: [InstructorService, LogsService, FeedbackService],
+  providers: [InstructorService, LogsService, FeedbackService,UsersService],
 })
 export class InstructorModule { }

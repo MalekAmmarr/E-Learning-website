@@ -31,7 +31,7 @@ interface Student {
 }
 
 const CertificatesPage: React.FC = () => {
-  const [students, setStudents] = useState<Student[]>([]);
+  const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState(true);
   const [insdata, setInsData] = useState<any>(null);
   const [instructor, setInstructor] = useState<Instructor | null>(null);
@@ -39,7 +39,15 @@ const CertificatesPage: React.FC = () => {
   const router = useRouter(); // Initialize useRouter for navigation
 
   useEffect(() => {
-    const fetchStudents = async () => {
+    const fetchStudentByEmail = async () => {
+        const queryParams = new URLSearchParams(window.location.search);
+      const email = queryParams.get('email');
+
+      if (!email) {
+        setError('No email provided');
+        setLoading(false);
+        return;
+      }
       try {
         const accessToken = sessionStorage.getItem('Ins_Token'); // Updated to match token naming convention
         const storedInstructor = sessionStorage.getItem('instructorData'); // Updated to match instructor data storage key
@@ -49,7 +57,8 @@ const CertificatesPage: React.FC = () => {
           const parsedInstructor = JSON.parse(storedInstructor);
           setInsData(parsedInstructor);
 
-          const response = await fetch(`http://localhost:3000/instructor/${parsedInstructor?.email}/students-progress`,
+          // Use the instructor's email to fetch the student's details
+          const response = await fetch(`http://localhost:3000/instructor/email/${email}`,
             {
               method: 'GET',
               headers: {
@@ -59,11 +68,11 @@ const CertificatesPage: React.FC = () => {
             },
           );
           if (!response.ok) {
-            throw new Error('Failed to fetch students');
+            throw new Error('Failed to fetch student');
           }
 
           const data = await response.json();
-          setStudents(data.students);
+          setStudent(data); // Assuming the response contains the student data
         } else {
           setError('Instructor data not found.');
         }
@@ -74,7 +83,7 @@ const CertificatesPage: React.FC = () => {
       }
     };
 
-    fetchStudents();
+    fetchStudentByEmail();
   }, []);
 
   const handleCardClick = (email: string) => {
@@ -87,31 +96,24 @@ const CertificatesPage: React.FC = () => {
 
   return (
     <div className="certificates-page">
-      <h1>Certificates</h1>
-      <p>Here is the list of students who have taken your courses:</p>
-      {students.length > 0 ? (
-        <ul className="students-list">
-          {students.map((student) => (
-            <li key={student.email} className="student-item">
-              <div className="student-card" onClick={() => handleCardClick(student.email)}>
-                <img
-                  src={student.profilePictureUrl || '/default-profile.png'}
-                  alt={`${student.name}'s profile`}
-                  className="student-profile-picture"
-                />
-                <div className="student-info">
-                  <h3>{student.name}</h3>
-                  <p>Email: {student.email}</p>
-                  <p>Age: {student.age}</p>
-                  <p>Accepted Courses: {student.acceptedCourses.join(', ') || 'None'}</p>
-                  <p>GPA: {student.GPA.toFixed(2)}</p>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+      <h1>Here is the information for the student:</h1>
+      {student ? (
+        <div className="student-card" onClick={() => handleCardClick(student.email)}>
+          <img
+            src={student.profilePictureUrl || '/default-profile.png'}
+            alt={`${student.name}'s profile`}
+            className="student-profile-picture"
+          />
+          <div className="student-info">
+            <h3>{student.name}</h3>
+            <p>Email: {student.email}</p>
+            <p>Age: {student.age}</p>
+            <p>Accepted Courses: {student.acceptedCourses.join(', ') || 'None'}</p>
+            <p>GPA: {student.GPA.toFixed(2)}</p>
+          </div>
+        </div>
       ) : (
-        <p>No students found for your courses.</p>
+        <p>No student found with this email.</p>
       )}
     </div>
   );

@@ -53,7 +53,17 @@ const StudentProgressPage: React.FC = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:3000/instructor/students/${email}/progress`);
+        const accessToken = sessionStorage.getItem('Ins_Token'); // Updated to match token naming convention
+        console.log('Access Token:', accessToken);
+        const response = await fetch(`http://localhost:3000/instructor/students/${email}/progress`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Add the token to the Authorization header
+              'Content-Type': 'application/json',
+            },
+          },
+        );
         if (!response.ok) {
           throw new Error('Failed to fetch student progress');
         }
