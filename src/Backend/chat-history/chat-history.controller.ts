@@ -6,6 +6,7 @@ import { ProgressService } from 'src/Backend/progress/progress.service';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AuthorizationGuard } from '../auth/guards/authorization.guard';
 import { CreateGroupDto } from './dto/create-group.dto';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Controller('chat-history')
 export class ChatHistoryController {
@@ -33,6 +34,21 @@ export class ChatHistoryController {
     @Param('title') title: string,
   ) {
     return this.chatHistoryService.getGroupChat(Admin, title);
+  }
+
+  @Post('sendMessage')
+  //@Roles('instructor', 'student')
+  async sendMessage(
+    @Body() sendMessageDto: SendMessageDto,
+    @Body('CourseTitle') CourseTitle: string,
+    @Body('Title') Title: string,
+  ) {
+    return this.chatHistoryService.sendMessage(
+      sendMessageDto,
+
+      CourseTitle,
+      Title,
+    );
   }
 
   // @Get('/getProgress/:CourseTitle/:studentEmail')
