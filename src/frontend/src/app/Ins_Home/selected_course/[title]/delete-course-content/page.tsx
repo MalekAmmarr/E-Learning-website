@@ -33,9 +33,10 @@ const DeleteCourseContentPage = () => {
   const courseTitle = decodeURIComponent(params.title);
 
   useEffect(() => {
-    // Retrieve instructor email from localStorage
-    const storedInstructor = localStorage.getItem('instructorData');
-    if (storedInstructor) {
+    // Retrieve instructor email from sessionStorage
+    const accessToken = sessionStorage.getItem('Ins_Token');
+    const storedInstructor = sessionStorage.getItem('instructorData');
+    if (storedInstructor && accessToken) {
       const parsedInstructor = JSON.parse(storedInstructor);
       setInstructorEmail(parsedInstructor.email);
     } else {
@@ -44,11 +45,24 @@ const DeleteCourseContentPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!instructorEmail) return;
-
     const fetchCourseDetails = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/instructor/course?title=${encodeURIComponent(courseTitle)}`);
+        const accessToken = sessionStorage.getItem('Ins_Token');
+      if (!accessToken) {
+        router.push('/Ins_login');
+        return;
+      }
+        
+        const res = await fetch(
+          `http://localhost:3000/instructor/course/bytitle?title=${encodeURIComponent(courseTitle)}`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Add the token to the Authorization header
+              'Content-Type': 'application/json',
+            },
+          },
+        );
         if (!res.ok) {
           throw new Error(`Failed to fetch course details: ${res.statusText}`);
         }
@@ -83,12 +97,20 @@ const DeleteCourseContentPage = () => {
     }
 
     try {
+      const accessToken = sessionStorage.getItem('Ins_Token');
+      if (!accessToken) {
+        router.push('/Ins_login');
+        return;
+      }
       const res = await fetch(
-        `http://localhost:3000/instructor/${encodeURIComponent(instructorEmail)}/courses/${encodeURIComponent(courseTitle)}/deletecontent`,
+        `http://localhost:3000/instructor/${encodeURIComponent(
+          instructorEmail
+        )}/courses/${encodeURIComponent(courseTitle)}/deletecontent`,
         {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({ contentToDelete: selectedContent }),
         }
@@ -103,7 +125,7 @@ const DeleteCourseContentPage = () => {
       setSelectedContent([]); // Clear the selected content after successful deletion
       setError(null); // Clear any previous error messages
       setTimeout(() => {
-        router.push(`/Ins_Home/selected_course/${encodeURIComponent(courseTitle)}`);
+        router.push(`/Ins_Home/selected_course?title=${encodeURIComponent(courseTitle)}`);
       }, 150);
     } catch (err: unknown) {
       if (err instanceof Error) {

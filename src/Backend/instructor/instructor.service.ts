@@ -44,6 +44,14 @@ export class InstructorService {
     return await this.authService.login(email, password, 'instructor');
   }
 
+  async getInstructorByEmail(email: string): Promise<Instructor> {
+    const instructor = await this.InstructorModel.findOne({ email }).exec();
+    if (!instructor) {
+      throw new NotFoundException(`Instructor with email ${email} not found`);
+    }
+    return instructor;
+  }
+
   // Method to get all users applied to courses taught by an instructor
   async getUsersAppliedToCourses(email: string) {
     // Find the instructor by ID
@@ -120,6 +128,22 @@ export class InstructorService {
     }
   }
 
+  async getStudentsForInstructorByEmail(instructorEmail: string): Promise<User[]> {
+    // Find the instructor by email
+    const instructor = await this.InstructorModel.findOne({ email: instructorEmail }).exec();
+    if (!instructor) {
+      throw new Error('Instructor not found');
+    }
+
+    // Find all students whose acceptedCourses intersect with the instructor's Teach_Courses
+    const students = await this.UserModel
+      .find({
+        acceptedCourses: { $in: instructor.Teach_Courses },
+      })
+      .exec();
+
+    return students;
+  }
   // Method to create a course by the instructor
   async createCourse(
     createCourseDto: CreateCourseDto,
@@ -390,28 +414,35 @@ export class InstructorService {
 
   // Method to get all courses taught by an instructor
   async getCoursesByInstructor(email: string): Promise<any[]> {
-    // Fetch the instructor by email
-    const instructor = await this.InstructorModel.findOne({ email }).exec();
-
-    // If the instructor is not found, throw a NotFoundException
+    console.log(`Searching for instructor with email: ${email}`);
+    
+    const instructor = await this.InstructorModel.findOne({
+      email: { $regex: new RegExp(`^${email}$`, 'i') },
+    }).exec();
+    
+    
     if (!instructor) {
+      console.log(`Instructor not found for email: ${email}`);
       throw new NotFoundException(`Instructor with email ${email} not found`);
     }
-
-    // Use the Teach_Courses array to fetch course details from the Course model
+  
+    console.log(`Found instructor: ${instructor.name}`);
+  
     const courses = await this.courseModel
       .find({ title: { $in: instructor.Teach_Courses } })
       .exec();
-
-    // Map and return the required course details
+  
+    console.log(`Courses found: ${courses.length}`);
+    
     return courses.map((course) => ({
       title: course.title,
       instructor_name: instructor.name,
       price: course.price,
-      image: course.image, // Assuming this is the correct path for images
+      image: course.image,
       category: course.category,
     }));
   }
+  
 
   async findCourseByTitle(title: string): Promise<{
     course: {
@@ -441,7 +472,7 @@ export class InstructorService {
       totalClasses: course.totalClasses,
       courseContent: course.courseContent,
       notes: course.notes,
-      image: `http://localhost:3000/files/${course.image}`, // Assuming the image is stored in the "files" folder
+      image: course.image, // Assuming the image is stored in the "files" folder
     };
 
     return { course: courseDetails };
@@ -471,8 +502,6 @@ export class InstructorService {
     const updatedStudents = students.map((student) => ({
       ...student,
       profilePictureUrl: student.profilePictureUrl
-        ? `http://localhost:3000/files/${student.profilePictureUrl}`
-        : null,
     }));
 
     return { students: updatedStudents };

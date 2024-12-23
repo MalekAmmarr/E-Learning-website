@@ -19,28 +19,60 @@ export interface Instructor {
 }
 
 const Profile = () => {
-  const [instructor, setUser] = useState<Instructor | null>(null); // Single user object
+  const [user, setUser] = useState<Instructor | null>(null); // Single user object
   const router = useRouter();
+  const fetchUserDetails = async (
+    email: string,
+    accessToken: string,
+  ): Promise<Instructor> => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/instructor/${email}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user details: ${response.statusText}`);
+      }
+
+      const data: Instructor = await response.json();
+      console.log('Fetched Instructor details:', data); // Debugging: Log the fetched user details
+      setUser(data); // Update state with user data
+      return data; // Return the fetched user data
+    } catch (error) {
+      console.error('Error fetching Instructor details', error);
+      throw error; // Propagate the error for the caller to handle
+    }
+  };
 
   useEffect(() => {
     try {
-      const userData = localStorage.getItem('instructorData');
+      const userData = sessionStorage.getItem('instructorData');
+      const accessToken = sessionStorage.getItem('Ins_Token');
       if (userData) {
-        const parsedData: Instructor = JSON.parse(userData); // Parse the single user object
-        setUser(parsedData);
+        if (accessToken) {
+          const parsedData: Instructor = JSON.parse(userData); // Parse the single user object
+          fetchUserDetails(parsedData.email, accessToken);
+        } else router.push('/Ins_login');
       } else {
         router.push('/Ins_login');
       }
     } catch (err) {
       console.error(
-        'Failed to retrieve or parse user data from localStorage',
+        'Failed to retrieve or parse Instructor data from localStorage',
         err,
       );
-      router.push('/login');
+      router.push('/Ins_login');
     }
   }, [router]);
 
-  if (!instructor) return <div>Loading...</div>;
+  if (!user) return <div>Loading...</div>;
 
   return (
     <div className="card">
@@ -48,53 +80,71 @@ const Profile = () => {
       <div
         className="img"
         style={{
-          width: '150px', // Set the width of the circle
-          height: '150px', // Set the height of the circle
-          borderRadius: '50%', // Make it circular
-          backgroundImage: `http://localhost:3000/files/${instructor.profilePictureUrl}`
-            ? `http://localhost:3000/files/${instructor.profilePictureUrl}`
+          width: '150px',
+          height: '150px',
+          borderRadius: '50%',
+          backgroundImage: user.profilePictureUrl
+            ? `url(${user.profilePictureUrl})`
             : `url(/assets/images/Default.jpg)`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           display: 'flex',
-          alignItems: 'center', // Center the image vertically
-          justifyContent: 'center', // Center the image horizontally
+          alignItems: 'center',
+          justifyContent: 'center',
+          marginBottom: '20px', // Added margin for spacing
         }}
       ></div>
 
       {/* Profile Info */}
-      <div className="info">
-        <span className="name">{instructor.name}</span>
-        <p className="job">{`Email: ${instructor.email}`}</p>
-        <p>{`Age: ${instructor.age}`}</p>
+      <div className="info" style={{ marginBottom: '20px' }}>
+        <span className="name" style={{ fontSize: '24px', fontWeight: 'bold' }}>
+          {user.name}
+        </span>
+        <p className="job" style={{ fontStyle: 'italic' }}>
+          {`Email: ${user.email}`}
+        </p>
+        <p>{`Age: ${user.age}`}</p>
       </div>
 
-      {/* Taught Courses */}
-      <div className="courses">
-        <h3>Taught Courses</h3>
+      {/* Applied and Accepted Courses */}
+      <div className="courses" style={{ marginBottom: '20px' }}>
+        <h3>Teaches Courses</h3>
         <ul>
-          {Array.isArray(instructor.Teach_Courses) && instructor.Teach_Courses.length > 0 ? (
-            instructor.Teach_Courses.map((course, index) => (
+          {user.Teach_Courses.length > 0 ? (
+            user.Teach_Courses.map((course, index) => (
               <li key={index}>{course}</li>
             ))
           ) : (
-            <li>No courses taught</li>
+            <li>No Teached courses</li>
           )}
         </ul>
       </div>
-
-      {/* Certificates */}
-      <div className="certificates">
-        <h3>Certificates</h3>
-        <p>{instructor.Certificates || 'No certificates available'}</p>
+      {/* Buttons */}
+      <div
+        className="button-container"
+        style={{ display: 'flex', justifyContent: 'space-between' }}
+      >
+        <a
+          href="/Ins_Home"
+          className="button"
+          style={{ flex: 1, marginRight: '10px' }}
+        >
+          Return Home
+        </a>
+        <a
+          href="/Ins_Home/Profile/EditProfile"
+          className="button edit-button"
+          style={{ flex: 1, marginRight: '10px' }}
+        >
+          Edit Profile
+        </a>
       </div>
-
-      {/* Button */}
-      <a href="/Ins_Home" className="button">
-        Return Home
-      </a>
     </div>
   );
 };
 
 export default Profile;
+
+
+
+

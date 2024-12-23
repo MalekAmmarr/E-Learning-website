@@ -1,17 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import router from 'next/router';
-
 import './page.css'; // Importing the CSS file
 
 const AddCourseContentPage = () => {
   const [newContent, setNewContent] = useState<string>(''); // Content input
   const [error, setError] = useState<string | null>(null); // Error message
   const [success, setSuccess] = useState<string | null>(null); // Success message
+  const [instructorEmail, setInstructorEmail] = useState<string>('');
   const router = useRouter();
   const params = useParams();
-  const [instructorEmail, setInstructorEmail] = useState<string>('');
 
   // Decode and validate course title from params
   const courseTitle = Array.isArray(params.title)
@@ -23,13 +21,16 @@ const AddCourseContentPage = () => {
   const decodedTitle = decodeURIComponent(courseTitle);
 
   useEffect(() => {
-    // Automatically set the instructor email from localStorage
-    const storedInstructor = localStorage.getItem('instructorData');
-    if (storedInstructor) {
-      const { email } = JSON.parse(storedInstructor);
-      setInstructorEmail(email); // Store the email for later use
+    // Fetch instructor email and access token on component mount
+    const accessToken = sessionStorage.getItem('Ins_Token');
+    const user = sessionStorage.getItem('instructorData');
+    if (user && accessToken) {
+      const parsedUser = JSON.parse(user);
+      setInstructorEmail(parsedUser.email);
+    } else {
+      router.push('/Ins_login');
     }
-  }, []);
+  }, [router]);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewContent(e.target.value);
@@ -47,12 +48,24 @@ const AddCourseContentPage = () => {
     setSuccess(null);
 
     try {
+      const accessToken = sessionStorage.getItem('Ins_Token');
+      if (!accessToken) {
+        router.push('/Ins_login');
+        return;
+      }
+
+      if (!instructorEmail) {
+        setError('Instructor email is not set.');
+        return;
+      }
+
       const response = await fetch(
         `http://localhost:3000/instructor/${encodeURIComponent(instructorEmail)}/addcontent/${encodeURIComponent(decodedTitle)}`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({ newContent: [newContent] }), // Wrap content in an array
         },
@@ -64,7 +77,6 @@ const AddCourseContentPage = () => {
 
       setSuccess('Content added successfully!');
       setNewContent(''); // Clear input
-
       router.refresh();
     } catch (err: unknown) {
       const errorMessage =

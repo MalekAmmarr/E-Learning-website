@@ -29,6 +29,7 @@ import { LogsService } from '../logs/logs.service';
 import { get } from 'mongoose';
 import { FeedbackService } from '../feedback/feedback.service';
 import { Feedback } from 'src/schemas/feedback.schema';
+import { UsersService } from '../users/users.service';
 
 @Controller('instructor')
 export class InstructorController {
@@ -36,6 +37,7 @@ export class InstructorController {
     private readonly instructorService: InstructorService,
     private readonly logsService: LogsService,
     private readonly feedbackService: FeedbackService,
+    private readonly userService: UsersService,
   ) {}
 
   // Register a new user
@@ -67,10 +69,37 @@ export class InstructorController {
     return login;
   }
 
+  @UseGuards(AuthorizationGuard)
+  @Get(':email')
+  @Roles('instructor')
+  async getInstructorByEmail(
+    @Param('email') email: string,
+  ): Promise<Instructor> {
+    return this.instructorService.getInstructorByEmail(email);
+  }
+
+  @UseGuards(AuthorizationGuard)
+  @Post('inscontent')
+  @Roles('instructor')
+  async getCourseContent(
+    @Body() { courseTitle }: { courseTitle: string },
+  ): Promise<any> {
+    if (!courseTitle) {
+      throw new BadRequestException('Course title is required');
+    }
+
+    try {
+      const result = await this.userService.getCourse(courseTitle);
+      return result;
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   // Get users applied to courses taught by an instructor
-  // @UseGuards(AuthorizationGuard)
+  @UseGuards(AuthorizationGuard)
   @Get('applied-users/:email')
-  //@Roles('instructor')
+  @Roles('instructor')
   async getUsersAppliedToCourses(@Param('email') instructorEmail: string) {
     try {
       return await this.instructorService.getUsersAppliedToCourses(
@@ -85,9 +114,9 @@ export class InstructorController {
     }
   }
   // Endpoint to accept or reject a student's course application
-  //@UseGuards(AuthorizationGuard)
+  @UseGuards(AuthorizationGuard)
   @Post('accept-reject-course') // No email parameter in the URL
-  // @Roles('instructor')
+  @Roles('instructor')
   async acceptOrRejectCourse(
     @Body()
     body: {
@@ -113,10 +142,19 @@ export class InstructorController {
     return { user, message };
   }
 
+
+  @UseGuards(AuthorizationGuard)
+  @Get('email/:email/students')
+  @Roles('instructor')
+  async getStudents(@Param('email') instructorEmail: string): Promise<User[]> {
+    return this.instructorService.getStudentsForInstructorByEmail(instructorEmail);
+  }
+
+
   // Endpoint to create a course
-  //@UseGuards(AuthorizationGuard)
+  @UseGuards(AuthorizationGuard)
   @Post(':email/create-course')
-  //@Roles('instructor')
+  @Roles('instructor')
   async createCourse(
     @Param('email') email: string, // Instructor email in the URL param
     @Body() createCourseDto: CreateCourseDto, // Course data in the request body
@@ -142,9 +180,9 @@ export class InstructorController {
     return updatedCourse;
   }
 
-  //@UseGuards(AuthorizationGuard)
+  @UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/addcontent/:courseTitle')
-  //@Roles('instructor')
+  @Roles('instructor')
   async addCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -158,9 +196,9 @@ export class InstructorController {
   }
 
   // Edit course content (replace the current content with new content)
-  //@UseGuards(AuthorizationGuard)
+  @UseGuards(AuthorizationGuard)
   @Put(':instructorEmail/courses/:courseTitle/editcontent')
-  //@Roles('instructor')
+  @Roles('instructor')
   async editCourseContent(
     @Param('instructorEmail') instructorEmail: string,
     @Param('courseTitle') courseTitle: string,
@@ -190,43 +228,48 @@ export class InstructorController {
   }
 
   // 1. Endpoint to get the number of enrolled students in a course
-  //@UseGuards(AuthorizationGuard)
+  @UseGuards(AuthorizationGuard)
   @Get('enrolled-students/:courseTitle')
-  //@Roles('instructor')
+  @Roles('instructor')
   async getEnrolledStudentsCount(
     @Param('courseTitle') courseTitle: string,
   ): Promise<number> {
     return this.instructorService.getEnrolledStudents(courseTitle);
   }
 
-  //@UseGuards(AuthorizationGuard)
+  
   // 2. Endpoint to get the number of students who completed the course
+  @UseGuards(AuthorizationGuard)
   @Get('completed-students/:courseTitle')
-  // @Roles('instructor')
+  @Roles('instructor')
   async getCompletedStudentsCount(
     @Param('courseTitle') courseTitle: string,
   ): Promise<number> {
     return this.instructorService.getCompletedStudentsCount(courseTitle);
   }
 
-  //@UseGuards(AuthorizationGuard)
+  
   // 3. Endpoint to get the number of students based on their scores
+  @UseGuards(AuthorizationGuard)
   @Get('students-score/:courseTitle')
-  //@Roles('instructor')
+  @Roles('instructor')
   async getStudentsByScore(
     @Param('courseTitle') courseTitle: string,
   ): Promise<any> {
     return this.instructorService.getStudentsByScore(courseTitle);
   }
 
-  //@UseGuards(AuthorizationGuard)
-  @Get('courses')
-  //@Roles('instructor')
+  @UseGuards(AuthorizationGuard)
+  @Get('courses/byinsemail')
+  @Roles('instructor')
   async getCourses(@Query('email') email: string): Promise<string[]> {
     return this.instructorService.getCoursesByInstructor(email);
   }
+  
 
-  @Get('course')
+  @UseGuards(AuthorizationGuard)
+  @Get('course/bytitle')
+  @Roles('instructor')
   async getCourseDetails(@Query('title') title: string) {
     const course = await this.instructorService.findCourseByTitle(title);
     if (!course) {
@@ -235,13 +278,24 @@ export class InstructorController {
     return course;
   }
 
+  @UseGuards(AuthorizationGuard)
   @Get(':email/students-progress')
+  @Roles('instructor')
   async getStudentsAndProgressByEmail(@Param('email') email: string) {
     return this.instructorService.getStudentsBycourses(email);
   }
 
+  @UseGuards(AuthorizationGuard)
   @Get('students/:email/progress')
+  @Roles('instructor')
   async getStudentProgress(@Param('email') studentEmail: string) {
     return this.instructorService.getStudentProgressByEmail(studentEmail);
+  }
+
+  @UseGuards(AuthorizationGuard)
+  @Get('email/:email')
+  @Roles('instructor')
+  async getStudentByEmail(@Param('email') email: string): Promise<User> {
+    return this.userService.findUserByEmail(email);
   }
 }

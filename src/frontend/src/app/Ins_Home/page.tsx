@@ -6,27 +6,42 @@ import { useEffect, useState } from 'react';
 import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import React from 'react';
+import './page.css';
 
-export interface Instructor {
-  _id: string;
+export interface User {
   email: string;
   name: string;
-  age: string; // Assuming age is a string, but can be converted to number if necessary
+  age: string;
   passwordHash: string;
-  Teach_Courses: string[]; // List of course names the instructor teaches
   profilePictureUrl?: string;
-  Certificates: string; // Certificates the instructor holds
-  createdAt: string; // ISO Date format
-  updatedAt: string; // ISO Date format
-  __v: number; // MongoDB version field (not typically required in app logic)
+  appliedCourses: string[];
+  acceptedCourses: string[];
+  courseScores: { courseTitle: string; score: number }[];
+  Notifiction: string[];
+  feedback: Array<{
+    quizId: string;
+    courseTitle: string;
+    feedback: Array<{ question: string; feedback: string }>;
+  }>;
+  Notes: string[];
+  GPA: number;
 }
 
+
 interface Course {
+  courseId: string;
   title: string;
+  instructormail: string;
+  instructorName?: string;
+  description: string;
   category: string;
+  difficultyLevel: 'Beginner' | 'Intermediate' | 'Advanced';
+  isArchived: boolean;
+  totalClasses: number;
+  courseContent: string[]; // Array of PDF URLs/paths
+  notes: string[]; // Array of note IDs or content (you can adjust depending on the structure of the notes)
   price: number;
-  image: string;
-  instructor_name: string;
+  image: string; // URL or path to the course image
 }
 
 export default function Home() {
@@ -34,7 +49,119 @@ export default function Home() {
   const [insdata, setInsData] = useState<any>(null);
   const [activeCategory, setActiveCategory] = React.useState('All');
   const [Teach_Courses, setTeachCourses] = useState<Course[]>([]);
+  const [users, setUsers] = useState<User[]>([]); // Initialize as an empty array
+
   const router = useRouter();
+
+  
+    const fetchUserDetails = async ()  => {
+      try {
+        // Retrieve the access token and instructor data from session storage
+        const accessToken = sessionStorage.getItem('Ins_Token'); // Updated to match token naming convention
+        const storedInstructor = sessionStorage.getItem('instructorData'); // Updated to match instructor data storage key
+        console.log('Access Token:', accessToken);
+
+        if (storedInstructor && accessToken) {
+          const parsedInstructor = JSON.parse(storedInstructor);
+          setInsData(parsedInstructor);
+
+          console.log('Access Token:', accessToken);
+          console.log('Instructor Email:', parsedInstructor?.email);
+        const response = await fetch(
+          `http://localhost:3000/instructor/email/${parsedInstructor?.email}/students`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+            },
+          },
+        );
+  
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user details: ${response.statusText}`);
+        }
+  
+        const data = await response.json();
+        console.log('Fetched user details:', data); // Debugging: Log the fetched user details
+        setUsers(data); // Update state with user data
+        return data; // Return the fetched user data
+      } else {
+        // Redirect to login if instructor data or token is missing
+        router.push('/Ins_login');
+      }
+      } catch (error) {
+        console.error('Error fetching user details', error);
+        throw error; // Propagate the error for the caller to handle
+      }
+    };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission behavior
+  
+    const searchInput = document.getElementById('searchText') as HTMLInputElement | null;
+  
+    if (!searchInput) {
+      console.error('Search input element not found');
+      return;
+    }
+  
+    const searchKeyword = searchInput.value.trim();
+  
+    if (!searchKeyword) {
+      alert('Please enter an email or course name to search.');
+      return;
+    }
+  
+    // Check if the search is for a student or a course
+    if (searchKeyword.includes('@')) {
+      // Search for a student by email
+      const student = users.find((user) => user.email === searchKeyword); // Assuming usersData contains the list of students
+  
+      if (!student) {
+        alert('Student not found');
+        return;
+      }
+  
+      // Check if the student has accepted any courses from the instructor's teaches_courses
+      const acceptedCourses = student.acceptedCourses;
+      const instructorCourses = insdata?.Teach_Courses; // Assuming insdata contains the instructor's courses
+  
+      const hasAcceptedCourse = acceptedCourses.some((course) =>
+        instructorCourses.includes(course)
+      );
+  
+      if (hasAcceptedCourse) {
+        // Navigate to student profile page
+        router.push(`/Ins_Home/student_Profile?email=${student.email}`);
+      } else {
+        alert('Student has not accepted any courses from the instructor.');
+      }
+    } else {
+      // Search for a course
+      const normalizedCourseMap = new Map<string, string>();
+      insdata?.Teach_Courses.forEach((course: string) => {
+        const normalized = course.toLowerCase().replace(/\s+/g, '');
+        normalizedCourseMap.set(normalized, course);
+      });
+  
+      // Normalize the search keyword for comparison
+      const normalizedSearchKeyword = searchKeyword
+        .toLowerCase()
+        .replace(/\s+/g, '');
+  
+      // Check if the normalized search keyword matches any normalized course title
+      if (normalizedCourseMap.has(normalizedSearchKeyword)) {
+        const originalTitle = normalizedCourseMap.get(normalizedSearchKeyword); // Get the original title
+        handleCourseTitleClick(originalTitle!); // Use the original title for redirection
+      } else {
+        alert(
+          `The course "${searchKeyword}" is not available. Please select a Teachable course.`
+        );
+      }
+    }
+  };
+  
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -53,7 +180,7 @@ export default function Home() {
 
           // Fetch courses for the instructor using the email
           const response = await fetch(
-            `http://localhost:3000/instructor/courses?email=${parsedInstructor?.email}`,
+            `http://localhost:3000/instructor/courses/byinsemail?email=${parsedInstructor?.email}`,
             {
               method: 'GET',
               headers: {
@@ -79,7 +206,7 @@ export default function Home() {
         console.error('Error fetching courses:', error);
       }
     };
-
+    fetchUserDetails();
     fetchCourses(); // Call the fetchCourses function
     setTimeout(() => {
       setIsLoading(false);
@@ -97,8 +224,16 @@ export default function Home() {
     router.push(`/Ins_Home/selected_course?title=${encodeURIComponent(title)}`);
   };
 
+  const handleAnalysis = (title: string) => {
+    router.push(`/Ins_Home/Progress?title=${encodeURIComponent(title)}`);
+  };
+
   const handleCreateCourse = () => {
     router.push('/Ins_Home/create-course');
+  };
+
+  const handleCreateModule = () => {
+    router.push('/Ins_Home/create-module');
   };
 
   return (
@@ -158,10 +293,10 @@ export default function Home() {
                 {/* ***** Logo End ***** */}
                 {/* ***** Serach Start ***** */}
                 <div className="search-input">
-                  <form id="search" action="#">
+                  <form id="search" onSubmit={(e) => handleSearch(e)}>
                     <input
                       type="text"
-                      placeholder="Type Something"
+                      placeholder="Search For Courses or students"
                       id="searchText"
                       name="searchKeyword"
                     />
@@ -186,7 +321,7 @@ export default function Home() {
                     <Link href="/Ins_Home/Profile">
                       {insdata?.profilePictureUrl ? (
                         <img
-                          src={`http://localhost:3000/files/${insdata.profilePictureUrl}`}
+                          src={insdata.profilePictureUrl}
                           alt="Profile"
                           style={{
                             width: '90px',
@@ -325,10 +460,10 @@ export default function Home() {
                   />
                 </div>
                 <div className="main-content">
-                  <h4>Give Certificates</h4>
+                  <h4>Certificates and Progress</h4>
                   <p>
-                    You can give Certificates for the students with their final
-                    grade from here
+                    You can give Certificates for the students and check their
+                    final grade from here
                   </p>
                   <div className="main-button">
                     <a href="/Ins_Home/Certificates">Add</a>
@@ -408,34 +543,56 @@ export default function Home() {
       </section>
       {/* Display filtered courses or message */}
       <div className="main-content">
-        <section className="section courses" id="courses">
-          <div className="container">
-            {/* Course Categories Filter */}
-            <ul className="event_filter">
-              {filteredAcceptedCourses.map((course) => (
-                <li
-                  key={course.title}
-                  onClick={() => handleCourseTitleClick(course.title)}
+        <div className="row event_box">
+          {filteredAcceptedCourses.map((Teach_Courses, index) => (
+            <div
+              key={index}
+              className={`col-lg-4 col-md-6 align-self-center mb-30 event_outer`}
+            >
+              <div className="events_item">
+                <div className="thumb">
+                  <a href="#">
+                    <img src={Teach_Courses.image} alt={Teach_Courses.title} />
+                  </a>
+                  <span className="category">{Teach_Courses.category}</span>
+                  <span className="price">
+                    <h6>
+                      <em>$</em>
+                      {Teach_Courses.price}
+                    </h6>
+                  </span>
+                </div>
+                <div className="down-content">
+                  <span className="author">{Teach_Courses.instructorName}</span>
+                  <h4
+                    onClick={() => handleCourseTitleClick(Teach_Courses.title)}
+                  >
+                    {Teach_Courses.title}
+                  </h4>
+                </div>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => handleAnalysis(Teach_Courses.title)}
                 >
-                  <div className="course-card">
-                    <h3>{course.title}</h3>
-                    <p>Instructor: {course.instructor_name}</p>
-                    <p>Price: ${course.price}</p>
-                    <p>Category: {course.category}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </section>
+                  Check analysis
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
         <div className="row">
           <div className="col-lg-12 text-center">
             <button className="btn btn-primary" onClick={handleCreateCourse}>
               Create Course
             </button>
+            <button className="btn btn-primary" onClick={handleCreateModule}>
+              Create Module
+            </button>
           </div>
         </div>
+      </div>
 
+      <div className="row event_box">
         <footer className="footer-spacing">
           <div className="container">
             <div className="col-lg-12">
