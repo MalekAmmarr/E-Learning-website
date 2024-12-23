@@ -72,30 +72,30 @@ const AnnouncementsPage: React.FC = () => {
       if (!token) {
         throw new Error('No token found. Please log in again.');
       }
-
-      // Log the data to check if it's correct
-      console.log('Sending announcement data:', newAnnouncement);
-
+  
+      // Make the POST request to add the announcement
       const response = await fetch('http://localhost:3000/admins/createAnnouncement', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(newAnnouncement),
+        body: JSON.stringify(newAnnouncement), // Send the new announcement details
       });
-
+  
       if (!response.ok) {
         throw new Error(`Failed to add announcement. Status: ${response.status}`);
       }
-
-      const addedAnnouncement = await response.json();
-      setAnnouncements((prev) => [...prev, addedAnnouncement]);
-
-      // Reset input fields after successfully adding the announcement
+  
+      const addedAnnouncement = await response.json(); // Parse the response
+  
+      console.log('Added announcement:', addedAnnouncement);
+  
+      // Update the announcements list with the new announcement
+      setAnnouncements((prev) => [...prev, addedAnnouncement.announcement]);
+  
+      // Reset the form fields and hide the add row
       setNewAnnouncement({ title: '', content: '', createdBy: '' });
-
-      // Hide the add row after submitting
       setShowAddRow(false);
     } catch (error: any) {
       console.error('Error adding announcement:', error);
