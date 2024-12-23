@@ -1,25 +1,28 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { Message } from './message.schema';
 
 @Schema({ timestamps: true })
 export class ChatHistory extends Document {
   @Prop({ required: true })
-  messageId: string; // Unique identifier for the message
+  Title: string; // Unique identifier for the message
 
   @Prop({ required: true })
-  senderId: string; // ID of the message sender
+  Admin: string; // Unique identifier for the message
+  @Prop({ required: true })
+  CourseTitle: string; // Unique identifier for the message
+
+  @Prop({ type: [String], default: [] })
+  MembersEmail: string[];
+
+  @Prop({ type: [String], default: [] })
+  MembersName: string[];
 
   @Prop({ required: true })
-  receiverId: string; // ID of the message receiver (use "all" for group chats)
+  ProfilePictureUrl: string; // ID of the message receiver (use "all" for group chats)
 
-  @Prop({ required: true })
-  message: string; // Content of the message
-
-  @Prop({ default: null })
-  courseId?: string; // Optional reference to the course for course-specific chats
-
-  @Prop({ default: null })
-  threadId?: string; // Optional reference to a discussion thread
+  @Prop({ type: [Message], required: true, default: [] })
+  messages: [Message]; // Content of the message
 
   @Prop({ default: Date.now })
   timestamp: Date; // Timestamp of when the message was sent

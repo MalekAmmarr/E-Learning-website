@@ -22,7 +22,11 @@ import { AuthModule } from './Backend/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import path, { join } from 'path';
 import { ChatModule } from './Backend/chat/chat.module';
+
+import { ChatHistoryModule } from './Backend/chat-history/chat-history.module';
+import { InstructorController } from './instructor/instructor.controller';
 import { DiscussionModule } from './Backend/Discussion/DiscussionModule';
+
 
 @Module({
   imports: [
@@ -54,6 +58,7 @@ import { DiscussionModule } from './Backend/Discussion/DiscussionModule';
     CertificateModule,
     BackupModule,
     LogsModule,
+
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret', // Use environment variable for secret
       signOptions: { expiresIn: '24h' }, // Token expiration time
@@ -64,9 +69,12 @@ import { DiscussionModule } from './Backend/Discussion/DiscussionModule';
     ProgressModule,
     AuthModule,
     ChatModule,
-    DiscussionModule
+
+    ChatHistoryModule,
+     DiscussionModule,
+
   ],
-  controllers: [AppController],
+  controllers: [AppController, InstructorController],
   providers: [AppService],
 })
 export class AppModule {}

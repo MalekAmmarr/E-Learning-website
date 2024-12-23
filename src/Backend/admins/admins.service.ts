@@ -45,15 +45,22 @@ export class AdminsService {
     return await this.authService.login(email, password, 'admin');
   } 
 
+
   async createAnnouncement( title: string, content: string,createdBy:string): Promise<Announcement> {
     try {
       const newAnnouncement = new this.AnnouncementModel({  title, content ,createdBy});
+
       return await newAnnouncement.save();
     } catch (error) {
       console.error('Error during announcement creation:', error);
       throw new Error('Failed to create announcement');
     }
   }
+
+
+  
+
+
   async getAllAnnouncements() {
     return await this.AnnouncementModel.find(); // Retrieves all announcements
   }

@@ -146,7 +146,7 @@ async restoreCourse(@Body() body: { courseId: string }) {
       console.error('Error during announcement creation:', error);
       throw new BadRequestException('Failed to create announcement');
     }
-  }
+
 
   @UseGuards(AuthorizationGuard)
   @Patch('editAnnouncement')
