@@ -38,7 +38,7 @@ export class InstructorController {
     private readonly logsService: LogsService,
     private readonly feedbackService: FeedbackService,
     private readonly userService: UsersService,
-  ) {}
+  ) { }
 
   // Register a new user
   @Post('register')
@@ -61,12 +61,29 @@ export class InstructorController {
   async login(
     @Body() { email, passwordHash }: { email: string; passwordHash: string },
   ) {
-    const login = await this.instructorService.loginInstructor(
-      email,
-      passwordHash,
-    );
-    const Logs = await this.logsService.create(email, login.log, 'instructor');
-    return login;
+    let log = "failed"; // Default to "failed"
+
+    try {
+      // Attempt to log in
+      const login = await this.instructorService.loginInstructor(email, passwordHash);
+
+      // If login is successful, set log to "pass"
+      log = login.log;
+
+      // Save log to logsService
+      await this.logsService.create(email, log, 'instructor');
+
+      // Return the login response
+      return login;
+    } catch (error) {
+      console.error('Login failed:', error);
+
+      // Save failed log to logsService
+      await this.logsService.create(email, log, 'instructor');
+
+      // Re-throw the error so the client receives it
+      throw new BadRequestException('Login failed');
+    }
   }
 
   @UseGuards(AuthorizationGuard)
@@ -142,19 +159,19 @@ export class InstructorController {
     return { user, message };
   }
 
-
   @UseGuards(AuthorizationGuard)
   @Get('email/:email/students')
   @Roles('instructor')
   async getStudents(@Param('email') instructorEmail: string): Promise<User[]> {
-    return this.instructorService.getStudentsForInstructorByEmail(instructorEmail);
+    return this.instructorService.getStudentsForInstructorByEmail(
+      instructorEmail,
+    );
   }
 
-
-  // Endpoint to create a course
-  @UseGuards(AuthorizationGuard)
+  // // Endpoint to create a course
+  // @UseGuards(AuthorizationGuard)
   @Post(':email/create-course')
-  @Roles('instructor')
+  // @Roles('instructor')
   async createCourse(
     @Param('email') email: string, // Instructor email in the URL param
     @Body() createCourseDto: CreateCourseDto, // Course data in the request body
@@ -237,7 +254,10 @@ export class InstructorController {
     return this.instructorService.getEnrolledStudents(courseTitle);
   }
 
-  
+ 
+
+
+
   // 2. Endpoint to get the number of students who completed the course
   @UseGuards(AuthorizationGuard)
   @Get('completed-students/:courseTitle')
@@ -248,7 +268,9 @@ export class InstructorController {
     return this.instructorService.getCompletedStudentsCount(courseTitle);
   }
 
-  
+
+
+
   // 3. Endpoint to get the number of students based on their scores
   @UseGuards(AuthorizationGuard)
   @Get('students-score/:courseTitle')
@@ -265,7 +287,7 @@ export class InstructorController {
   async getCourses(@Query('email') email: string): Promise<string[]> {
     return this.instructorService.getCoursesByInstructor(email);
   }
-  
+
 
   @UseGuards(AuthorizationGuard)
   @Get('course/bytitle')
@@ -298,7 +320,6 @@ export class InstructorController {
   async getStudentByEmail(@Param('email') email: string): Promise<User> {
     return this.userService.findUserByEmail(email);
   }
-
   
   @UseGuards(AuthorizationGuard)
   @Delete(':instructorEmail/courses/:courseTitle')
@@ -309,6 +330,5 @@ export class InstructorController {
 ) {
   return await this.instructorService.deleteCourse(instructorEmail, courseTitle);
 }
-
 
 }

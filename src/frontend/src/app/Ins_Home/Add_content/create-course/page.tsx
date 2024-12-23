@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import './page.css';
 
-
 const CreateCourse = () => {
   const [formData, setFormData] = useState({
     courseId: '',
@@ -20,14 +19,18 @@ const CreateCourse = () => {
 
   useEffect(() => {
     // Automatically set the instructor email from localStorage
-    const storedInstructor = localStorage.getItem('instructorData');
+    const storedInstructor = sessionStorage.getItem('instructorData');
     if (storedInstructor) {
       const { email } = JSON.parse(storedInstructor);
       setFormData((prevData) => ({ ...prevData, instructormail: email }));
     }
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
+  ) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
@@ -35,16 +38,22 @@ const CreateCourse = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const storedInstructor = localStorage.getItem('instructorData');
+      const storedInstructor = sessionStorage.getItem('instructorData');
       if (!storedInstructor) throw new Error('Instructor data not found.');
 
       const { email } = JSON.parse(storedInstructor);
 
-      const res = await fetch(`http://localhost:3000/instructor/${email}/create-course`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, instructormail: email }),
-      });
+      const res = await fetch(
+        `http://localhost:3000/instructor/${email}/create-course`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionStorage.getItem('Ins_Token')}`, // Add the token to the Authorization header
+          },
+          body: JSON.stringify({ ...formData, instructormail: email }),
+        },
+      );
 
       if (!res.ok) {
         throw new Error(`Failed to create course: ${res.statusText}`);
