@@ -78,7 +78,7 @@ const ChatCreate = () => {
 
       if (response.ok) {
         setCreateGroupResponse(await response.json());
-        router.push(`/User_Home/chat?title=${courseTitle}`); // Navigate to chat page after creating the group
+        router.push(`/User_Home/chat_Hossam?title=${courseTitle}`); // Navigate to chat page after creating the group
       } else {
         setError(
           `Failed to create chat: Make sure that all users are enrolled in ${courseTitle}`,

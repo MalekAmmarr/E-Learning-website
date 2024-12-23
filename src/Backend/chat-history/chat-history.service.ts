@@ -11,6 +11,9 @@ import { Course } from 'src/schemas/course.schema';
 import { Progress } from 'src/schemas/progress.schema';
 import { User } from 'src/schemas/user.schema';
 import { CreateGroupDto } from './dto/create-group.dto';
+import { SendMessageDto } from './dto/send-message.dto';
+import { group } from 'console';
+
 
 @Injectable()
 export class ChatHistoryService {
@@ -23,6 +26,7 @@ export class ChatHistoryService {
     private readonly ChatHistoryModel: Model<ChatHistory>,
     @InjectModel(Message.name, 'eLearningDB')
     private readonly MessageModel: Model<Message>,
+   
   ) {}
 
   // Method to search a student by email and return the student info and their course progress
@@ -93,11 +97,32 @@ export class ChatHistoryService {
     return { Groups };
   }
   async getGroupChat(Admin: string, title: string) {
-    const Groups = await this.ChatHistoryModel.find(
+    const Groups = await this.ChatHistoryModel.findOne(
       { Admin, Title: title },
       'messages', // Include only the 'messages' field
     ).exec();
 
     return { Groups };
+  }
+  async sendMessage(
+    sendMessageDto: SendMessageDto,
+
+    CourseTitle: string,
+    Title: string,
+  ) {
+    console.log('sendDto :', sendMessageDto);
+    console.log('Course Title : ', CourseTitle);
+    console.log('Title : ', Title);
+    const Group = await this.ChatHistoryModel.findOne({
+      CourseTitle: CourseTitle,
+      Title: Title,
+    });
+    if (Group) {
+      const message = new this.MessageModel({ ...sendMessageDto });
+      Group.messages.push(message);
+      await Group.save();
+      // After saving the message, broadcast it to all connected clients
+      
+    } else throw new Error('No Group to Add on it your message');
   }
 }

@@ -8,6 +8,9 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import './page.css';
 import { User } from '../Notes/page';
+import { title } from 'process';
+import { timeStamp } from 'console';
+// import { io } from 'socket.io-client';
 export interface ChatHistory {
   Title: string; // The title of the chat group
   Admin: string; // The admin of the chat group
@@ -23,12 +26,14 @@ export interface Message {
   senderName?: string; // Optional name of the sender
   message: string; // The content of the message
   ProfilePictureUrl: string; // URL of the sender's profile picture
-  timestamp?: Date; // Timestamp of when the message was sent
+  timestamp: Date; // Timestamp of when the message was sent
 }
 const chat = () => {
   // const [createGroupResponse, setCreateGroupResponse] = useState(null);
   const [groupsInfo, setGroupInfo] = useState<ChatHistory[]>([]);
   const [groupChat, setGroupChat] = useState<Message[]>([]);
+  const [socket, setSocket] = useState(null);
+
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingGroupChat, setIsLoadingGroupChat] = useState(false);
@@ -36,6 +41,7 @@ const chat = () => {
   const [GroupTitle, SetGroupTitle] = useState<string>('No Group Selected');
   const [GroupMembers, SetGroupMembers] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [message, setMessage] = useState('');
 
   const [userData, setUserData] = useState<User>();
   const router = useRouter();
@@ -72,20 +78,61 @@ const chat = () => {
   ) => {
     try {
       setIsLoadingGroupChat(true);
-      SetGroupTitle(GroupTitle);
+      SetGroupTitle(title);
       SetGroupMembers(GroupMembers);
       const response = await fetch(
         `http://localhost:3000/chat-history/getGroupChat/${admin}/${title}`,
       );
       const groupsInfo = await response.json();
       if (groupsInfo) {
-        console.log('Group info : ', groupsInfo.Groups);
-        setGroupChat(groupsInfo.Groups);
+        console.log('Group chats : ', groupsInfo.Groups.messages);
+        setGroupChat(groupsInfo.Groups.messages);
       }
     } catch (err) {
       setError('Failed to get groups: ' + err);
     } finally {
       setIsLoadingGroupChat(false);
+    }
+  };
+  const sendChat = async (
+    senderEmail: string,
+    message: string,
+    ProfilePictureUrl: string,
+    timestamp: Date,
+    CourseTitle: string,
+    Title: string,
+  ) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/chat-history/sendMessage`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json', // Ensure the server understands JSON format
+          },
+          body: JSON.stringify({
+            senderEmail,
+            message,
+            ProfilePictureUrl,
+            CourseTitle,
+            Title,
+            timestamp: timestamp || new Date(), // Defaults to current date/time if not provided
+          }),
+        },
+      );
+
+      // Check if the response status is successful (2xx)
+      if (response.ok) {
+        console.log('Message sent successfully');
+        await handleGetGroupChat(senderEmail, Title, CourseTitle, GroupMembers); // Refresh the page or router if necessary
+      } else {
+        const errorData = await response.json();
+        throw new Error(
+          `Failed to send chat. Error: ${errorData.message || 'Unknown error'}`,
+        );
+      }
+    } catch (err) {
+      console.error('Failed to send chat:', err);
     }
   };
   const fetchUserDetails = async (
@@ -139,6 +186,50 @@ const chat = () => {
     };
     Initialize();
   }, []);
+  // useEffect(() => {
+  //   console.log('Initializing WebSocket connection...'); // Log when the connection starts
+
+  //   const socketInstance = io('http://localhost:3000/chat'); // Connect to the WebSocket server
+
+  //   // Log when the WebSocket connection is established
+  //   socketInstance.on('connect', () => {
+  //     console.log('WebSocket connected to the server');
+  //   });
+
+  //   // Listen for 'newMessage' events and update the UI in real-time
+  //   socketInstance.on('newMessage', (newMessage) => {
+  //     console.log('Received new message:', newMessage); // Log the received message
+
+  //     const updatedMessage = {
+  //       senderEmail: newMessage.senderEmail,
+  //       senderName: newMessage.senderName || '', // Handle missing senderName
+  //       message: newMessage.message,
+  //       ProfilePictureUrl: newMessage.ProfilePictureUrl,
+  //       timestamp: new Date(newMessage.timestamp), // Convert to Date object
+  //     };
+
+  //     // Log the updated message before updating the state
+  //     console.log('Updated message:', updatedMessage);
+
+  //     // Update the group chat state with the new message
+  //     setGroupChat((prevMessages) => {
+  //       const updatedMessages = [...prevMessages, updatedMessage];
+  //       console.log('Updated group chat state:', updatedMessages); // Log the new state
+  //       return updatedMessages;
+  //     });
+  //   });
+
+  //   // Log when the connection is disconnected
+  //   socketInstance.on('disconnect', () => {
+  //     console.log('WebSocket disconnected');
+  //   });
+
+  //   // Cleanup WebSocket connection when the component unmounts
+  //   return () => {
+  //     console.log('Cleaning up WebSocket connection');
+  //     socketInstance.disconnect();
+  //   };
+  // }, []);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
@@ -149,7 +240,7 @@ const chat = () => {
     // const queryParams = new URLSearchParams(window.location.search);
     // const courseTitle = queryParams.get('title');
     // if (courseTitle)
-    router.push(`/User_Home/chat/CreateGroup?title=Machine Learning`);
+    router.push(`/User_Home/chat_Hossam/CreateGroup?title=Machine Learning`);
     // else console.log('no course title available');
   };
 
@@ -244,8 +335,8 @@ const chat = () => {
                             onClick={() =>
                               handleGetGroupChat(
                                 userData?.email,
-                                CourseTitle,
                                 group.Title,
+                                CourseTitle,
                                 group.MembersEmail,
                               )
                             }
@@ -371,10 +462,7 @@ const chat = () => {
                               }`}
                             >
                               <img
-                                src={
-                                  msg.ProfilePictureUrl ||
-                                  'https://via.placeholder.com/50'
-                                } // Default image if no profile pic
+                                src={msg.ProfilePictureUrl} // Default image if no profile pic
                                 alt="User Avatar"
                                 className="img-circle"
                               />
@@ -426,8 +514,9 @@ const chat = () => {
                 <div className="message_write">
                   <textarea
                     className="form-control"
-                    placeholder="type a message"
-                    defaultValue={''}
+                    placeholder="Type a message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)} // Update state on input change
                   />
                   <div className="clearfix" />
                   <div className="chat_bottom">
@@ -435,7 +524,29 @@ const chat = () => {
                       <i className="fa fa-cloud-upload" aria-hidden="true" />
                       Add Files
                     </a>
-                    <a href="#" className="pull-right btn btn-success">
+                    <a
+                      onClick={() => {
+                        if (!userData) {
+                          alert('User is not logged in or email is missing.');
+                          return;
+                        }
+
+                        if (!message.trim()) {
+                          alert("Message can't be empty!");
+                          return;
+                        }
+
+                        sendChat(
+                          userData.email, // Guaranteed to be a string after the check
+                          message,
+                          userData.profilePictureUrl || '', // Provide a fallback value
+                          new Date(),
+                          CourseTitle || 'Default Course', // Provide fallback if CourseTitle is undefined
+                          GroupTitle || 'Default Group', // Provide fallback if GroupTitle is undefined
+                        );
+                      }}
+                      className="pull-right btn btn-success"
+                    >
                       Send
                     </a>
                   </div>
