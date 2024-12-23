@@ -1,4 +1,4 @@
-import { Injectable,NotFoundException,BadRequestException, } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -18,23 +18,23 @@ export class AdminsService {
 
   // Inject UserModel and AuthenticationLogService into the constructor
   constructor(
-    @InjectModel(Announcement.name,'eLearningDB')
-    private readonly AnnouncementModel : Model<Announcement>,
-    @InjectModel(Course.name,'eLearningDB')
-    private readonly courseModel : Model<Course>, // Inject the admin model for DB operations
-    @InjectModel(admin.name,'eLearningDB')
-    private readonly adminModel : Model<admin>, // Inject the admin model for DB operations
+    @InjectModel(Announcement.name, 'eLearningDB')
+    private readonly AnnouncementModel: Model<Announcement>,
+    @InjectModel(Course.name, 'eLearningDB')
+    private readonly courseModel: Model<Course>, // Inject the admin model for DB operations
+    @InjectModel(admin.name, 'eLearningDB')
+    private readonly adminModel: Model<admin>, // Inject the admin model for DB operations
     @InjectModel(Instructor.name, 'eLearningDB')
     private readonly InstructorModel: Model<Instructor>, // Inject the Instructor model for DB operations
     @InjectModel(User.name, 'eLearningDB')
     private readonly UserModel: Model<User>, // Inject the User model for DB operations
-    @InjectModel(Logs.name,'eLearningDB')
-    private readonly logsModel:Model<Logs>,
+    @InjectModel(Logs.name, 'eLearningDB')
+    private readonly logsModel: Model<Logs>,
     private readonly authService: AuthService, // Inject AuthService
 
-  ) {}
-  
- 
+  ) { }
+
+
   // Register a new Admin
   async registerAdmin(createAdminDto: CreateAdminDto) {
     return await this.authService.registerUser(createAdminDto, 'admin');
@@ -43,12 +43,12 @@ export class AdminsService {
   // Login Admin
   async loginAdmin(email: string, password: string) {
     return await this.authService.login(email, password, 'admin');
-  } 
+  }
 
 
-  async createAnnouncement( title: string, content: string,createdBy:string): Promise<Announcement> {
+  async createAnnouncement(title: string, content: string, createdBy: string): Promise<Announcement> {
     try {
-      const newAnnouncement = new this.AnnouncementModel({  title, content ,createdBy});
+      const newAnnouncement = new this.AnnouncementModel({ title, content, createdBy });
 
       return await newAnnouncement.save();
     } catch (error) {
@@ -58,7 +58,7 @@ export class AdminsService {
   }
 
 
-  
+
 
 
   async getAllAnnouncements() {
@@ -76,10 +76,10 @@ export class AdminsService {
   async deleteAnnouncementByTitle(title: string) {
     return await this.AnnouncementModel.findOneAndDelete({ title });
   }
-  
-  
-  
-// *Step 2 Features*
+
+
+
+  // *Step 2 Features*
 
   // Get all students
   //Fetches a list of all students in the database.
@@ -96,18 +96,18 @@ export class AdminsService {
     try {
       console.log(`Updating student with email: ${email}`);
       console.log('Updates:', updates);
-  
+
       const updatedStudent = await this.UserModel.findOneAndUpdate(
         { email: email },
         updates,
         { new: true }
       );
-  
+
       if (!updatedStudent) {
         console.error('No student found with the provided email.');
         throw new NotFoundException('Student not found');
       }
-  
+
       console.log('Successfully updated student:', updatedStudent);
       return updatedStudent;
     } catch (error) {
@@ -115,8 +115,8 @@ export class AdminsService {
       throw new Error('Failed to update student');
     }
   }
-  
-  
+
+
 
   async deleteStudentByEmail(email: string): Promise<User> {
     try {
@@ -130,7 +130,7 @@ export class AdminsService {
       throw new Error('Failed to delete student by email');
     }
   }
-  
+
 
   // Fetches a list of all instructors.
   async getAllInstructors(): Promise<Instructor[]> {
@@ -147,18 +147,18 @@ export class AdminsService {
     try {
       console.log(`Updating student with email: ${email}`);
       console.log('Updates:', updates);
-  
+
       const updateInstructor = await this.InstructorModel.findOneAndUpdate(
         { email: email },
         updates,
         { new: true }
       );
-  
+
       if (!updateInstructor) {
         console.error('No student found with the provided email.');
         throw new NotFoundException('Student not found');
       }
-  
+
       console.log('Successfully updated student:', updateInstructor);
       return updateInstructor;
     } catch (error) {
@@ -170,7 +170,7 @@ export class AdminsService {
   // Deletes a specific instructor account by their id.
   async deleteInstructor(email: string): Promise<Instructor> {
     try {
-      const deletedInstructor = await this.InstructorModel.findOneAndDelete({email: email});
+      const deletedInstructor = await this.InstructorModel.findOneAndDelete({ email: email });
       if (!deletedInstructor) {
         throw new NotFoundException('Instructor not found');
       }

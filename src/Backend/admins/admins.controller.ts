@@ -36,10 +36,29 @@ export class AdminsController {
 
   @Post('login')
   async login(@Body() { email, passwordHash }: { email: string; passwordHash: string }) {
+    let log = "failed"; // Default to "failed"
 
-    const login = await this.adminsService.loginAdmin(email, passwordHash);
-    const Logs = await this.logsService.create(email, login.log, 'admin')
-    return login
+    try {
+      // Attempt to log in
+      const login = await this.adminsService.loginAdmin(email, passwordHash);
+
+      // If login is successful, set log to "pass"
+      log = login.log;
+
+      // Save log to logsService
+      await this.logsService.create(email, log, 'admin');
+
+      // Return the login response
+      return login;
+    } catch (error) {
+      console.error('Login failed:', error);
+
+      // Save failed log to logsService
+      await this.logsService.create(email, log, 'admin');
+
+      // Re-throw the error so the client receives it
+      throw new BadRequestException('Login failed');
+    }
   }
 
   @Get('viewCourses')
@@ -84,45 +103,45 @@ export class AdminsController {
   }
 
   @UseGuards(AuthorizationGuard)
-@Patch('restoreCourse')
-@Roles('admin')
-async restoreCourse(@Body() body: { courseId: string }) {
-  const { courseId } = body;
-  if (!courseId) {
-    throw new BadRequestException('courseId is required.');
+  @Patch('restoreCourse')
+  @Roles('admin')
+  async restoreCourse(@Body() body: { courseId: string }) {
+    const { courseId } = body;
+    if (!courseId) {
+      throw new BadRequestException('courseId is required.');
+    }
+
+    try {
+      const restoredCourse = await this.coursesService.restoreCourse(courseId);
+
+      return {
+        message: 'Course restored successfully',
+        restoredCourse,
+      };
+    } catch (error) {
+      console.error('Error during course restoring:', error.message);
+      throw new BadRequestException('Course restoring failed.');
+    }
   }
 
-  try {
-    const restoredCourse = await this.coursesService.restoreCourse(courseId);
 
-    return {
-      message: 'Course restored successfully',
-      restoredCourse,
-    };
-  } catch (error) {
-    console.error('Error during course restoring:', error.message);
-    throw new BadRequestException('Course restoring failed.');
-  }
-}
-
-  
 
   @UseGuards(AuthorizationGuard)
   @Delete('deleteCourse')
   @Roles('admin')
   async deleteCourse(@Body() body: { title: string }) {
     const { title } = body;
-   try {
-     const deletedCourse = await this.coursesService.DeleteCourse(title);
-     return {
-       message: 'Course deleted successfully',
-       deletedCourse,
-     };
+    try {
+      const deletedCourse = await this.coursesService.DeleteCourse(title);
+      return {
+        message: 'Course deleted successfully',
+        deletedCourse,
+      };
     } catch (error) {
-     console.error('Error during course deletion:', error);
-     throw new BadRequestException('Course deletion failed');
-   }
- }
+      console.error('Error during course deletion:', error);
+      throw new BadRequestException('Course deletion failed');
+    }
+  }
 
   @Get('getAnnouncement')
   async getAllAnnouncements() {
@@ -132,12 +151,12 @@ async restoreCourse(@Body() body: { courseId: string }) {
   @UseGuards(AuthorizationGuard)
   @Post('createAnnouncement')
   @Roles('admin')
-  async createAnnouncement(@Body() body: {  title: string; content: string ;createdBy:string}) {
-    const {  title, content ,createdBy} = body;
-  
+  async createAnnouncement(@Body() body: { title: string; content: string; createdBy: string }) {
+    const { title, content, createdBy } = body;
+
     try {
-      const announcement = await this.adminsService.createAnnouncement( title, content,createdBy);
-  
+      const announcement = await this.adminsService.createAnnouncement(title, content, createdBy);
+
       return {
         message: 'Announcement created successfully',
         announcement,
@@ -260,7 +279,7 @@ async restoreCourse(@Body() body: { courseId: string }) {
     @Body() updates: Record<string, any>,
   ) {
     try {
-      const updatedInstructor = await this.adminsService.updateInstructor(email, updates) ;
+      const updatedInstructor = await this.adminsService.updateInstructor(email, updates);
       return {
         message: 'Instructor updated successfully',
         updatedInstructor,
@@ -285,15 +304,15 @@ async restoreCourse(@Body() body: { courseId: string }) {
 
   // Monitor unauthorized access logs
   //Calls getLogs to fetch all access or unauthorized login attempt logs.
-  @Get('logs')
-  async getLogs() {
-    try {
-      return await this.logsService.getLogs();
-    } catch (error) {
-      console.error('Error fetching logs:', error);
-      throw new BadRequestException('Failed to fetch logs');
-    }
-  }
+  // @Get('logs')
+  // async getLogs() {
+  //   try {
+  //     return await this.logsService.getLogs();
+  //   } catch (error) {
+  //     console.error('Error fetching logs:', error);
+  //     throw new BadRequestException('Failed to fetch logs');
+  //   }
+  // }
 
 
 }

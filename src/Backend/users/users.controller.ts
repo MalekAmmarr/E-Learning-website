@@ -30,7 +30,7 @@ export class UsersController {
     private readonly userService: UsersService,
     private readonly logsService: LogsService,
     private readonly feedbackService: FeedbackService,
-  ) {}
+  ) { }
 
   // Register a new user
   @Post('register')
@@ -51,10 +51,31 @@ export class UsersController {
   async login(
     @Body() { email, passwordHash }: { email: string; passwordHash: string },
   ) {
-    const login = await this.userService.loginUser(email, passwordHash);
-    const Logs = await this.logsService.create(email, login.log, 'student');
-    return login;
+    let log = "failed"; // Default to "failed"
+
+    try {
+      // Attempt to log in
+      const login = await this.userService.loginUser(email, passwordHash);
+
+      // If login is successful, set log to "pass"
+      log = login.log;
+
+      // Save log to logsService
+      await this.logsService.create(email, log, 'student');
+
+      // Return the login response
+      return login;
+    } catch (error) {
+      console.error('Login failed:', error);
+
+      // Save failed log to logsService
+      await this.logsService.create(email, log, 'student');
+
+      // Re-throw the error so the client receives it
+      throw new BadRequestException('Login failed');
+    }
   }
+
   // Get user by email
   @Post('getUser/:email')
   async getUserByEmail(@Param('email') email: string): Promise<User | null> {
