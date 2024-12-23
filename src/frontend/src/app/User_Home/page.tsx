@@ -100,15 +100,15 @@ export default function Home() {
     activeCategory === 'All'
       ? appliedCourses
       : appliedCourses.filter(
-          (appliedCourses) => appliedCourses.category === activeCategory,
-        );
+        (appliedCourses) => appliedCourses.category === activeCategory,
+      );
   // Filter courses based on the active category
   const filteredAcceptedCourses =
     activeCategory === 'All'
       ? acceptedCourses
       : acceptedCourses.filter(
-          (acceptedCourses) => acceptedCourses.category === activeCategory,
-        );
+        (acceptedCourses) => acceptedCourses.category === activeCategory,
+      );
 
   useEffect(() => {
     const initialize = async () => {
@@ -190,7 +190,7 @@ export default function Home() {
     }
   };
 
-  const getCourses = async (user: User) => {};
+  const getCourses = async (user: User) => { };
 
   return (
     <>
@@ -1018,6 +1018,35 @@ export default function Home() {
                     <li>
                       <a
                         href="https://www.instagram.com/yousssefgalal/profilecard"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-instagram" />
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-3 col-md-6">
+              <div className="team-member">
+                <div className="main-content">
+                  <img src="assets\images\3elwa.jpg" alt="" />
+                  <span className="category">English Instructor</span>
+                  <h4>Ali Ayman</h4>
+                  <ul className="social-icons">
+                    <li>
+                      <a
+                        href="https://www.facebook.com/ali.ayman.9843/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-facebook" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.instagram.com/aliayman16/"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
