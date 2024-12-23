@@ -209,7 +209,7 @@ const EditPage = () => {
   }
   return (
     <form className="form" onSubmit={handleSubmit}>
-      <p className="title">Updtae Profile</p>
+      <p className="title">Update Profile</p>
 
       <div className="flex">
         {/* Name and Age Fields */}
@@ -221,7 +221,7 @@ const EditPage = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
-          <span>Old Name:{userData.name}</span>
+          <span>Old Name: {userData.name}</span>
         </label>
         <label>
           <input
@@ -231,7 +231,7 @@ const EditPage = () => {
             value={age}
             onChange={(e) => setAge(e.target.value)}
           />
-          <span>old Age :{userData.age}</span>
+          <span>Old Age: {userData.age}</span>
         </label>
       </div>
 
@@ -244,7 +244,7 @@ const EditPage = () => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
-        <span>old Email :{userData.email}</span>
+        <span>Old Email: {userData.email}</span>
       </label>
       <label>
         <input

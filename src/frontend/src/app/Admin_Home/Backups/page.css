@@ -1,0 +1,145 @@
+/* General Styling */
+body {
+    background-color: #f4f5f7; /* Light gray background */
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #2c3e50;
+    font-weight: 700;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 10px;
+  }
+  
+  p {
+    color: #7f8c8d;
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Table Styling */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 1rem;
+  }
+  
+  thead {
+    background-color: #34495e;
+    color: #ffffff;
+  }
+  
+  thead th {
+    padding: 15px;
+    text-align: left;
+    font-weight: 700;
+  }
+  
+  tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tbody td {
+    padding: 15px;
+    font-size: 0.95rem;
+    color: #555;
+  }
+  
+  tbody td:last-child {
+    text-align: center;
+  }
+  
+  /* Button Styling */
+  button {
+    display: inline-block;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  button:hover {
+    opacity: 0.9;
+  }
+  
+  button.bg-blue-600 {
+    background-color: #3498db;
+    color: #ffffff;
+  }
+  
+  button.bg-blue-600:hover {
+    background-color: #2980b9;
+  }
+  
+  button.bg-green-500 {
+    background-color: #2ecc71;
+    color: #ffffff;
+  }
+  
+  button.bg-green-500:hover {
+    background-color: #27ae60;
+  }
+  
+  button.bg-red-500 {
+    background-color: #e74c3c;
+    color: #ffffff;
+  }
+  
+  button.bg-red-500:hover {
+    background-color: #c0392b;
+  }
+  
+  /* Loader and Error Message Styling */
+  .text-center {
+    text-align: center;
+  }
+  
+  .text-gray-600 {
+    color: #7f8c8d;
+  }
+  
+  .text-red-500 {
+    color: #e74c3c;
+  }
+  
+  .text-gray-50 {
+    background-color: #f4f5f7;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    table {
+      font-size: 0.9rem;
+    }
+  
+    button {
+      padding: 8px 15px;
+      font-size: 0.8rem;
+    }
+  }
+  
