@@ -142,19 +142,19 @@ export class InstructorController {
     return { user, message };
   }
 
-
   @UseGuards(AuthorizationGuard)
   @Get('email/:email/students')
   @Roles('instructor')
   async getStudents(@Param('email') instructorEmail: string): Promise<User[]> {
-    return this.instructorService.getStudentsForInstructorByEmail(instructorEmail);
+    return this.instructorService.getStudentsForInstructorByEmail(
+      instructorEmail,
+    );
   }
 
-
-  // Endpoint to create a course
-  @UseGuards(AuthorizationGuard)
+  // // Endpoint to create a course
+  // @UseGuards(AuthorizationGuard)
   @Post(':email/create-course')
-  @Roles('instructor')
+  // @Roles('instructor')
   async createCourse(
     @Param('email') email: string, // Instructor email in the URL param
     @Body() createCourseDto: CreateCourseDto, // Course data in the request body
@@ -237,7 +237,6 @@ export class InstructorController {
     return this.instructorService.getEnrolledStudents(courseTitle);
   }
 
-  
   // 2. Endpoint to get the number of students who completed the course
   @UseGuards(AuthorizationGuard)
   @Get('completed-students/:courseTitle')
@@ -248,7 +247,6 @@ export class InstructorController {
     return this.instructorService.getCompletedStudentsCount(courseTitle);
   }
 
-  
   // 3. Endpoint to get the number of students based on their scores
   @UseGuards(AuthorizationGuard)
   @Get('students-score/:courseTitle')
@@ -265,7 +263,6 @@ export class InstructorController {
   async getCourses(@Query('email') email: string): Promise<string[]> {
     return this.instructorService.getCoursesByInstructor(email);
   }
-  
 
   @UseGuards(AuthorizationGuard)
   @Get('course/bytitle')
@@ -298,5 +295,4 @@ export class InstructorController {
   async getStudentByEmail(@Param('email') email: string): Promise<User> {
     return this.userService.findUserByEmail(email);
   }
-
 }
