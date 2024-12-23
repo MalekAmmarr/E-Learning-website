@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Logs } from 'src/schemas/logs.schema';
@@ -49,6 +49,13 @@ export class LogsService {
     }
   }
 
+  async deleteLogById(logId: string) {
+    const deletedLog = await this.LogsModel.findByIdAndDelete(logId).exec();
+    if (!deletedLog) {
+      throw new NotFoundException(`Log with ID ${logId} not found`);
+    }
+    return { message: 'Log deleted successfully', deletedLog };
+  }
 
 }
 
