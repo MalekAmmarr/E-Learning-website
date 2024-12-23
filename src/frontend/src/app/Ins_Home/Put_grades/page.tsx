@@ -71,6 +71,41 @@ const Putgrades = () => {
     router.push(`/Ins_Home/Put_grades/${encodeURIComponent(quizId)}`);
   };
 
+  const handleDeleteModule = async (quizId: string) => {
+    try {
+      const token = sessionStorage.getItem('Ins_Token'); 
+      if (!token) {
+        throw new Error('Authorization token not found. Please log in again.');
+      }
+      const response = await fetch(
+        `http://localhost:3000/modules/${encodeURIComponent(quizId)}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`Failed to delete module: ${response.statusText}`);
+      }
+  
+      // Update the state to remove the deleted module
+      setModules((prevModules) => prevModules.filter((module) => module.quizId !== quizId));
+  
+      alert(`Module with title "${quizId}" successfully deleted.`);
+    } catch (error) {
+      console.error('Error deleting module:', error);
+      alert('An error occurred while trying to delete the module.');
+    }
+  };
+  
+
+  
+  
+
   const handleModuleClick = (quizId: string) => {
     router.push(`/Ins_Home/create-module/update-module/${encodeURIComponent(quizId)}`);
   };
@@ -101,24 +136,39 @@ const Putgrades = () => {
         </div>
 
         {/* Modules Section */}
-        <div className="row">
-          <div className="col-lg-12 text-center">
-            <h3>Modules</h3>
-          </div>
-          {modules.map((module, index) => (
-            <div
-              key={index}
-              className="col-lg-4 col-md-6 mb-30"
-              onClick={() => handleModuleClick(module.quizId)}
-            >
-              <div className="quiz-card">
-                <h4>{module.courseTitle}</h4>
-                <p>{module.quizId}</p>
-                <p>Click to update the module</p>
-              </div>
+          <div className="row">
+            <div className="col-lg-12 text-center">
+              <h3>Modules</h3>
             </div>
-          ))}
-        </div>
+            {modules.map((module, index) => (
+              <div key={index} className="col-lg-4 col-md-6 mb-30">
+                <div className="quiz-card">
+                  <h4>{module.courseTitle}</h4>
+                  <p>{module.quizId}</p>
+                  <div style={{ display: "flex", gap: "10px", justifyContent: "center", marginTop: "10px" }}>
+                    <button
+                      className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition duration-200"
+                      onClick={() => handleModuleClick(module.quizId)}
+                    >
+                      Edit Module
+                    </button>
+                    <button
+  className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 transition duration-200"
+  onClick={() => {
+    console.log("Deleting module with quizId:", module.quizId); // Debug log
+    if (confirm(`Are you sure you want to delete the module "${module.quizId}"?`)) {
+      handleDeleteModule(module.quizId);
+    }
+  }}
+>
+  Delete Module
+</button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
 
         {/* Quizzes Section */}
         <div className="row">
