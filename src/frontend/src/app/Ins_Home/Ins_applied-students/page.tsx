@@ -28,6 +28,7 @@ export interface User {
 
 const Apply_Students: React.FC = () => {
   const [students, setStudents] = useState<User[]>([]); // Holds the list of students
+  const [insdata, setInsData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [instructor, setInstructor] = useState<Instructor>(); // Loading state
   const [error, setError] = useState<string | null>(null); // Error state
@@ -36,14 +37,23 @@ const Apply_Students: React.FC = () => {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const storedInstructor = localStorage.getItem('instructorData');
-        console.log(storedInstructor);
-        if (storedInstructor) {
+        const accessToken = sessionStorage.getItem('Ins_Token'); // Updated to match token naming convention
+        const storedInstructor = sessionStorage.getItem('instructorData'); // Updated to match instructor data storage key
+        console.log('Access Token:', accessToken);
+
+        if (storedInstructor && accessToken) {
           const parsedInstructor = JSON.parse(storedInstructor);
-          setInstructor(parsedInstructor);
+          setInsData(parsedInstructor);
 
           const response = await fetch(
             `http://localhost:3000/instructor/applied-users/${parsedInstructor?.email}`,
+            {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+              },
+            },
           ); // Replace with your actual API endpoint
           if (!response.ok) {
             throw new Error('Failed to fetch students');
@@ -70,12 +80,14 @@ const Apply_Students: React.FC = () => {
     action: 'accept' | 'reject',
   ) => {
     try {
+      const accessToken = sessionStorage.getItem('Ins_Token');
       const response = await fetch(
         'http://localhost:3000/instructor/accept-reject-course',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
           },
           body: JSON.stringify({
             email,

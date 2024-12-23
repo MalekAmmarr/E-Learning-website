@@ -20,4 +20,9 @@ export class LogsController {
     return await this.logsService.getLogs(date);
   }
 
+  @Delete(':id')
+  async deleteLog(@Param('id') logId: string) {
+    return await this.logsService.deleteLogById(logId);
+  }
+
 }

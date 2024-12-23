@@ -52,6 +52,20 @@ export class InstructorService {
     return instructor;
   }
 
+
+  async deleteCourse(instructorEmail: string, courseTitle: string): Promise<void> {
+    const result = await this.courseModel.deleteOne({
+      instructormail: instructorEmail,
+      title: courseTitle,
+    });
+  
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(
+        `Course with title "${courseTitle}" not found for instructor "${instructorEmail}".`,
+      );
+    }
+  }
+
   // Method to get all users applied to courses taught by an instructor
   async getUsersAppliedToCourses(email: string) {
     // Find the instructor by ID

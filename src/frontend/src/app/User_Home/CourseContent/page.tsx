@@ -341,12 +341,9 @@ const CourseContent: React.FC = () => {
   };
   // Function to handle note title click
   const handleOnChatClicked = (courseTitle: string) => {
-    // router.push(
-    //   `/User_Home/chat_Hossam?title=${encodeURIComponent(courseTitle)}`,
-    // );
-    if (userData) {
-      getProgress(userData?.email, courseTitle);
-    }
+    router.push(
+      `/User_Home/chat_Hossam?title=${encodeURIComponent(courseTitle)}`,
+    );
   };
   return (
     <>

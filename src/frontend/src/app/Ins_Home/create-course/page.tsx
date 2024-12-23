@@ -47,7 +47,7 @@ const CreateCourse = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const storedInstructor = localStorage.getItem('instructorData');
+      const storedInstructor = sessionStorage.getItem('instructorData');
       if (!storedInstructor) throw new Error('Instructor data not found.');
 
       const { email } = JSON.parse(storedInstructor);
