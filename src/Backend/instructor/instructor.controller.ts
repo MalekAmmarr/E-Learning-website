@@ -299,4 +299,16 @@ export class InstructorController {
     return this.userService.findUserByEmail(email);
   }
 
+  
+  @UseGuards(AuthorizationGuard)
+  @Delete(':instructorEmail/courses/:courseTitle')
+  @Roles('instructor')
+  async deleteCourse(
+  @Param('instructorEmail') instructorEmail: string,
+  @Param('courseTitle') courseTitle: string,
+) {
+  return await this.instructorService.deleteCourse(instructorEmail, courseTitle);
+}
+
+
 }

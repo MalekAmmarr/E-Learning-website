@@ -30,7 +30,6 @@ const InstructorLoginNotification = () => {
       // Save the token (if needed)
       sessionStorage.setItem('Ins_Token', data.accessToken);
       sessionStorage.setItem('instructorData', JSON.stringify(data.user));
-      
 
       router.push('/Ins_Home');
     } catch (err: any) {

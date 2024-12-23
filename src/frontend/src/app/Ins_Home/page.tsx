@@ -228,6 +228,42 @@ export default function Home() {
     router.push(`/Ins_Home/Progress?title=${encodeURIComponent(title)}`);
   };
 
+  const handleDeleteCourse = async (instructorEmail: string, courseTitle: string) => {
+    try {
+      const token = sessionStorage.getItem('Ins_Token');
+      if (!token) {
+        throw new Error('Authorization token not found. Please log in again.');
+      }
+  
+      const res = await fetch(
+        `http://localhost:3000/instructor/${encodeURIComponent(instructorEmail)}/courses/${encodeURIComponent(courseTitle)}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Include the token in the Authorization header
+          },
+        }
+      );
+  
+      if (!res.ok) {
+        throw new Error(`Failed to delete course: ${res.statusText}`);
+      }
+  
+      // Update state to reflect deletion
+      setTeachCourses((prevCourses) =>
+        prevCourses.filter((course) => course.title !== courseTitle)
+      );
+  
+      alert(`Course "${courseTitle}" deleted successfully!`);
+    } catch (err: any) {
+      alert(err.message || 'An unknown error occurred while deleting the course.');
+    }
+  };
+  
+  
+  
+
   const handleCreateCourse = () => {
     router.push('/Ins_Home/create-course');
   };
@@ -576,6 +612,21 @@ export default function Home() {
                 >
                   Check analysis
                 </button>
+                <button
+  className="btn btn-danger"
+  onClick={() => {
+    if (
+      confirm(
+        `Are you sure you want to delete the course "${Teach_Courses.title}"?`
+      )
+    ) {
+      handleDeleteCourse(insdata.email, Teach_Courses.title);
+    }
+  }}
+>
+  Delete Course
+</button>
+
               </div>
             </div>
           ))}
