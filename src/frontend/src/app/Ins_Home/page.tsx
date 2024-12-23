@@ -27,7 +27,6 @@ export interface User {
   GPA: number;
 }
 
-
 interface Course {
   courseId: string;
   title: string;
@@ -53,20 +52,19 @@ export default function Home() {
 
   const router = useRouter();
 
-  
-    const fetchUserDetails = async ()  => {
-      try {
-        // Retrieve the access token and instructor data from session storage
-        const accessToken = sessionStorage.getItem('Ins_Token'); // Updated to match token naming convention
-        const storedInstructor = sessionStorage.getItem('instructorData'); // Updated to match instructor data storage key
+  const fetchUserDetails = async () => {
+    try {
+      // Retrieve the access token and instructor data from session storage
+      const accessToken = sessionStorage.getItem('Ins_Token'); // Updated to match token naming convention
+      const storedInstructor = sessionStorage.getItem('instructorData'); // Updated to match instructor data storage key
+      console.log('Access Token:', accessToken);
+
+      if (storedInstructor && accessToken) {
+        const parsedInstructor = JSON.parse(storedInstructor);
+        setInsData(parsedInstructor);
+
         console.log('Access Token:', accessToken);
-
-        if (storedInstructor && accessToken) {
-          const parsedInstructor = JSON.parse(storedInstructor);
-          setInsData(parsedInstructor);
-
-          console.log('Access Token:', accessToken);
-          console.log('Instructor Email:', parsedInstructor?.email);
+        console.log('Instructor Email:', parsedInstructor?.email);
         const response = await fetch(
           `http://localhost:3000/instructor/email/${parsedInstructor?.email}/students`,
           {
@@ -77,11 +75,13 @@ export default function Home() {
             },
           },
         );
-  
+
         if (!response.ok) {
-          throw new Error(`Failed to fetch user details: ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch user details: ${response.statusText}`,
+          );
         }
-  
+
         const data = await response.json();
         console.log('Fetched user details:', data); // Debugging: Log the fetched user details
         setUsers(data); // Update state with user data
@@ -90,47 +90,49 @@ export default function Home() {
         // Redirect to login if instructor data or token is missing
         router.push('/Ins_login');
       }
-      } catch (error) {
-        console.error('Error fetching user details', error);
-        throw error; // Propagate the error for the caller to handle
-      }
-    };
+    } catch (error) {
+      console.error('Error fetching user details', error);
+      throw error; // Propagate the error for the caller to handle
+    }
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent default form submission behavior
-  
-    const searchInput = document.getElementById('searchText') as HTMLInputElement | null;
-  
+
+    const searchInput = document.getElementById(
+      'searchText',
+    ) as HTMLInputElement | null;
+
     if (!searchInput) {
       console.error('Search input element not found');
       return;
     }
-  
+
     const searchKeyword = searchInput.value.trim();
-  
+
     if (!searchKeyword) {
       alert('Please enter an email or course name to search.');
       return;
     }
-  
+
     // Check if the search is for a student or a course
     if (searchKeyword.includes('@')) {
       // Search for a student by email
       const student = users.find((user) => user.email === searchKeyword); // Assuming usersData contains the list of students
-  
+
       if (!student) {
         alert('Student not found');
         return;
       }
-  
+
       // Check if the student has accepted any courses from the instructor's teaches_courses
       const acceptedCourses = student.acceptedCourses;
       const instructorCourses = insdata?.Teach_Courses; // Assuming insdata contains the instructor's courses
-  
+
       const hasAcceptedCourse = acceptedCourses.some((course) =>
-        instructorCourses.includes(course)
+        instructorCourses.includes(course),
       );
-  
+
       if (hasAcceptedCourse) {
         // Navigate to student profile page
         router.push(`/Ins_Home/student_Profile?email=${student.email}`);
@@ -144,24 +146,23 @@ export default function Home() {
         const normalized = course.toLowerCase().replace(/\s+/g, '');
         normalizedCourseMap.set(normalized, course);
       });
-  
+
       // Normalize the search keyword for comparison
       const normalizedSearchKeyword = searchKeyword
         .toLowerCase()
         .replace(/\s+/g, '');
-  
+
       // Check if the normalized search keyword matches any normalized course title
       if (normalizedCourseMap.has(normalizedSearchKeyword)) {
         const originalTitle = normalizedCourseMap.get(normalizedSearchKeyword); // Get the original title
         handleCourseTitleClick(originalTitle!); // Use the original title for redirection
       } else {
         alert(
-          `The course "${searchKeyword}" is not available. Please select a Teachable course.`
+          `The course "${searchKeyword}" is not available. Please select a Teachable course.`,
         );
       }
     }
   };
-  
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -580,6 +581,14 @@ export default function Home() {
             </div>
           ))}
         </div>
+        <div
+          style={{
+            height: '600px',
+            backgroundColor: 'white',
+            marginTop: '30px',
+            marginBottom: '30px',
+          }}
+        ></div>
         <div className="row">
           <div className="col-lg-12 text-center">
             <button className="btn btn-primary" onClick={handleCreateCourse}>
@@ -591,6 +600,14 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <div
+        style={{
+          height: '500px',
+          backgroundColor: 'white',
+          marginTop: '30px',
+          marginBottom: '30px',
+        }}
+      ></div>
 
       <div className="row event_box">
         <footer className="footer-spacing">

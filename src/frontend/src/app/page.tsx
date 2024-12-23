@@ -49,6 +49,13 @@ export default function Home() {
       intructor_name: 'Dr.Ali 3elwa',
     },
     {
+      name: 'Ethical Hacking',
+      category: 'Security',
+      price: 600,
+      image: '/assets/images/Prog_2.jpg',
+      intructor_name: 'Dr.Charl',
+    },
+    {
       name: 'English Advanced',
       category: 'English',
       price: 240,
@@ -756,6 +763,35 @@ export default function Home() {
                     <li>
                       <a
                         href="https://www.instagram.com/aliayman16/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-instagram" />
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-3 col-md-6">
+              <div className="team-member">
+                <div className="main-content">
+                  <img src="assets\images\Charl.JPG" alt="" />
+                  <span className="category">Ethical Hacking Instructor</span>
+                  <h4>Karim Charl</h4>
+                  <ul className="social-icons">
+                    <li>
+                      <a
+                        href="https://www.facebook.com/karim.charl.9/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <i className="fab fa-facebook" />
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        href="https://www.instagram.com/karimcharl/"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
