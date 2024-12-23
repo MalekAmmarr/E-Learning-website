@@ -22,12 +22,13 @@ import { AuthModule } from './Backend/auth/auth.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import path, { join } from 'path';
 import { ChatModule } from './Backend/chat/chat.module';
-
+import { ForumModule } from './Backend/forums/forum.module';
 import { ChatHistoryModule } from './Backend/chat-history/chat-history.module';
 import { InstructorController } from './instructor/instructor.controller';
-import { DiscussionModule } from './Backend/Discussion/DiscussionModule';
-
-
+// import { DiscussionModule } from './Backend/Discussion/DiscussionModule';
+import { DiscussionModule } from './Backend/DiscussionForum/discussion.module';
+import { ThreadModule } from './Backend/threads/thread.module';
+import { ReplyModule } from './Backend/replies/reply.module';
 @Module({
   imports: [
     MongooseModule.forRoot(
@@ -72,6 +73,10 @@ import { DiscussionModule } from './Backend/Discussion/DiscussionModule';
 
     ChatHistoryModule,
      DiscussionModule,
+     ForumModule,
+     ThreadModule,
+     ReplyModule,
+     DiscussionModule
 
   ],
   controllers: [AppController, InstructorController],

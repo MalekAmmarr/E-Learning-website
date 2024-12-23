@@ -1,16 +1,19 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 
-
-
-@Schema()
+@Schema({ timestamps: true })
 export class Forum extends Document {
+  @Prop({ required: true })
+  name: string;
 
   @Prop({ required: true })
-  courseId: string; // Associated course ID
+  courseId: string;
 
   @Prop({ required: true })
-  createdBy: string; 
+  instructorId: string;
+
+  @Prop({ type: [String], default: [] })
+  studentIds: string[];
 }
 
 export const ForumSchema = SchemaFactory.createForClass(Forum);
