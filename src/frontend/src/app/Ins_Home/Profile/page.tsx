@@ -21,9 +21,10 @@ export interface Instructor {
 const Profile = () => {
   const [user, setUser] = useState<Instructor | null>(null); // Single user object
   const router = useRouter();
+
   const fetchUserDetails = async (
     email: string,
-    accessToken: string,
+    accessToken: string
   ): Promise<Instructor> => {
     try {
       const response = await fetch(
@@ -34,7 +35,7 @@ const Profile = () => {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
           },
-        },
+        }
       );
 
       if (!response.ok) {
@@ -42,12 +43,52 @@ const Profile = () => {
       }
 
       const data: Instructor = await response.json();
-      console.log('Fetched Instructor details:', data); // Debugging: Log the fetched user details
       setUser(data); // Update state with user data
       return data; // Return the fetched user data
     } catch (error) {
       console.error('Error fetching Instructor details', error);
       throw error; // Propagate the error for the caller to handle
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      const token = sessionStorage.getItem('Ins_Token');
+      if (!token) {
+        throw new Error('Authorization token not found. Please log in again.');
+      }
+
+      const userData = sessionStorage.getItem('instructorData');
+      if (!userData) {
+        throw new Error('Instructor data not found. Please log in again.');
+      }
+
+      const { email } = JSON.parse(userData); // Extract email from instructor data
+
+      const response = await fetch(
+        `http://localhost:3000/admins/instructors/${encodeURIComponent(email)}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete account: ${response.statusText}`);
+      }
+
+      alert(`Account with email "${email}" successfully deleted.`);
+
+      // Clear session storage and redirect to login page
+      sessionStorage.removeItem('Ins_Token');
+      sessionStorage.removeItem('instructorData');
+      router.push('/Ins_login');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      alert('An error occurred while trying to delete your account.');
     }
   };
 
@@ -65,8 +106,8 @@ const Profile = () => {
       }
     } catch (err) {
       console.error(
-        'Failed to retrieve or parse Instructor data from localStorage',
-        err,
+        'Failed to retrieve or parse Instructor data from sessionStorage',
+        err
       );
       router.push('/Ins_login');
     }
@@ -138,13 +179,24 @@ const Profile = () => {
         >
           Edit Profile
         </a>
+        <button
+          onClick={handleDeleteAccount}
+          className="button delete-button"
+          style={{
+            flex: 1,
+            backgroundColor: 'red',
+            color: 'white',
+            border: 'none',
+            padding: '10px',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          Delete Account
+        </button>
       </div>
     </div>
   );
 };
 
 export default Profile;
-
-
-
-

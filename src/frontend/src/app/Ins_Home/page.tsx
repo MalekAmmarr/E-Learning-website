@@ -614,19 +614,19 @@ export default function Home() {
                   Check analysis
                 </button>
                 <button
-  className="btn btn-danger"
-  onClick={() => {
-    if (
-      confirm(
-        `Are you sure you want to delete the course "${Teach_Courses.title}"?`
-      )
-    ) {
-      handleDeleteCourse(insdata.email, Teach_Courses.title);
-    }
-  }}
->
-  Delete Course
-</button>
+                className="btn btn-danger"
+                onClick={() => {
+                  if (
+                    confirm(
+                      `Are you sure you want to delete the course "${Teach_Courses.title}"?`
+                    )
+                  ) {
+                    handleDeleteCourse(insdata.email, Teach_Courses.title);
+                  }
+                }}
+              >
+                Delete Course
+              </button>
 
               </div>
             </div>
