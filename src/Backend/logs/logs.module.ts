@@ -8,9 +8,9 @@ import { Logs } from 'src/schemas/logs.schema';
 @Module({
 
   imports: [
-    MongooseModule.forFeature([{name:Logs.name,schema:LogsSchema}],'eLearningDB'),  // Assuming Logs is a Mongoose model
+    MongooseModule.forFeature([{ name: Logs.name, schema: LogsSchema }], 'eLearningDB'),  // Assuming Logs is a Mongoose model
   ],
   controllers: [LogsController],
   providers: [LogsService],
 })
-export class LogsModule {}
+export class LogsModule { }

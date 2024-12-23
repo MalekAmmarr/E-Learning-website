@@ -8,6 +8,20 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import './page.css';
 import { Spinner } from 'react-bootstrap';
+export interface Progress {
+  studentEmail: string; // Email of the student
+  Coursetitle: string; // Title of the course
+  score: number; // User's score in the course
+  completionRate: number; // Completion rate of the course (0-100)
+  lastAccessed?: Date; // Last date the user accessed the course (optional)
+  completedLectures: CompletedLecture[]; // Array of completed lectures for the course
+}
+
+export interface CompletedLecture {
+  Coursetitle: string; // Title of the course the lecture belongs to
+  completedLectures: number; // Number of lectures completed
+  pdfUrl: string; // URL of the PDF for the completed lecture
+}
 
 interface Course {
   courseId: string;
@@ -34,6 +48,9 @@ const CourseContent: React.FC = () => {
   const [courseinfo, setCourseInfo] = useState<Course>();
   const [error, setError] = useState<string | null>(null);
   const [Courses, setCourses] = useState<Course[]>([]);
+  const [CourseTitle, setCoursesTitle] = useState<string>();
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [PdfUrls, setPdfUrls] = useState<string[]>([]);
 
   const router = useRouter();
 
@@ -82,7 +99,7 @@ const CourseContent: React.FC = () => {
         console.error('courseTitle not provided in URL');
         return;
       }
-
+      setCoursesTitle(courseTitle);
       const response = await fetch('http://localhost:3000/users/content', {
         method: 'POST',
         headers: {
@@ -158,22 +175,46 @@ const CourseContent: React.FC = () => {
     }
   };
   useEffect(() => {
+    const fetchInitialData = async () => {
+      const queryParams = new URLSearchParams(window.location.search);
+      const courseTitle = queryParams.get('title'); // Get 'title' from query params
+      const user = sessionStorage.getItem('userData');
+      const accessToken = sessionStorage.getItem('authToken');
+
+      if (user) {
+        const parsedUser = JSON.parse(user);
+
+        if (courseTitle) {
+          // Fetch progress
+          await getProgress(parsedUser?.email, courseTitle);
+        }
+
+        if (accessToken) {
+          // Fetch user details
+          await fetchUserDetails(parsedUser.email, accessToken);
+        }
+
+        // Fetch courses and content
+        fetchCourses();
+        fetchContent();
+      } else {
+        router.push('/login'); // Redirect to login if user is not found
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  // Ensure loading state is reset after all data is fetched
+  useEffect(() => {
     setTimeout(() => {
       setIsLoading(false);
     }, 1000);
-    fetchCourses();
-    const accessToken = sessionStorage.getItem('authToken');
-    const user = sessionStorage.getItem('userData');
-    if (user) {
-      if (accessToken) {
-        const parsedUser = JSON.parse(user);
-        fetchUserDetails(parsedUser.email, accessToken);
-      } // Set userData state only if data exists}
-    } else {
-      router.push('/login');
-    }
-    fetchContent();
   }, []);
+  useEffect(() => {
+    console.log('Progress state:', progress); // Log to see if the values are updated
+  }, [progress]);
+
   // Method to fetch user details from the API
   const fetchUserDetails = async (email: string, accessToken: string) => {
     try {
@@ -199,7 +240,50 @@ const CourseContent: React.FC = () => {
       console.error('Error fetching user details');
     }
   };
+  // Method to fetch user details from the API
+  const getProgress = async (email: string, courseTitle: string) => {
+    try {
+      setIsLoading(true);
+      console.log(email);
+      console.log(courseTitle);
+      const response = await fetch(
+        `http://localhost:3000/progress/getProgress/${courseTitle}/${email}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
+      if (!response.ok) {
+        throw new Error(`Failed to fetch progress: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Fetched progress:', data); // Debugging: Log the fetched progress
+
+      // Extract only the pdfUrls from completedLectures
+      const pdfUrls = data.completedLectures.map(
+        (lecture: { pdfUrl: string }) => lecture.pdfUrl,
+      );
+      console.log(pdfUrls);
+      setPdfUrls(pdfUrls);
+      // Set the progress state
+      setProgress({
+        studentEmail: data.studentEmail,
+        Coursetitle: data.Coursetitle,
+        score: data.score,
+        completionRate: data.completionRate,
+        lastAccessed: data.lastAccessed,
+        completedLectures: data.completedLectures, // Save only the PDF URLs
+      });
+    } catch (error) {
+      console.error('Error fetching progress:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   // Function to handle note title click
   const HandleStartExam = async (
     quizId: string,
@@ -255,7 +339,15 @@ const CourseContent: React.FC = () => {
       //alert(`An error occurred while processing your request: ${error}`);
     }
   };
-
+  // Function to handle note title click
+  const handleOnChatClicked = (courseTitle: string) => {
+    // router.push(
+    //   `/User_Home/chat_Hossam?title=${encodeURIComponent(courseTitle)}`,
+    // );
+    if (userData) {
+      getProgress(userData?.email, courseTitle);
+    }
+  };
   return (
     <>
       <meta charSet="utf-8" />
@@ -387,16 +479,124 @@ const CourseContent: React.FC = () => {
           </div>
         </div>
       </header>
+      {/* ***** Header Area End *****
+      <div className="main-banner" id="top">
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-12">
+              <div className="owl-carousel owl-banner">
+                <div className="item item-1">
+                  <div className="header-text">
+                    <span className="category">Your Progress</span>
+                    <h2>
+                      Hello, {userData?.name.split(' ')[0]}! Here's how you're
+                      doing:
+                    </h2>
+
+                    <div className="progress-info">
+                      <div className="progress-item">
+                        <h2>Current Score</h2>
+                        <h2>{progress?.score || 0}</h2>
+                      </div>
+
+                      <div className="progress-item">
+                        <h2>Completion Rate</h2>
+                        <h2>{progress?.completionRate || 0}%</h2>
+                      </div>
+
+                      <div className="progress-item">
+                        <h2>Completed Lectures</h2>
+                        <h2>{progress?.completedLectures?.length || 0}</h2>
+                      </div>
+
+                      <div className="progress-item">
+                        <p>Last Accessed</p>
+                        <h2>
+                          {progress?.lastAccessed
+                            ? new Date(
+                                progress.lastAccessed,
+                              ).toLocaleDateString()
+                            : 'N/A'}
+                        </h2>
+                      </div>
+                    </div>
+
+                    <div className="buttons">
+                      <div className="main-button">
+                        <a href="#courses">Take a look at courses</a>
+                      </div>
+                      <div className="icon-button"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> */}
+
       {/* ***** Header Area End ***** */}
       <div className="main-banner" id="top">
         <div className="container">
           <div className="row">
             <div className="col-lg-12">
-              <div className="owl-carousel owl-banner"></div>
+              <div className="owl-carousel owl-banner">
+                <div className="item item-1">
+                  <div className="header-text">
+                    <span className="category">Your Progress</span>
+                    <h2 className="greeting">
+                      Hello, {userData?.name.split(' ')[0]}! Here's how you're
+                      doing:
+                    </h2>
+
+                    <div className="progress-info">
+                      <div className="progress-item">
+                        <h3 className="progress-title">Current Score</h3>
+                        <div className="progress-value">
+                          {progress?.score || 0}
+                        </div>
+                      </div>
+
+                      <div className="progress-item">
+                        <h3 className="progress-title">Completion Rate</h3>
+                        <div className="progress-value">
+                          {progress?.completionRate || 0}%
+                        </div>
+                      </div>
+
+                      <div className="progress-item">
+                        <h3 className="progress-title">Completed Lectures</h3>
+                        <div className="progress-value">
+                          {progress?.completedLectures?.length || 0}
+                        </div>
+                      </div>
+
+                      <div className="progress-item">
+                        <h3 className="progress-title">Quiz Grades</h3>
+                        {/* <div className="progress-value">
+                          {progress?.lastAccessed
+                            ? new Date(
+                                progress.lastAccessed,
+                              ).toLocaleDateString()
+                            : 'N/A'}
+                        </div> */}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <div className="container">
+        <div className="row">
+          <div className="col-lg-12">
+            <div className="owl-carousel owl-banner"></div>
+          </div>
+        </div>
+      </div>
+
       <div className="services section" id="services">
         <div className="container">
           <div className="row">
@@ -502,6 +702,93 @@ const CourseContent: React.FC = () => {
           )}
         </div>
       </div>
+      <div
+        style={{
+          height: '100px',
+          backgroundColor: 'white',
+          marginTop: '30px',
+          marginBottom: '30px',
+        }}
+      ></div>
+      <div className="services section" id="services">
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img
+                    src="/assets/images/service-01.png"
+                    alt="Chat With Colleagues"
+                  />
+                </div>
+                <div className="main-content">
+                  <h4>Collaborate With Your Peers</h4>
+                  <p>
+                    Connect, collaborate, and share ideas seamlessly with your
+                    peers.
+                  </p>
+                  <div className="main-button">
+                    <a
+                      onClick={() =>
+                        handleOnChatClicked(CourseTitle || 'No Chat')
+                      }
+                    >
+                      Start Chatting
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img src="/assets/images/service-02.png" alt="private chat" />
+                </div>
+                <div className="main-content">
+                  <h4>Chat Privately</h4>
+                  <p>
+                    Engage in private conversations with your instructor or
+                    peers for personalized support and collaboration.
+                  </p>
+                  <div className="main-button">
+                    <a href="/User_Home/chat_Hossam?title=Machine Learning">
+                      Start Private Chat
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img src="/assets/images/service-02.png" alt="web experts" />
+                </div>
+                <div className="main-content">
+                  <h4>Discussion Forum</h4>
+                  <p>
+                    Join discussion Forums to start discussions with your peers
+                    and Instructors.
+                  </p>
+                  <div className="main-button">
+                    <a href="/User_Home/DiscussionForum">
+                      Join Discussion Forums
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          height: '100px',
+          backgroundColor: 'white',
+          marginTop: '30px',
+          marginBottom: '30px',
+        }}
+      ></div>
 
       {/* ***** Header Area End ***** */}
 
@@ -520,57 +807,73 @@ const CourseContent: React.FC = () => {
           {/* Display filtered courses or message */}
           <div className="row event_box">
             {courseinfo && courseContent.length > 0 ? (
-              courseContent.map((course, index) => (
-                <div
-                  key={index}
-                  className="col-lg-4 col-md-6 align-self-center mb-30 event_outer"
-                >
-                  <div className="events_item">
-                    {/* Course Image and Category */}
-                    <div className="thumb">
-                      <a
-                        onClick={() =>
-                          downloadPDF(userData?.email, courseinfo.title, course)
-                        }
-                      >
-                        <img
-                          src={courseinfo.image} // Correct usage of the current course image
-                          alt={courseinfo.title} // Correct usage of the current course name
-                        />
-                      </a>
-                      <span className="category">{courseinfo.category}</span>
-                    </div>
+              courseContent.map((course, index) => {
+                const courseName = course; // Extract course name without extension
+                const isFinished = PdfUrls.includes(courseName); // Check if the lecture is finished
 
-                    {/* Course Instructor and Title */}
-                    <div className="down-content">
-                      <span className="author">
-                        {courseinfo.instructorName}
-                      </span>
-                      <h4
-                        onClick={() => {
-                          setIsLoading(true); // Set loading to true
-                          downloadPDF(
-                            userData?.email,
-                            courseinfo.title,
-                            course,
-                          ).finally(() => setIsLoading(false)); // Reset loading after operation
-                        }}
-                      >
-                        {isLoading ? (
-                          <div className="loading-overlay">
-                            <div className="loading-content">
-                              <div className="loading-spinner"></div>
-                              <p>Downloading...</p>
+                return (
+                  <div
+                    key={index}
+                    className="col-lg-4 col-md-6 align-self-center mb-30 event_outer"
+                  >
+                    <div className="events_item">
+                      {/* Course Image and Category */}
+                      <div className="thumb">
+                        <a
+                          onClick={() =>
+                            downloadPDF(
+                              userData?.email,
+                              courseinfo.title,
+                              course,
+                            )
+                          }
+                        >
+                          <img
+                            src={courseinfo.image} // Correct usage of the current course image
+                            alt={courseinfo.title} // Correct usage of the current course name
+                          />
+                        </a>
+                        <span className="category">{courseinfo.category}</span>
+                      </div>
+
+                      {/* Course Instructor, Title, and Completion Status */}
+                      <div className="down-content">
+                        <span className="author">
+                          {courseinfo.instructorName}
+                        </span>
+                        <h4
+                          onClick={() => {
+                            setIsLoading(true); // Set loading to true
+                            downloadPDF(
+                              userData?.email,
+                              courseinfo.title,
+                              course,
+                            ).finally(() => setIsLoading(false)); // Reset loading after operation
+                          }}
+                        >
+                          {isLoading ? (
+                            <div className="loading-overlay">
+                              <div className="loading-content">
+                                <div className="loading-spinner"></div>
+                                <p>Downloading...</p>
+                              </div>
                             </div>
-                          </div>
-                        ) : (
-                          course.split('.')[0]
-                        )}
-                      </h4>
+                          ) : (
+                            <>
+                              {course}
+                              {isFinished && (
+                                <span className="finished-icon">
+                                  <i className="fas fa-check-circle text-success"></i>
+                                </span>
+                              )}
+                            </>
+                          )}
+                        </h4>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             ) : (
               <div className="loading-overlay">
                 <div className="loading-content">
