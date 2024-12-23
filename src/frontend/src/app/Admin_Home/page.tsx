@@ -14,7 +14,7 @@ const AdminHome = () => {
 
       {/* Main Content */}
       <main className="container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
+
         {/* Card 1 - Course Management */}
         <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
           <h2 className="text-xl font-semibold mb-2">Course Management</h2>
@@ -75,7 +75,7 @@ const AdminHome = () => {
           <p className="text-gray-600 mb-4">
             Monitor unauthorized access or login attempt logs.
           </p>
-          <Link href="/admin/logs" passHref>
+          <Link href="/Admin_Home/Logs" passHref>
             <button className="text-blue-500 hover:underline">
               View Logs
             </button>
@@ -91,12 +91,12 @@ const AdminHome = () => {
           <Link href="/Admin_Home/Register" passHref>
             <button className="text-blue-500 hover:underline">
               Register
-              </button>
+            </button>
           </Link>
         </div>
 
-         {/* Card 5 - feedbacks Logs */}
-         <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+        {/* Card 5 - feedbacks Logs */}
+        <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
           <h2 className="text-xl font-semibold mb-2">Feedbacks</h2>
           <p className="text-gray-600 mb-4">
             Collect feedbacks for future updates.
@@ -107,6 +107,20 @@ const AdminHome = () => {
             </button>
           </Link>
         </div>
+
+        {/* Card - Backups */}
+        <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+          <h2 className="text-xl font-semibold mb-2">Backups</h2>
+          <p className="text-gray-600 mb-4">
+            Manage scheduled backups and restore critical data.
+          </p>
+          <Link href="/Admin_Home/Backups" passHref>
+            <button className="text-blue-500 hover:underline">
+              Manage Backups
+            </button>
+          </Link>
+        </div>
+
       </main>
     </div>
   );

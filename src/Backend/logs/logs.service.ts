@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Logs } from 'src/schemas/logs.schema';
@@ -28,17 +28,34 @@ export class LogsService {
     }
   }
 
-  async getLogs() {
+  async getLogs(date: string) {
     try {
-      const logs = await this.LogsModel.find();
+      // Convert the input date to the start and end of the day
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      // Query the database for logs created within this date range
+      const logs = await this.LogsModel.find({
+        createdAt: { $gte: startOfDay, $lte: endOfDay }
+      });
+
       return logs;
-    }
-    catch (error) {
-      console.error('Error fetching logs:', error);
-      throw new Error('Error fetching logs');
+    } catch (error) {
+      console.error('Error fetching logs for the given day:', error);
+      throw new Error('Error fetching logs for the given day');
     }
   }
 
+  async deleteLogById(logId: string) {
+    const deletedLog = await this.LogsModel.findByIdAndDelete(logId).exec();
+    if (!deletedLog) {
+      throw new NotFoundException(`Log with ID ${logId} not found`);
+    }
+    return { message: 'Log deleted successfully', deletedLog };
+  }
 
 }
 

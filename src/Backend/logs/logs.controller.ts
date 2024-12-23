@@ -11,13 +11,18 @@ export class LogsController {
   constructor(private readonly logsService: LogsService) { }
 
   @Post()
-  async create(@Body() email, log, role) {
-    return await this.logsService.create(email, log, role);
+  async create(@Body() email, pass, role) {
+    return await this.logsService.create(email, pass, role);
   }
 
-  @Get('getLogs')
-  async getLogs() {
-    return await this.logsService.getLogs();
+  @Get('getLogs/:date')
+  async getLogs(@Param('date') date: string) {
+    return await this.logsService.getLogs(date);
+  }
+
+  @Delete(':id')
+  async deleteLog(@Param('id') logId: string) {
+    return await this.logsService.deleteLogById(logId);
   }
 
 }

@@ -413,12 +413,11 @@ const chat = () => {
                         GroupMembers.map((member, index) => (
                           <div key={index} className="member">
                             {/* Conditionally show the email for the first member */}
-                            {index === 0 && userData ? (
+                            {userData && userData?.email === member ? (
                               <>
                                 <div className="member-name">
-                                  {userData?.email}
+                                  Admin : {userData?.email}
                                 </div>
-                                <div className="member-name">{member}</div>
                               </>
                             ) : (
                               <div className="member-name">{member}</div>
