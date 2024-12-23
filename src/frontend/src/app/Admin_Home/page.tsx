@@ -94,6 +94,19 @@ const AdminHome = () => {
               </button>
           </Link>
         </div>
+
+         {/* Card 5 - feedbacks Logs */}
+         <div className="p-6 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+          <h2 className="text-xl font-semibold mb-2">Feedbacks</h2>
+          <p className="text-gray-600 mb-4">
+            Collect feedbacks for future updates.
+          </p>
+          <Link href="/Admin_Home/Feedbacks" passHref>
+            <button className="text-blue-500 hover:underline">
+              View Feedbacks
+            </button>
+          </Link>
+        </div>
       </main>
     </div>
   );
