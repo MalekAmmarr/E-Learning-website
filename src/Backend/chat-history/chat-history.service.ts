@@ -13,8 +13,7 @@ import { User } from 'src/schemas/user.schema';
 import { CreateGroupDto } from './dto/create-group.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { group } from 'console';
-import { ChatGateway } from './chat.gateway'; // Import the gateway
-import { Socket } from 'socket.io';
+
 
 @Injectable()
 export class ChatHistoryService {
@@ -27,7 +26,7 @@ export class ChatHistoryService {
     private readonly ChatHistoryModel: Model<ChatHistory>,
     @InjectModel(Message.name, 'eLearningDB')
     private readonly MessageModel: Model<Message>,
-    private readonly chatGateway: ChatGateway, // Inject the ChatGateway here
+   
   ) {}
 
   // Method to search a student by email and return the student info and their course progress
@@ -123,7 +122,7 @@ export class ChatHistoryService {
       Group.messages.push(message);
       await Group.save();
       // After saving the message, broadcast it to all connected clients
-      this.chatGateway.handleSendMessage(message, null); // Emitting the message to all clients
+      
     } else throw new Error('No Group to Add on it your message');
   }
 }
