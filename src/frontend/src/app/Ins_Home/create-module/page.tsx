@@ -1,6 +1,6 @@
 'use client';
-import Link from 'next/link';
 import React, { useState } from 'react';
+import Link from 'next/link';
 import './page.css';
 
 interface Question {
@@ -15,8 +15,8 @@ interface ModuleState {
   quizId: string;
   courseTitle: string;
   instructorEmail: string;
-  quizType: string;
-  questionTypes: string;
+  quizType: 'Small' | 'Midterm' | 'Final';
+  questionTypes: 'MCQ' | 'True/False' | 'Both';
   questions: Question[];
 }
 
@@ -25,8 +25,8 @@ const CreateModule = () => {
     quizId: '',
     courseTitle: '',
     instructorEmail: '',
-    quizType: '',
-    questionTypes: '',
+    quizType: 'Small',
+    questionTypes: 'MCQ',
     questions: [],
   });
 
@@ -43,7 +43,7 @@ const CreateModule = () => {
   const addQuestion = () => {
     const newQuestion: Question = {
       question: '',
-      questionType: '',
+      questionType: 'MCQ',
       options: ['', '', '', ''],
       correctAnswer: '',
       difficulty: '',
@@ -73,9 +73,12 @@ const CreateModule = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const accessToken = sessionStorage.getItem('Ins_Token');
       const res = await fetch('http://localhost:3000/modules', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+         },
         body: JSON.stringify(formData),
       });
 
@@ -125,23 +128,29 @@ const CreateModule = () => {
         </label>
         <label>
           Quiz Type:
-          <input
-            type="text"
+          <select
             name="quizType"
             value={formData.quizType}
             onChange={handleInputChange}
             required
-          />
+          >
+            <option value="Small">Small</option>
+            <option value="Midterm">Midterm</option>
+            <option value="Final">Final</option>
+          </select>
         </label>
         <label>
           Question Types:
-          <input
-            type="text"
+          <select
             name="questionTypes"
             value={formData.questionTypes}
             onChange={handleInputChange}
             required
-          />
+          >
+            <option value="MCQ">MCQ</option>
+            <option value="True/False">True/False</option>
+            <option value="Both">Both</option>
+          </select>
         </label>
 
         <h2>Questions</h2>
@@ -160,30 +169,39 @@ const CreateModule = () => {
             </label>
             <label>
               Question Type:
-              <input
-                type="text"
+              <select
                 value={question.questionType}
                 onChange={(e) =>
                   handleQuestionChange(index, 'questionType', e.target.value)
                 }
                 required
-              />
+              >
+                <option value="MCQ">MCQ</option>
+                <option value="True/False">True/False</option>
+              </select>
             </label>
             <label>
               Options:
-              {question.options.map((option, optionIndex) => (
-                <input
-                  key={optionIndex}
-                  type="text"
-                  value={option}
-                  onChange={(e) => {
-                    const updatedOptions = [...question.options];
-                    updatedOptions[optionIndex] = e.target.value;
-                    handleQuestionChange(index, 'options', updatedOptions);
-                  }}
-                  required
-                />
-              ))}
+              {question.questionType === 'True/False' ? (
+                <>
+                  <input type="text" value="True" disabled />
+                  <input type="text" value="False" disabled />
+                </>
+              ) : (
+                question.options.map((option, optionIndex) => (
+                  <input
+                    key={optionIndex}
+                    type="text"
+                    value={option}
+                    onChange={(e) => {
+                      const updatedOptions = [...question.options];
+                      updatedOptions[optionIndex] = e.target.value;
+                      handleQuestionChange(index, 'options', updatedOptions);
+                    }}
+                    required
+                  />
+                ))
+              )}
             </label>
             <label>
               Correct Answer:
@@ -214,11 +232,6 @@ const CreateModule = () => {
         </button>
         <button type="submit">Create Module</button>
       </form>
-      <div className="action-buttons-container">
-        <Link href={`/Ins_Home/create-module/update-module/${formData.quizId}`}>
-          <button className="action-button add-button">Update module</button>
-        </Link>
-      </div>
     </div>
   );
 };

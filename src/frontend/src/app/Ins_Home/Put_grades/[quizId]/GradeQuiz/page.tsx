@@ -47,7 +47,15 @@ const StudentAnswers = () => {
 
       const apiUrl = `http://localhost:3000/quizzes/${encodeURIComponent(quizId)}/slecetedstudent-answers?studentEmail=${email}`;
       try {
-        const res = await fetch(apiUrl);
+        const accessToken = sessionStorage.getItem('Ins_Token');
+        const res = await fetch(apiUrl,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`, // Assuming Bearer token is used for authorization
+            },
+          },);
         if (!res.ok) throw new Error(`Failed to fetch student answers: ${res.statusText}`);
         const data = await res.json();
 
@@ -81,19 +89,16 @@ const StudentAnswers = () => {
     };
   
     // Retrieve the token from localStorage (or wherever it is stored)
-    const token = localStorage.getItem('Ins_Token'); // Adjust this according to where you store the token
-  
-    if (!token) {
-      setError('Authorization token is missing.');
-      return;
-    }
+    // Adjust this according to where you store the token
+
   
     try {
+      const accessToken = sessionStorage.getItem('Ins_Token');
       const res = await fetch('http://localhost:3000/quizzes/feedback', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Add the Bearer token here
+          'Authorization': `Bearer ${accessToken}`, // Add the Bearer token here
         },
         body: JSON.stringify(feedbackData),
       });

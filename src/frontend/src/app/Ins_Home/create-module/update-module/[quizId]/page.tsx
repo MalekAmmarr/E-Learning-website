@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import './page.css';
 
 interface Question {
   question: string;
@@ -30,16 +31,23 @@ const UpdateModule = () => {
   });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  
-  const quizId = searchParams.get('quizId') || ''; // Retrieve quizId from query parameters
+  const params = useParams();
+
+  const quizId = Array.isArray(params.quizId) ? params.quizId[0] : params.quizId;
 
   useEffect(() => {
     const fetchModuleData = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/instructor/modules/${quizId}`);
+        const accessToken = sessionStorage.getItem('Ins_Token');
+        const res = await fetch(`http://localhost:3000/modules/details-by-quiz-id?quizId=${quizId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+        });
         const data = await res.json();
-  
+
         if (res.ok) {
           setFormData(data);
         } else {
@@ -55,7 +63,7 @@ const UpdateModule = () => {
         setLoading(false);
       }
     };
-  
+
     if (quizId) {
       fetchModuleData();
     }
@@ -78,21 +86,58 @@ const UpdateModule = () => {
   ) => {
     setFormData((prevData) => {
       const updatedQuestions = [...prevData.questions];
-      updatedQuestions[index] = {
-        ...updatedQuestions[index],
-        [field]: value,
-      };
+      const updatedQuestion = { ...updatedQuestions[index], [field]: value };
+
+      updatedQuestions[index] = updatedQuestion;
+      return { ...prevData, questions: updatedQuestions };
+    });
+  };
+
+  const addQuestion = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      questions: [
+        ...prevData.questions,
+        { question: '', questionType: 'MCQ', options: [], correctAnswer: '', difficulty: 'easy' },
+      ],
+    }));
+  };
+
+  const removeQuestion = (index: number) => {
+    setFormData((prevData) => {
+      const updatedQuestions = [...prevData.questions];
+      updatedQuestions.splice(index, 1);
       return { ...prevData, questions: updatedQuestions };
     });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Ensure that True/False questions have exactly 2 options and MCQ questions have 4 options
+    for (const question of formData.questions) {
+      if (question.questionType === 'True/False' && question.options.length !== 2) {
+        alert('True/False questions must have exactly two options.');
+        return;
+      }
+      if (question.questionType === 'MCQ' && question.options.length !== 4) {
+        alert('MCQ questions must have exactly four options.');
+        return;
+      }
+    }
+
+    const questionTypesSet = new Set(formData.questions.map((q) => q.questionType));
+    const questionTypes = Array.from(questionTypesSet).join(', ');
+
     try {
-      const res = await fetch(`http://localhost:3000/instructor/module/${quizId}`, {
+      const accessToken = sessionStorage.getItem('Ins_Token');
+      const res = await fetch(`http://localhost:3000/modules/${quizId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ ...formData, questionTypes }),
       });
 
       if (!res.ok) {
@@ -116,13 +161,7 @@ const UpdateModule = () => {
       <form onSubmit={handleSubmit}>
         <label>
           Quiz ID:
-          <input
-            type="text"
-            name="quizId"
-            value={formData.quizId}
-            onChange={handleInputChange}
-            disabled
-          />
+          <input type="text" name="quizId" value={formData.quizId} disabled />
         </label>
         <label>
           Course Title:
@@ -154,16 +193,6 @@ const UpdateModule = () => {
             required
           />
         </label>
-        <label>
-          Question Types:
-          <input
-            type="text"
-            name="questionTypes"
-            value={formData.questionTypes}
-            onChange={handleInputChange}
-            required
-          />
-        </label>
 
         <h2>Questions</h2>
         {formData.questions.map((question, index) => (
@@ -181,31 +210,55 @@ const UpdateModule = () => {
             </label>
             <label>
               Question Type:
-              <input
-                type="text"
+              <select
                 value={question.questionType}
                 onChange={(e) =>
                   handleQuestionChange(index, 'questionType', e.target.value)
                 }
-                required
-              />
+              >
+                <option value="MCQ">MCQ</option>
+                <option value="True/False">True/False</option>
+              </select>
             </label>
-            <label>
-              Options:
-              {question.options.map((option, optionIndex) => (
-                <input
-                  key={optionIndex}
-                  type="text"
-                  value={option}
-                  onChange={(e) => {
-                    const updatedOptions = [...question.options];
-                    updatedOptions[optionIndex] = e.target.value;
-                    handleQuestionChange(index, 'options', updatedOptions);
-                  }}
-                  required
-                />
-              ))}
-            </label>
+
+            {question.questionType === 'MCQ' && (
+              <div>
+                <label>Options:</label>
+                {Array.from({ length: 4 }).map((_, optionIndex) => (
+                  <input
+                    key={optionIndex}
+                    type="text"
+                    value={question.options[optionIndex] || ''}
+                    onChange={(e) => {
+                      const updatedOptions = [...question.options];
+                      updatedOptions[optionIndex] = e.target.value;
+                      handleQuestionChange(index, 'options', updatedOptions);
+                    }}
+                    required
+                  />
+                ))}
+              </div>
+            )}
+
+            {question.questionType === 'True/False' && (
+              <div>
+                <label>Options:</label>
+                {['True', 'False'].map((option, optionIndex) => (
+                  <input
+                    key={optionIndex}
+                    type="text"
+                    value={question.options[optionIndex] || option}
+                    onChange={(e) => {
+                      const updatedOptions = [...question.options];
+                      updatedOptions[optionIndex] = e.target.value;
+                      handleQuestionChange(index, 'options', updatedOptions);
+                    }}
+                    required
+                  />
+                ))}
+              </div>
+            )}
+
             <label>
               Correct Answer:
               <input
@@ -219,17 +272,25 @@ const UpdateModule = () => {
             </label>
             <label>
               Difficulty:
-              <input
-                type="text"
+              <select
                 value={question.difficulty}
                 onChange={(e) =>
                   handleQuestionChange(index, 'difficulty', e.target.value)
                 }
-                required
-              />
+              >
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
             </label>
+            <button type="button" onClick={() => removeQuestion(index)}>
+              Remove Question
+            </button>
           </div>
         ))}
+        <button type="button" onClick={addQuestion}>
+          Add Question
+        </button>
         <button type="submit">Update Module</button>
       </form>
     </div>
