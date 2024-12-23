@@ -11,7 +11,8 @@ export interface ChatHistory {
   MembersEmail: string[]; // Array of member email addresses
   MembersName: string[]; // Array of member names
   ProfilePictureUrl: string; // URL of the group profile picture
-  timestamp: Date; // Timestamp of the group's creation
+  timestamp: Date;
+  privacy: string; // Timestamp of the group's creation
 }
 
 const ChatCreate = () => {
@@ -22,6 +23,7 @@ const ChatCreate = () => {
     MembersEmail: [],
     MembersName: [],
     ProfilePictureUrl: '',
+    privacy: 'public',
     timestamp: new Date(),
   });
   const [Admin, setAdminEmail] = useState<string>(''); // Set default admin email
@@ -30,6 +32,8 @@ const ChatCreate = () => {
   const [createGroupResponse, setCreateGroupResponse] = useState(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
   const [loading, setLoading] = useState(false); // State for loading indicator
+  const [Privacy, setPrivacy] = useState('');
+  const [InstructorOrStudent, setInstructorOrStudent] = useState('student');
   const router = useRouter();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -66,7 +70,7 @@ const ChatCreate = () => {
 
     try {
       const response = await fetch(
-        'http://localhost:3000/chat-history/Create',
+        `http://localhost:3000/chat-history/Create/${InstructorOrStudent}`,
         {
           method: 'POST',
           headers: {
@@ -78,10 +82,12 @@ const ChatCreate = () => {
 
       if (response.ok) {
         setCreateGroupResponse(await response.json());
-        router.push(`/User_Home/chat_Hossam?title=${courseTitle}`); // Navigate to chat page after creating the group
+        router.push(
+          `/User_Home/chat_Hossam?title=${courseTitle}&privacy=${Privacy}`,
+        ); // Navigate to chat page after creating the group
       } else {
         setError(
-          `Failed to create chat: Make sure that all users are enrolled in ${courseTitle}`,
+          `Failed to create chat: Make sure that all ${InstructorOrStudent} are enrolled in ${courseTitle}`,
         );
       }
     } catch (err) {
@@ -122,11 +128,17 @@ const ChatCreate = () => {
           if (courseTitle) {
             setAdminEmail(parsedUser.email); // Manually set the admin email
             setCourseTitle(courseTitle); // Manually set the course title
-            setGroupDetails((prevDetails) => ({
-              ...prevDetails,
-              Admin: parsedUser.email,
-              CourseTitle: courseTitle,
-            }));
+            const queryParams = new URLSearchParams(window.location.search);
+            const privacy = queryParams.get('privacy');
+            if (privacy) {
+              setGroupDetails((prevDetails) => ({
+                ...prevDetails,
+                Admin: parsedUser.email,
+                CourseTitle: courseTitle,
+                privacy,
+              }));
+              setPrivacy(privacy);
+            }
           } else console.log('no course title available');
         }
       }
@@ -158,48 +170,90 @@ const ChatCreate = () => {
           {/* Members Emails Input */}
           <div className="form_group">
             <label className="sub_title" htmlFor="MembersEmail">
-              Members Emails (comma separated)
+              {Privacy === 'private'
+                ? 'Enter the email for private chat'
+                : 'Members Emails (comma separated)'}
             </label>
             <input
-              placeholder="Enter Member Emails"
+              placeholder={
+                Privacy === 'private'
+                  ? 'Enter Member Email'
+                  : 'Enter Member Emails (comma separated)'
+              }
               className="form_style"
               type="text"
               id="MembersEmail"
               name="MembersEmail"
-              value={groupDetails.MembersEmail.join(', ')}
+              value={
+                Privacy === 'private'
+                  ? groupDetails.MembersEmail[0] || '' // Only show the first email for private
+                  : groupDetails.MembersEmail.join(', ') // Show all emails for non-private
+              }
               onChange={handleAddMemberEmail}
             />
           </div>
 
-          {/* Profile Picture Upload Input */}
-          <div className="form_group">
-            <label className="sub_title" htmlFor="ProfilePictureUrl">
-              Profile Picture
-            </label>
-            <div className="file_input_wrapper">
-              <input
-                className="file_input"
-                type="file"
-                id="ProfilePictureUrl"
-                name="ProfilePictureUrl"
-                accept="image/*"
-                onChange={handleProfilePictureChange}
-              />
-              <label htmlFor="ProfilePictureUrl" className="file_input_button">
-                Choose File
-              </label>
-            </div>
-            {/* Display the selected image preview */}
-            {imagePreview && (
-              <div className="image_preview">
-                <img
-                  src={imagePreview}
-                  alt="Profile Preview"
-                  className="preview_image"
-                />
+          {Privacy === 'private' ? (
+            <div className="form_group">
+              <label className="sub_title">Select Your Role</label>
+              <div className="role_selection">
+                {/* Radio Buttons for Role Selection */}
+                <div>
+                  <input
+                    type="radio"
+                    id="student"
+                    name="role"
+                    value="Student"
+                    onChange={(e) => setInstructorOrStudent(e.target.value)}
+                  />
+                  <label htmlFor="student">Student</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    id="instructor"
+                    name="role"
+                    value="Instructor"
+                    onChange={(e) => setInstructorOrStudent(e.target.value)}
+                  />
+                  <label htmlFor="instructor">Instructor</label>
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            /* Profile Picture Upload Input */
+            <div className="form_group">
+              <label className="sub_title" htmlFor="ProfilePictureUrl">
+                Profile Picture
+              </label>
+              <div className="file_input_wrapper">
+                <input
+                  className="file_input"
+                  type="file"
+                  id="ProfilePictureUrl"
+                  name="ProfilePictureUrl"
+                  accept="image/*"
+                  onChange={handleProfilePictureChange}
+                />
+                <label
+                  htmlFor="ProfilePictureUrl"
+                  className="file_input_button"
+                >
+                  Choose File
+                </label>
+              </div>
+              {/* Display the selected image preview */}
+              {imagePreview && (
+                <div className="image_preview">
+                  <img
+                    src={imagePreview}
+                    alt="Profile Preview"
+                    className="preview_image"
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Error message */}
           {error && <div className="error_message">{error}</div>}
