@@ -3,6 +3,8 @@ import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Announcement extends Document {
+  
+  
   @Prop({ required: true })
   title: string; // Title of the announcement
 
@@ -11,6 +13,9 @@ export class Announcement extends Document {
 
   @Prop({ default: new Date() })
   createdAt: Date; // Timestamp for when the announcement was created
+
+  @Prop({ required: true })
+  createdBy: string; // User who created the thread
 
 }
 

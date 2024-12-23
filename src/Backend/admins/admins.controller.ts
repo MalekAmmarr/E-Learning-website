@@ -82,31 +82,47 @@ export class AdminsController {
       throw new BadRequestException('Course archiving failed');
     }
   }
-  @Delete('deleteCourse')
-  async deletecourse(@Param('courseId') courseId: string) {
-    try {
-      return await this.adminsService.DeleteCourse(courseId);
-    } catch (error) {
-      console.error('Error deleting course :', error);
-      throw new BadRequestException('Failed to delete course');
-    }
+
+  @UseGuards(AuthorizationGuard)
+@Patch('restoreCourse')
+@Roles('admin')
+async restoreCourse(@Body() body: { courseId: string }) {
+  const { courseId } = body;
+  if (!courseId) {
+    throw new BadRequestException('courseId is required.');
   }
 
- // @Delete('deleteCourse')
-  //@Roles('admin')
-  //async deleteCourse(@Body() body: { courseId: string }) {
-    //const { courseId } = body;
-   // try {
-    //  const deletedCourse = await this.coursesService.DeleteCourse(courseId);
-     // return {
-       // message: 'Course deleted successfully',
-      //  deletedCourse,
-     // };
-    //} catch (error) {
-     // console.error('Error during course deletion:', error);
-     // throw new BadRequestException('Course deletion failed');
-   // }
- // }
+  try {
+    const restoredCourse = await this.coursesService.restoreCourse(courseId);
+
+    return {
+      message: 'Course restored successfully',
+      restoredCourse,
+    };
+  } catch (error) {
+    console.error('Error during course restoring:', error.message);
+    throw new BadRequestException('Course restoring failed.');
+  }
+}
+
+  
+
+  @UseGuards(AuthorizationGuard)
+  @Delete('deleteCourse')
+  @Roles('admin')
+  async deleteCourse(@Body() body: { title: string }) {
+    const { title } = body;
+   try {
+     const deletedCourse = await this.coursesService.DeleteCourse(title);
+     return {
+       message: 'Course deleted successfully',
+       deletedCourse,
+     };
+    } catch (error) {
+     console.error('Error during course deletion:', error);
+     throw new BadRequestException('Course deletion failed');
+   }
+ }
 
   @Get('getAnnouncement')
   async getAllAnnouncements() {
@@ -116,15 +132,12 @@ export class AdminsController {
   @UseGuards(AuthorizationGuard)
   @Post('createAnnouncement')
   @Roles('admin')
-  async createAnnouncement(@Body() body: { title: string; content: string }) {
-    const { title, content } = body;
-
+  async createAnnouncement(@Body() body: {  title: string; content: string ;createdBy:string}) {
+    const {  title, content ,createdBy} = body;
+  
     try {
-      const announcement = await this.adminsService.createAnnouncement({
-        title,
-        content,
-      });
-
+      const announcement = await this.adminsService.createAnnouncement( title, content,createdBy);
+  
       return {
         message: 'Announcement created successfully',
         announcement,
@@ -134,6 +147,7 @@ export class AdminsController {
       throw new BadRequestException('Failed to create announcement');
     }
   }
+
 
   @UseGuards(AuthorizationGuard)
   @Patch('editAnnouncement')
@@ -215,8 +229,9 @@ export class AdminsController {
       throw new BadRequestException('Failed to update student');
     }
   }
-
+  @UseGuards(AuthorizationGuard)
   @Delete('students/deleteByEmail/:email')
+  @Roles('admin')
   async deleteStudentByEmail(@Param('email') email: string) {
     try {
       return await this.adminsService.deleteStudentByEmail(email);
@@ -256,7 +271,9 @@ export class AdminsController {
     }
   }
   //Calls deleteInstructor to remove a specific instructor account.
+  @UseGuards(AuthorizationGuard)
   @Delete('instructors/:email')
+  @Roles('admin')
   async deleteInstructor(@Param('email') email: string) {
     try {
       return await this.adminsService.deleteInstructor(email);

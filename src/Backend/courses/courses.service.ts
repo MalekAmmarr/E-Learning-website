@@ -5,6 +5,7 @@ import { Course, CourseSchema } from 'src/schemas/course.schema';
 
 @Injectable()
 export class CoursesService {
+  [x: string]: any;
   constructor(
     @InjectModel(Course.name, 'eLearningDB')
     private readonly courseModel: Model<Course>,
@@ -76,11 +77,35 @@ export class CoursesService {
     }
   }
 
+  async restoreCourse(courseId: string): Promise<Course> {
+    try {
+      if (!courseId) {
+        throw new Error('Invalid courseId provided.');
+      }
+  
+      const restoredCourse = await this.courseModel.findOneAndUpdate(
+        { courseId, isArchived: true }, // Ensure the course is currently archived
+        { isArchived: false }, // Update to mark as active
+        { new: true } // Return the updated document
+      );
+  
+      if (!restoredCourse) {
+        throw new Error('Course not found or is already active.');
+      }
+  
+      return restoredCourse;
+    } catch (error) {
+      console.error('Error restoring course:', error.message);
+      throw new Error('Error restoring course. Please try again later.');
+    }
+  }
+  
+
   //Delete outdated Course
-  async DeleteCourse(courseId: string): Promise<Course> {
+  async DeleteCourse(title: string): Promise<Course> {
     try {
       const deletedCourse = await this.courseModel.findOneAndDelete({
-        courseId: courseId,
+        title: title,
       });
 
       if (!deletedCourse) {

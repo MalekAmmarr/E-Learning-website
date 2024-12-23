@@ -298,4 +298,5 @@ export class InstructorController {
   async getStudentByEmail(@Param('email') email: string): Promise<User> {
     return this.userService.findUserByEmail(email);
   }
+
 }
