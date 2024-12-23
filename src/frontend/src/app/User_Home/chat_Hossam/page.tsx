@@ -149,7 +149,7 @@ const chat = () => {
     // const queryParams = new URLSearchParams(window.location.search);
     // const courseTitle = queryParams.get('title');
     // if (courseTitle)
-    router.push(`/User_Home/chat/CreateGroup?title=Machine Learning`);
+    router.push(`/User_Home/chat_Hossam/CreateGroup?title=Machine Learning`);
     // else console.log('no course title available');
   };
 

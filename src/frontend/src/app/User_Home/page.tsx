@@ -445,7 +445,9 @@ export default function Home() {
                     insights to enhance your learning experience.
                   </p>
                   <div className="main-button">
-                    <a href="/User_Home/Chat">Start Chat</a>
+                    <a href="/User_Home/chat_Hossam?title=Machine Learning">
+                      Start Chat
+                    </a>
                   </div>
                 </div>
               </div>
