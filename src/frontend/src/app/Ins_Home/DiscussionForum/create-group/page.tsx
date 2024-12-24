@@ -17,10 +17,10 @@ export interface ChatHistory {
 const ChatCreate = () => {
   const [groupDetails, setGroupDetails] = useState<ChatHistory>({
     Title: '',
-    Admin: '',
+    Admin: (JSON.parse((sessionStorage.getItem('instructorData'))|| '')).email,
     CourseTitle: '',
-    MembersEmail: [],
-    MembersName: [],
+    MembersEmail: [], // Admin and members will be handled internally
+    MembersName: [], // Admin and members will be handled internally
     ProfilePictureUrl: '',
     timestamp: new Date(),
   });
@@ -37,16 +37,8 @@ const ChatCreate = () => {
     setGroupDetails((prevDetails) => ({
       ...prevDetails,
       [name]: value,
+      Admin:Admin,
     }));
-  };
-
-  const handleAddMemberEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.name === 'MembersEmail') {
-      setGroupDetails((prevDetails) => ({
-        ...prevDetails,
-        MembersEmail: e.target.value.split(',').map((email) => email.trim()),
-      }));
-    }
   };
 
   const handleCreateGroup = async (e: React.FormEvent) => {
@@ -55,8 +47,9 @@ const ChatCreate = () => {
     // Basic validation
     if (
       !groupDetails.Title ||
-      !groupDetails.Admin ||
-      !groupDetails.CourseTitle
+      
+      !groupDetails.CourseTitle ||
+      !groupDetails.ProfilePictureUrl
     ) {
       setError('Please fill in all the required fields.');
       return;
@@ -66,7 +59,7 @@ const ChatCreate = () => {
 
     try {
       const response = await fetch(
-        'http://localhost:3000/chat-history/Create',
+        'http://localhost:3000/chat-history/create-discussion',
         {
           method: 'POST',
           headers: {
@@ -77,8 +70,10 @@ const ChatCreate = () => {
       );
 
       if (response.ok) {
-        setCreateGroupResponse(await response.json());
-        router.push(`/User_Home/chat_Hossam?title=${courseTitle}`); // Navigate to chat page after creating the group
+        const successResponse=await response.json()
+        setCreateGroupResponse(successResponse);
+        //router.push(`/User_Home/chat_Hossam?title=${courseTitle}`); // Navigate to chat page after creating the group
+        console.log('Response : ',successResponse);
       } else {
         setError(
           `Failed to create chat: Make sure that all users are enrolled in ${courseTitle}`,
@@ -112,24 +107,16 @@ const ChatCreate = () => {
 
   useEffect(() => {
     const Initialize = async () => {
-      const user = sessionStorage.getItem('userData');
-      const accessToken = sessionStorage.getItem('authToken');
+      const user = sessionStorage.getItem('instructorData');
+      const accessToken = sessionStorage.getItem('Ins_Token');
       if (accessToken) {
         if (user) {
-          const queryParams = new URLSearchParams(window.location.search);
-          const courseTitle = queryParams.get('title');
           const parsedUser = JSON.parse(user);
-          if (courseTitle) {
-            setAdminEmail(parsedUser.email); // Manually set the admin email
-            setCourseTitle(courseTitle); // Manually set the course title
-            setGroupDetails((prevDetails) => ({
-              ...prevDetails,
-              Admin: parsedUser.email,
-              CourseTitle: courseTitle,
-            }));
-          } else console.log('no course title available');
+          setAdminEmail(parsedUser?.email);
+          
         }
-      }
+    } 
+      
     };
     Initialize();
   }, []);
@@ -155,19 +142,19 @@ const ChatCreate = () => {
             />
           </div>
 
-          {/* Members Emails Input */}
+          {/* Course Title Input */}
           <div className="form_group">
-            <label className="sub_title" htmlFor="MembersEmail">
-              Members Emails (comma separated)
+            <label className="sub_title" htmlFor="CourseTitle">
+              Course Title
             </label>
             <input
-              placeholder="Enter Member Emails"
+              placeholder="Enter Course Title"
               className="form_style"
               type="text"
-              id="MembersEmail"
-              name="MembersEmail"
-              value={groupDetails.MembersEmail.join(', ')}
-              onChange={handleAddMemberEmail}
+              id="CourseTitle"
+              name="CourseTitle"
+              value={groupDetails.CourseTitle}
+              onChange={handleInputChange}
             />
           </div>
 

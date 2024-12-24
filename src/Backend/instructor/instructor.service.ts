@@ -553,4 +553,43 @@ async findInstructorByEmail(instructorEmail: string): Promise<Instructor> {
 }
 
 
+async sendNotificationToStudentsByEmail(
+  instructorEmail: string,
+  courseTitle: string,
+  notificationMessage: string,
+): Promise<any> {  // Change return type to any or a specific object type if you prefer
+  // Find the instructor by email
+  const instructor = await this.InstructorModel.findOne({ email: instructorEmail });
+  if (!instructor) {
+    throw new NotFoundException('Instructor not found.');
+  }
+
+  // Check if the instructor teaches the course
+  if (!instructor.Teach_Courses.includes(courseTitle)) {
+    throw new BadRequestException('Instructor does not teach this course.');
+  }
+
+  // Find all students enrolled in the specified course
+  const students = await this.UserModel.find({ acceptedCourses: courseTitle }, 'email');
+  if (!students || students.length === 0) {
+    throw new NotFoundException('No students found for this course.');
+  }
+
+  // Send notification to all students by their email
+  const studentEmails = students.map((student) => student.email);
+  await Promise.all(
+    studentEmails.map((email) =>
+      this.UserModel.updateOne(
+        { email }, // Use email to find the student
+        { $push: { Notifiction: notificationMessage } },
+      ),
+    ),
+  );
+
+  // Return a structured JSON response
+  return { message: `Notification sent to all students in the course "${courseTitle}".` };
+}
+
+
+
 }
