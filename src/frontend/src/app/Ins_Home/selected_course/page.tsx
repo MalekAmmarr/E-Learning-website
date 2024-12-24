@@ -344,6 +344,58 @@ const CourseContent: React.FC = () => {
           )}
         </div>
       </div>
+      <div className="services section" id="services">
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img src="/assets/images/service-02.png" alt="private chat" />
+                </div>
+                <div className="main-content">
+                  <h4>Chat Privately</h4>
+                  <p>
+                    Engage in private conversations with your instructor or
+                    peers for personalized support and collaboration.
+                  </p>
+                  <div className="main-button">
+                    <a href="/User_Home/chat_Hossam?title=Machine Learning">
+                      Start Private Chat
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img src="/assets/images/service-02.png" alt="web experts" />
+                </div>
+                <div className="main-content">
+                  <h4>Discussion Forum</h4>
+                  <p>
+                    Join discussion Forums to start discussions with your peers
+                    and Instructors.
+                  </p>
+                  <div className="main-button">
+                    <a href="/Ins_Home/DiscussionForum">
+                      Join Discussion Forums
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          height: '100px',
+          backgroundColor: 'white',
+          marginTop: '30px',
+          marginBottom: '30px',
+        }}
+      ></div>
 
       {/* ***** Header Area End ***** */}
 

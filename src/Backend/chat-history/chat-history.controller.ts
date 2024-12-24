@@ -1,6 +1,6 @@
 import { ChatHistoryService } from 'src/Backend/chat-history/chat-history.service';
 import { ChatHistory } from 'src/schemas/chathistory.schema';
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ProgressService } from 'src/Backend/progress/progress.service';
 
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -56,6 +56,21 @@ export class ChatHistoryController {
       CourseTitle,
       Title,
     );
+  }
+
+  @Post('create-discussion')
+  async createGroupChat(
+    @Body() createGroupDto: CreateGroupDto,
+  ) {
+    return this.chatHistoryService.CreateGroupsDiscussions(createGroupDto);
+  }
+
+  @Get('get-discussion')
+  async getGroupChat(
+    @Query('Title') Title: string,
+    @Query('CourseTitle') CourseTitle: string,
+  ): Promise<ChatHistory | null> {
+    return this.chatHistoryService.getGroupChatByTitleAndCourse(Title, CourseTitle);
   }
 
   // @Get('/getProgress/:CourseTitle/:studentEmail')

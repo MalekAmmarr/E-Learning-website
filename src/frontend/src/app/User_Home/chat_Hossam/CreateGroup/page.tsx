@@ -149,7 +149,7 @@ const ChatCreate = () => {
   return (
     <div className="container">
       <div className="form_area">
-        <p className="title">Create group</p>
+        <p className="title">Create Group</p>
         <form onSubmit={handleCreateGroup}>
           {/* Title Input */}
           <div className="form_group">
@@ -257,6 +257,8 @@ const ChatCreate = () => {
 
           {/* Error message */}
           {error && <div className="error_message">{error}</div>}
+
+          {/* Submit Button */}
           <div className="form_group">
             {loading ? (
               <div className="loading-container">

@@ -14,13 +14,16 @@ import { CreateGroupDto } from './dto/create-group.dto';
 import { SendMessageDto } from './dto/send-message.dto';
 import { group } from 'console';
 import { Instructor } from 'src/schemas/instructor.schema';
+
 import { ST } from 'next/dist/shared/lib/utils';
+
 
 @Injectable()
 export class ChatHistoryService {
   constructor(
     @InjectModel(User.name, 'eLearningDB')
     private readonly userModel: Model<User>,
+   
     @InjectModel(Course.name, 'eLearningDB')
     private readonly courseModel: Model<Course>,
     @InjectModel(ChatHistory.name, 'eLearningDB')
@@ -193,5 +196,53 @@ export class ChatHistoryService {
       await Group.save();
       // After saving the message, broadcast it to all connected clients
     } else throw new Error('No Group to Add on it your message');
+  }
+
+
+
+  // 
+  async CreateGroupsDiscussions(CreateGroupDto: CreateGroupDto) {
+    const {
+      Title,
+      Admin,
+      MembersEmail,
+      MembersName,
+      ProfilePictureUrl,
+      messages,
+      CourseTitle,
+    } = CreateGroupDto;
+    // Step 2: Validate members' eligibility
+    MembersEmail.push(Admin);
+    // Step 2: Fetch students who have accepted the course
+    const students = await this.userModel.find({
+      acceptedCourses: CourseTitle,
+    });
+    const studentsEmails = students.map(student => student.email);
+    const studentsNames = students.map(student => student.name);
+    
+    // Step 3: Create and save the group
+    const newGroup = new this.ChatHistoryModel({
+      Title,
+      Admin,
+      MembersEmail:studentsEmails,
+      MembersName:studentsNames,
+      ProfilePictureUrl,
+      messages,
+      CourseTitle,
+      timestamp: new Date(),
+    });
+    await newGroup.save();
+
+    return {
+      message: `${Title} Group created successfully`,
+      group: newGroup,
+      
+    };
+  }
+
+
+  async getGroupChatByTitleAndCourse(Title: string, CourseTitle: string): Promise<ChatHistory | null> {
+    const groupChat = await this.ChatHistoryModel.findOne({ Title, CourseTitle });
+    return groupChat; // Returns null if no group chat is found
   }
 }
