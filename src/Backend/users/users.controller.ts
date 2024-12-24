@@ -164,4 +164,17 @@ export class UsersController {
   async getUserWithProgressByEmail(@Param('email') email: string) {
     return this.userService.getUserWithProgressByEmail(email);
   }
+  @Get('certificate/:studentName/:courseTitle')
+  async getCertificateImageUrl(
+    @Param('studentName') studentName: string,
+    @Param('courseTitle') courseTitle: string,
+  ): Promise<User> {
+    if (!studentName || !courseTitle) {
+      throw new BadRequestException('Both studentName and courseTitle are required.');
+    }
+
+   return await this.userService.getCertificateImageUrl(studentName, courseTitle);
+    
+  }
 }
+

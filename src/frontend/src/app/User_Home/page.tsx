@@ -424,7 +424,7 @@ export default function Home() {
                     it. don't waste time
                   </p>
                   <div className="main-button">
-                    <a href="/login">Start Now</a>
+                    <a href="/User_Home/Student_Certificate">Start Now</a>
                   </div>
                 </div>
               </div>

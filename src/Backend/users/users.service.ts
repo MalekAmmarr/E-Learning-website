@@ -213,4 +213,20 @@ export class UsersService {
 
     return result;
   }
+  async getCertificateImageUrl(studentName: string, courseTitle: string): Promise<User> {
+    const user = await this.userModel.findOne({
+      name: studentName,
+     
+    });
+
+    if (!user) {
+      throw new NotFoundException(`No certificate found for ${studentName} in ${courseTitle}`);
+    }
+
+    
+    
+
+    return user;
+  }
 }
+
