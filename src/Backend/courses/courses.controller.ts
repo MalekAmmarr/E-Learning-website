@@ -27,5 +27,14 @@ export class CoursesController {
     return this.coursesService.getAllCoursesByTitle(title);
   }
 
+  @Get('category/:title')
+  async getCategoryByTitle(@Param('title') title: string): Promise<string> {
+    const category = await this.coursesService.getCategoryByTitle(title);
+    if (category) {
+      return category; // Return the category if found
+    } else {
+      throw new Error('Course not found');
+    }
+  }
   
 }

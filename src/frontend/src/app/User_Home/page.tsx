@@ -23,6 +23,15 @@ interface Course {
   price: number;
   image: string; // URL or path to the course image
 }
+interface Recommendation {
+  title: string; // Title of the recommended course
+  category: string; // Category of the recommended course
+  creditHours: number; // Credit hours of the recommended course
+  price: number; // Price of the recommended course
+  imageUrl?: string; // Image URL for the recommended course (optional)
+}
+
+
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,8 +40,10 @@ export default function Home() {
   const [appliedCourses, setAppliedCourses] = useState<Course[]>([]);
   const [acceptedCourses, setAcceptedCourses] = useState<Course[]>([]);
   const [Courses, setCourses] = useState<Course[]>([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
   const router = useRouter();
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault(); // Prevent default form submission behavior
 
@@ -95,7 +106,49 @@ export default function Home() {
       throw error; // Propagate the error for the caller to handle
     }
   };
-  // Filter courses based on the active category
+
+  const fetchRecommendations = async (email: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/recommendation/fetch-by-email/${email}`,
+        {
+          method: 'GET',
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Fetched recommendations:', data);
+      setRecommendations(data);
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+    }
+  };
+
+  const generateRecommendations = async (email: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/recommendation/generate/${email}`,
+        {
+          method: 'POST',
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to generate recommendations: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log('Generated recommendations:', data);
+      setRecommendations(data);
+    } catch (error) {
+      console.error('Error generating recommendations:', error);
+    }
+  };
+
   const filteredAppliedCourses =
     activeCategory === 'All'
       ? appliedCourses
@@ -129,6 +182,10 @@ export default function Home() {
               accessToken,
             );
 
+            // Fetch recommendations for the user
+            //await fetchRecommendations(parsedUser.email);
+            await generateRecommendations(parsedUser.email);
+
             // Filter applied courses based on user data
             const userAppliedCourses = Coursat.filter(
               (course) => updatedUser?.appliedCourses.includes(course.title), // Ensure course.title is correct
@@ -154,12 +211,14 @@ export default function Home() {
 
   console.log(appliedCourses);
   console.log(acceptedCourses);
+
   // Function to handle note title click
   const handleCourseTitleClick = (courseTitle: string) => {
     router.push(
       `/User_Home/CourseContent?title=${encodeURIComponent(courseTitle)}`,
     );
   };
+
   const fetchUserDetails = async (
     email: string,
     accessToken: string,
@@ -1166,116 +1225,52 @@ export default function Home() {
       </div>
       <div className="section events" id="events">
         <div className="container">
-          <div className="row">
-            <div className="col-lg-12 text-center">
-              <div className="section-heading">
-                <h6>Schedule</h6>
-                <h2>Upcoming Courses</h2>
-              </div>
-            </div>
-            <div className="col-lg-12 col-md-6">
-              <div className="item">
-                <div className="row">
-                  <div className="col-lg-3">
-                    <div className="image">
-                      <img src="/assets/images/Advanced_ML.jpg" alt="" />
-                    </div>
-                  </div>
-                  <div className="col-lg-9">
-                    <ul>
-                      <li>
-                        <span className="category">Data Science</span>
-                        <h4>Advanced Machnie Learning</h4>
-                      </li>
-                      <li>
-                        <span>Date:</span>
-                        <h6>23 December 2024</h6>
-                      </li>
-                      <li>
-                        <span>Duration:</span>
-                        <h6>22 Hours</h6>
-                      </li>
-                      <li>
-                        <span>Price:</span>
-                        <h6>$120</h6>
-                      </li>
-                    </ul>
-                    <a href="#">
-                      <i className="fa fa-angle-right" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-12 col-md-6">
-              <div className="item">
-                <div className="row">
-                  <div className="col-lg-3">
-                    <div className="image">
-                      <img src="/assets/images/german.jpg" alt="" />
-                    </div>
-                  </div>
-                  <div className="col-lg-9">
-                    <ul>
-                      <li>
-                        <span className="category">Deutsch</span>
-                        <h4>German Beginners</h4>
-                      </li>
-                      <li>
-                        <span>Date:</span>
-                        <h6>1 Jan 2025</h6>
-                      </li>
-                      <li>
-                        <span>Duration:</span>
-                        <h6>30 Hours</h6>
-                      </li>
-                      <li>
-                        <span>Price:</span>
-                        <h6>$320</h6>
-                      </li>
-                    </ul>
-                    <a href="#!">
-                      <i className="fa fa-angle-right" />
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-12 col-md-6">
-              <div className="item">
-                <div className="row">
-                  <div className="col-lg-3">
-                    <div className="image">
-                      <img src="/assets/images/Data_Structure.jpg" alt="" />
-                    </div>
-                  </div>
-                  <div className="col-lg-9">
-                    <ul>
-                      <li>
-                        <span className="category">Programming</span>
-                        <h4>Data structur & Algorithms</h4>
-                      </li>
-                      <li>
-                        <span>Date:</span>
-                        <h6>3 Mar 2025</h6>
-                      </li>
-                      <li>
-                        <span>Duration:</span>
-                        <h6>48 Hours</h6>
-                      </li>
-                      <li>
-                        <span>Price:</span>
-                        <h6>$440</h6>
-                      </li>
-                    </ul>
-                    <a href="#">
-                      <i className="fa fa-angle-right" />
-                    </a>
-                  </div>
-                </div>
-              </div>
+        <div className="row">
+  <div className="col-lg-12 text-center">
+    <div className="section-heading">
+      <h6>Schedule</h6>
+      <h2>Recommendation Courses</h2>
+    </div>
+  </div>
+  
+  {recommendations.map((recommendation, index) => (
+    <div key={index} className="col-lg-12 col-md-6">
+      <div className="item">
+        <div className="row">
+          <div className="col-lg-3">
+            <div className="image">
+              <img src={recommendation.imageUrl || "/assets/images/default_image.jpg"} alt={recommendation.title} />
             </div>
           </div>
+          <div className="col-lg-9">
+            <ul>
+              <li>
+                <span className="category">{recommendation.category}</span>
+                <h4>{recommendation.title}</h4>
+              </li>
+              <li>
+                <span>Date:</span>
+                <h6>{new Date().toLocaleDateString()}</h6> {/* You can update this to the actual date for each recommendation */}
+              </li>
+              <li>
+                <span>Duration:</span>
+                <h6>{recommendation.creditHours} Hours</h6>
+              </li>
+              <li>
+                <span>Price:</span>
+                <h6>${recommendation.price}</h6>
+              </li>
+            </ul>
+            <a href="#">
+              <i className="fa fa-angle-right" />
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
         </div>
       </div>
       {/* <div className="contact-us section" id="contact">
