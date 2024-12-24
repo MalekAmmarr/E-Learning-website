@@ -1,28 +1,20 @@
+// thread.schema.ts
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
 @Schema({ timestamps: true })
 export class Thread extends Document {
   @Prop({ required: true })
-  courseId: string; // courseID of the forum this thread belongs to
+  title: string;
 
   @Prop({ required: true })
-  title: string; // Thread title
+  forumId: string;
 
   @Prop({ required: true })
-  createdBy: string; // User who created the thread
+  createdBy: string;
 
-  @Prop({ default: '' })
-  content: string; // Content of the thread
-
-  @Prop({ default: 0 })
-  repliesCount: number; // Number of replies this thread has
-
-  @Prop({ default: false })
-  isClosed: boolean; // Flag to indicate if the thread is closed for further replies
-
-  createdAt: Date;
-  updatedAt: Date;
+  @Prop({ type: [String], default: [] })
+  replyIds: string[];
 }
 
 export const ThreadSchema = SchemaFactory.createForClass(Thread);

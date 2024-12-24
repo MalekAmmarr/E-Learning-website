@@ -539,7 +539,7 @@ export default function Home() {
                     Join discussion Forums to start discussions with your peers and Instructors.
                   </p>
                   <div className="main-button">
-                    <a href="/User_Home/DiscussionForum">Join Discussion Forums</a>
+                    <a href="/User_Home/DiscussionForum/pages/forums">Join Discussion Forums</a>
                   </div>
                 </div>
               </div>
