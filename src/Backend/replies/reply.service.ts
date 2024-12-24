@@ -4,15 +4,28 @@ import { Model } from 'mongoose';
 import { Reply } from 'src/schemas/reply.schema';
 import { CreateReplyDto } from './dto/create-reply.dto';
 import { UpdateReplyDto } from './dto/update-reply.dto';
+import { Thread } from 'src/schemas/threads.schema';
 
 @Injectable()
 export class ReplyService {
-  constructor(@InjectModel(Reply.name, 'eLearningDB') private readonly replyModel: Model<Reply>) {}
+  constructor(@InjectModel(Reply.name, 'eLearningDB') private readonly replyModel: Model<Reply>,
+  @InjectModel(Thread.name, 'eLearningDB') private readonly threadModel: Model<Thread>,
+) {}
 
-  async createReply(createReplyDto: CreateReplyDto): Promise<Reply> {
-    const reply = new this.replyModel(createReplyDto);
-    return reply.save();
-  }
+
+async createReply(createReplyDto: CreateReplyDto): Promise<Reply> {
+  
+  const reply = await new this.replyModel(createReplyDto).save();
+
+
+  await this.threadModel.findByIdAndUpdate(
+    reply.threadId,
+    { $addToSet: { replyIds: reply._id } }, 
+    { new: true },
+  );
+
+  return reply;
+}
 
   async getRepliesByThread(threadId: string): Promise<Reply[]> {
     return this.replyModel.find({ threadId }).exec();

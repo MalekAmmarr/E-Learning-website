@@ -1,10 +1,13 @@
 import { Controller, Post, Get, Body, Param,Delete, Patch } from '@nestjs/common';
 import { ForumService } from './forum.service';
 import { CreateForumDto } from './dto/create-forum.dto';
+import { ReplyService } from '../replies/reply.service';
 
 @Controller('forums')
 export class ForumController {
-  constructor(private readonly forumService: ForumService) {}
+  constructor(private readonly forumService: ForumService
+    
+  ) {}
 
   @Post()
   async createForum(@Body() createForumDto: CreateForumDto) {
@@ -23,5 +26,6 @@ export class ForumController {
   @Delete(':forumId')
   async deleteForum(@Param('forumId') forumId: string, @Body('instructorId') instructorId: string) {
     await this.forumService.deleteForum(forumId, instructorId);
+    
   }
 }
