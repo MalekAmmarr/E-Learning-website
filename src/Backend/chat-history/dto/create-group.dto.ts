@@ -6,6 +6,7 @@ import {
   IsUrl,
   IsDate,
   ValidateNested,
+  IsBoolean,
 } from 'class-validator';
 
 import { Message } from 'src/schemas/message.schema';
@@ -34,6 +35,9 @@ export class CreateGroupDto {
   @IsUrl()
   @IsOptional()
   ProfilePictureUrl: string;
+  @IsBoolean()
+  @IsOptional()
+  isDiscusForum: boolean;
 
   @IsArray()
   @ValidateNested({ each: true })

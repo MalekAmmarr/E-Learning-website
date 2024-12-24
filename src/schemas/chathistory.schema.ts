@@ -28,6 +28,8 @@ export class ChatHistory extends Document {
   timestamp: Date; // Timestamp of when the message was sent
   @Prop({ required: false })
   privacy: string; // ID of the message receiver (use "all" for group chats)
+  @Prop({ required: false })
+  isDiscusForum: boolean; // ID of the message receiver (use "all" for group chats)
 }
 
 export const ChatHistorySchema = SchemaFactory.createForClass(ChatHistory);
