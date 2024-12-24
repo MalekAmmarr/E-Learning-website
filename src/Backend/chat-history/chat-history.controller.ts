@@ -61,6 +61,14 @@ export class ChatHistoryController {
       privacy,
     );
   }
+  @Get('getGroupChat/:Admin/:title')
+  //@Roles('instructor', 'student')
+  async getGroupChat(
+    @Param('Admin') Admin: string,
+    @Param('title') title: string,
+  ) {
+    return this.chatHistoryService.getGroupChat(Admin, title);
+  }
   @Get('getInstructorGroupChat/:Admin/:title')
   //@Roles('instructor', 'student')
   async getInstructorGroupChat(
@@ -95,16 +103,16 @@ export class ChatHistoryController {
   async createGroupChat(@Body() createGroupDto: CreateGroupDto) {
     return this.chatHistoryService.CreateGroupsDiscussions(createGroupDto);
   }
-  @Get('get-discussion')
-  async getGroupChat(
-    @Query('Title') Title: string,
-    @Query('CourseTitle') CourseTitle: string,
-  ): Promise<ChatHistory | null> {
-    return this.chatHistoryService.getGroupChatByTitleAndCourse(
-      Title,
-      CourseTitle,
-    );
-  }
+  // @Get('get-discussion')
+  // async getGroupChat(
+  //   @Query('Title') Title: string,
+  //   @Query('CourseTitle') CourseTitle: string,
+  // ): Promise<ChatHistory | null> {
+  //   return this.chatHistoryService.getGroupChatByTitleAndCourse(
+  //     Title,
+  //     CourseTitle,
+  //   );
+  // }
   // @Get('/getProgress/:CourseTitle/:studentEmail')
   // async getProgress(
   //   @Param('CourseTitle') CourseTitle: string,
