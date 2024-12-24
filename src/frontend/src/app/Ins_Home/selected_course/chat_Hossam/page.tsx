@@ -7,7 +7,7 @@ import Script from 'next/script';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import './page.css';
-import { User } from '../Notes/page';
+import { User } from '../../page';
 import { title } from 'process';
 import { timeStamp } from 'console';
 // import { io } from 'socket.io-client';
@@ -62,7 +62,28 @@ const chat = () => {
     try {
       setIsLoading(true);
       const response = await fetch(
-        `http://localhost:3000/chat-history/getGroups/${admin}/${title}/${privacy}`,
+        `http://localhost:3000/chat-history/getInstructorGroups/${admin}/${title}/${privacy}`,
+      );
+      const groupsInfo = await response.json();
+      if (groupsInfo) {
+        console.log('Group info : ', groupsInfo.Groups);
+        setGroupInfo(groupsInfo.Groups);
+      }
+    } catch (err) {
+      setError('Failed to get groups: ' + err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  const handleGetPrivateGroups = async (
+    admin: string,
+    title: string,
+    privacy: string,
+  ) => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `http://localhost:3000/chat-history/getPrivateInstructorGroups/${admin}/${title}/${privacy}`,
       );
       const groupsInfo = await response.json();
       if (groupsInfo) {
@@ -88,7 +109,33 @@ const chat = () => {
       console.log('title : ', title);
       console.log('admin: ', admin);
       const response = await fetch(
-        `http://localhost:3000/chat-history/getGroupChat/${admin}/${title}`,
+        `http://localhost:3000/chat-history/getInstructorGroupChat/${admin}/${title}`,
+      );
+      const groupsInfo = await response.json();
+      if (groupsInfo) {
+        console.log('Group chats : ', groupsInfo.Groups.messages);
+        setGroupChat(groupsInfo.Groups.messages);
+      }
+    } catch (err) {
+      setError('Failed to get groups: ' + err);
+    } finally {
+      setIsLoadingGroupChat(false);
+    }
+  };
+  const handleGetPrivateGroupChat = async (
+    admin: string,
+    title: string,
+    GroupTitle: string,
+    GroupMembers: string[],
+  ) => {
+    try {
+      setIsLoadingGroupChat(true);
+      SetGroupTitle(title);
+      SetGroupMembers(GroupMembers);
+      console.log('title : ', title);
+      console.log('admin: ', admin);
+      const response = await fetch(
+        `http://localhost:3000/chat-history/getPrivateInstructorGroupChat/${admin}/${title}`,
       );
       const groupsInfo = await response.json();
       if (groupsInfo) {
@@ -133,7 +180,20 @@ const chat = () => {
       // Check if the response status is successful (2xx)
       if (response.ok) {
         console.log('Message sent successfully');
-        await handleGetGroupChat(senderEmail, Title, CourseTitle, GroupMembers); // Refresh the page or router if necessary
+        if (Privacy == 'public')
+          await handleGetGroupChat(
+            senderEmail,
+            Title,
+            CourseTitle,
+            GroupMembers,
+          ); // Refresh the page or router if necessary
+        else
+          await handleGetPrivateGroupChat(
+            senderEmail,
+            Title,
+            CourseTitle,
+            GroupMembers,
+          ); // Refresh the page or router if necessary
       } else {
         const errorData = await response.json();
         throw new Error(
@@ -175,24 +235,28 @@ const chat = () => {
   };
   useEffect(() => {
     const Initialize = async () => {
-      const user = sessionStorage.getItem('userData');
-      const accessToken = sessionStorage.getItem('authToken');
+      const user = sessionStorage.getItem('instructorData');
+      const accessToken = sessionStorage.getItem('Ins_Token');
       if (accessToken) {
         if (user) {
           const queryParams = new URLSearchParams(window.location.search);
           const courseTitle = queryParams.get('title');
           const parsedUser = JSON.parse(user);
-          const UpdatedUser = await fetchUserDetails(
-            parsedUser.email,
-            accessToken,
-          );
+          setUserData(parsedUser);
           if (courseTitle) {
             const queryParams = new URLSearchParams(window.location.search);
             const privacy = queryParams.get('privacy');
             setCourseTitle(courseTitle);
             if (privacy) {
               setPrivacy(privacy);
-              await handleGetGroups(UpdatedUser.email, courseTitle, privacy);
+              if (privacy == 'public')
+                await handleGetGroups(parsedUser.email, courseTitle, privacy);
+              else
+                await handleGetPrivateGroups(
+                  parsedUser.email,
+                  courseTitle,
+                  privacy,
+                );
             }
           }
         }
@@ -349,14 +413,22 @@ const chat = () => {
                           <li
                             className="left clearfix"
                             key={index}
-                            onClick={() =>
-                              handleGetGroupChat(
-                                userData?.email,
-                                group.Title,
-                                CourseTitle,
-                                group.MembersEmail,
-                              )
-                            }
+                            onClick={() => {
+                              if (Privacy == 'public') {
+                                handleGetGroupChat(
+                                  userData?.email,
+                                  group.Title,
+                                  CourseTitle,
+                                  group.MembersEmail,
+                                );
+                              } else
+                                handleGetPrivateGroupChat(
+                                  userData?.email,
+                                  group.Title,
+                                  CourseTitle,
+                                  group.MembersEmail,
+                                );
+                            }}
                           >
                             <span className="chat-img pull-left">
                               <img

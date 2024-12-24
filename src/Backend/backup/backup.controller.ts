@@ -7,6 +7,7 @@ import {
   Body,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { BackupService } from './backup.service';
 import { Backup } from 'src/schemas/backup.schema';
@@ -42,20 +43,24 @@ export class BackupController {
     return this.backupService.deleteBackup(backupId);
   }
   @Get('/Hoss/OpenFile')
-  async getBackup(
-    @Body('storagePath') storagePath: string,
-    @Res() res: Response,
-  ) {
-    try {
-      // Call the service method to handle file download
-      await this.backupService.getBackupFile(storagePath, res);
-    } catch (error) {
-      // Handle error gracefully
-      console.error('Error downloading backup:', error);
-      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        message: 'Failed to download backup file',
-        error: error.message,
-      });
-    }
+async getBackup(
+  @Query('storagePath') storagePath: string,  // Change to query parameter
+  @Res() res: Response,
+) {
+  try {
+    // Decode the storage path twice to fix double encoding
+    const decodedPath = decodeURIComponent(decodeURIComponent(storagePath));
+
+    // Call the service method to handle file download
+    await this.backupService.getBackupFile(decodedPath, res);
+  } catch (error) {
+    // Handle error gracefully
+    console.error('Error downloading backup:', error);
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      message: 'Failed to download backup file',
+      error: error.message,
+    });
   }
 }
+
+}  

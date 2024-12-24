@@ -34,7 +34,7 @@ const CourseContent: React.FC = () => {
   const [courseinfo, setCourseInfo] = useState<Course>();
   const [error, setError] = useState<string | null>(null);
   const [course, setCourse] = useState<Course | null>(null);
-
+  const [coursetitle, setCoursetitle] = useState<string>('');
   const router = useRouter();
   const searchParams = useSearchParams();
   const title = searchParams.get('title');
@@ -60,14 +60,17 @@ const CourseContent: React.FC = () => {
   const fetchCourses = async (): Promise<Course[]> => {
     try {
       setIsLoading(true);
-      const accessToken = sessionStorage.getItem('Ins_Token'); 
-      const response = await fetch(`http://localhost:3000/instructor/course/bytitle?title=${encodeURIComponent(courseTitle)}`, {
-        method: 'GET',
-        headers: {
-          Authorization: `Bearer ${accessToken}`, // Add the token to the Authorization header
-          'Content-Type': 'application/json',
+      const accessToken = sessionStorage.getItem('Ins_Token');
+      const response = await fetch(
+        `http://localhost:3000/instructor/course/bytitle?title=${encodeURIComponent(courseTitle)}`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // Add the token to the Authorization header
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to fetch user details: ${response.statusText}`);
@@ -96,14 +99,17 @@ const CourseContent: React.FC = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/instructor/inscontent', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('Ins_Token')}`, // Add token if needed
+      const response = await fetch(
+        'http://localhost:3000/instructor/inscontent',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${sessionStorage.getItem('Ins_Token')}`, // Add token if needed
+          },
+          body: JSON.stringify({ courseTitle }),
         },
-        body: JSON.stringify({ courseTitle }),
-      });
+      );
 
       if (!response.ok) {
         throw new Error('Failed to fetch course content');
@@ -132,6 +138,9 @@ const CourseContent: React.FC = () => {
       if (accessToken) {
         const parsedUser = JSON.parse(user);
         fetchUserDetails(parsedUser.email, accessToken);
+        const queryParams = new URLSearchParams(window.location.search);
+        const courseTitle = queryParams.get('title'); // Get 'title' from query params
+        if (courseTitle) setCoursetitle(courseTitle);
       } // Set userData state only if data exists}
     } else {
       router.push('/Ins_login');
@@ -163,7 +172,11 @@ const CourseContent: React.FC = () => {
       console.error('Error fetching user details');
     }
   };
-
+  const HandleOnChat = (courseTitle: string, privacy: string) => {
+    router.push(
+      `/Ins_Home/selected_course/chat_Hossam?title=${encodeURIComponent(courseTitle)}&privacy=${encodeURIComponent(privacy)}`,
+    );
+  };
 
   return (
     <>
@@ -305,8 +318,7 @@ const CourseContent: React.FC = () => {
           <div className="row">
             <div className="col-lg-4 col-md-6">
               <div className="service-item">
-                <div className="circle-image">
-                </div>
+                <div className="circle-image"></div>
               </div>
             </div>
           </div>
@@ -344,6 +356,75 @@ const CourseContent: React.FC = () => {
           )}
         </div>
       </div>
+      <div className="services section" id="services">
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img src="/assets/images/service-02.png" alt="private chat" />
+                </div>
+                <div className="main-content">
+                  <h4 onClick={() => HandleOnChat(courseTitle, 'public')}>
+                    Show Discussion Forum
+                  </h4>
+                  <p></p>
+                  <div className="main-button">
+                    <a onClick={() => HandleOnChat(courseTitle, 'public')}>
+                      Show
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img src="/assets/images/service-02.png" alt="private chat" />
+                </div>
+                <div className="main-content">
+                  <h4 onClick={() => HandleOnChat(courseTitle, 'public')}>
+                    Show Private Message
+                  </h4>
+                  <p></p>
+                  <div className="main-button">
+                    <a onClick={() => HandleOnChat(courseTitle, 'private')}>
+                      Private
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-4 col-md-6">
+              <div className="service-item">
+                <div className="icon">
+                  <img src="/assets/images/service-02.png" alt="web experts" />
+                </div>
+                <div className="main-content">
+                  <h4>Discussion Forum</h4>
+                  <p>
+                    Join discussion Forums to start discussions with your peers
+                    and Instructors.
+                  </p>
+                  <div className="main-button">
+                    <a href="/Ins_Home/DiscussionForum">
+                      Join Discussion Forums
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        style={{
+          height: '100px',
+          backgroundColor: 'white',
+          marginTop: '30px',
+          marginBottom: '30px',
+        }}
+      ></div>
 
       {/* ***** Header Area End ***** */}
 
@@ -370,8 +451,7 @@ const CourseContent: React.FC = () => {
                   <div className="events_item">
                     {/* Course Image and Category */}
                     <div className="thumb">
-                      <a
-                      >
+                      <a>
                         <img
                           src={courseinfo.image} // Correct usage of the current course image
                           alt={courseinfo.title} // Correct usage of the current course name
@@ -385,8 +465,7 @@ const CourseContent: React.FC = () => {
                       <span className="author">
                         {courseinfo.instructorName}
                       </span>
-                      <h4
-                      >
+                      <h4>
                         {isLoading ? (
                           <div className="loading-overlay">
                             <div className="loading-content">

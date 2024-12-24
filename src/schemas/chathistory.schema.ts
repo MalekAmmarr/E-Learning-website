@@ -18,7 +18,7 @@ export class ChatHistory extends Document {
   @Prop({ type: [String], default: [] })
   MembersName: string[];
 
-  @Prop({ required: true })
+  @Prop({ required: false })
   ProfilePictureUrl: string; // ID of the message receiver (use "all" for group chats)
 
   @Prop({ type: [Message], required: true, default: [] })
@@ -26,6 +26,10 @@ export class ChatHistory extends Document {
 
   @Prop({ default: Date.now })
   timestamp: Date; // Timestamp of when the message was sent
+  @Prop({ required: false })
+  privacy: string; // ID of the message receiver (use "all" for group chats)
+  @Prop({ required: false })
+  isDiscusForum: boolean; // ID of the message receiver (use "all" for group chats)
 }
 
 export const ChatHistorySchema = SchemaFactory.createForClass(ChatHistory);

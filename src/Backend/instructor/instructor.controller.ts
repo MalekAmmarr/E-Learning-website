@@ -87,7 +87,7 @@ export class InstructorController {
   }
 
   @UseGuards(AuthorizationGuard)
-  @Get(':email')
+  @Get('getbyemail/:email')
   @Roles('instructor')
   async getInstructorByEmail(
     @Param('email') email: string,
@@ -320,6 +320,23 @@ export class InstructorController {
   async getStudentByEmail(@Param('email') email: string): Promise<User> {
     return this.userService.findUserByEmail(email);
   }
+
+
+  @UseGuards(AuthorizationGuard)
+  @Post('send-notification')
+  @Roles('instructor')
+  async sendNotificationToStudents(
+    @Body('instructorEmail') instructorEmail: string,
+    @Body('courseTitle') courseTitle: string,
+    @Body('notificationMessage') notificationMessage: string,
+  ): Promise<string> {
+    return this.instructorService.sendNotificationToStudentsByEmail(
+      instructorEmail,
+      courseTitle,
+      notificationMessage,
+    );
+  }
+
   
   @UseGuards(AuthorizationGuard)
   @Delete(':instructorEmail/courses/:courseTitle')
@@ -330,5 +347,6 @@ export class InstructorController {
 ) {
   return await this.instructorService.deleteCourse(instructorEmail, courseTitle);
 }
+
 
 }

@@ -292,7 +292,7 @@ export class AdminsController {
   //Calls deleteInstructor to remove a specific instructor account.
   @UseGuards(AuthorizationGuard)
   @Delete('instructors/:email')
-  @Roles('admin')
+  @Roles('admin','instructor')
   async deleteInstructor(@Param('email') email: string) {
     try {
       return await this.adminsService.deleteInstructor(email);

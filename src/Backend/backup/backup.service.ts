@@ -99,36 +99,22 @@ export class BackupService {
 
   async getBackupFile(storagePath: string, res: Response): Promise<any> {
     try {
-      // Resolve the absolute path of the file
       const absolutePath = path.resolve(storagePath);
-
-      // Check if the file exists
       if (!fs.existsSync(absolutePath)) {
         throw new NotFoundException('Backup file not found');
       }
-
-      // Read the file contents (Optional: if you want to parse it to JSON)
-      const fileContent = fs.readFileSync(absolutePath, 'utf8');
-
-      // Optional: Parse the content to JSON (if needed for other logic)
-      const parsedContent = JSON.parse(fileContent);
-
-      // If you want to send the file as a downloadable response:
-      res.setHeader(
-        'Content-Disposition',
-        `attachment; filename=${path.basename(absolutePath)}`,
-      );
-      res.setHeader('Content-Type', 'application/json');
-
-      // Create a read stream and pipe it to the response (to download the file)
+  
+      // Set headers for downloading the file
+      res.setHeader('Content-Disposition', `attachment; filename=${path.basename(absolutePath)}`);
+      res.setHeader('Content-Type', 'application/octet-stream');
+  
       const fileStream = fs.createReadStream(absolutePath);
       fileStream.pipe(res);
-
-      // Return the parsed content if needed for other logic
-      return parsedContent;
+  
     } catch (error) {
       console.error('Error reading backup file:', error);
       throw new NotFoundException('Failed to retrieve backup file');
     }
   }
+  
 }

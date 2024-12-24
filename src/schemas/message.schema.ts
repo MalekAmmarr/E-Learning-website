@@ -13,6 +13,8 @@ export class Message extends Document {
 
   @Prop({ required: true })
   ProfilePictureUrl: string; // ID of the message receiver (use "all" for group chats)
+  @Prop({ required: true })
+  privacy: string; // ID of the message receiver (use "all" for group chats)
 
   @Prop({ default: Date.now })
   timestamp: Date; // Timestamp of when the message was sent
