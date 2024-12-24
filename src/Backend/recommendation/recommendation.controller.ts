@@ -8,17 +8,21 @@ export class RecommendationController {
     constructor(private readonly recommendationService: RecommendationService) {}
 
 
-    // Generate recommendations for a user by email
-  @Post('generate/:studentEmail')
-  async generateRecommendations(@Param('studentEmail') studentEmail: string): Promise<Recommendation[]> {
-    return this.recommendationService.generateRecommendations(studentEmail);
+
+    @Post('generate/:email')
+  async generateRecommendations(
+    @Param('email') email: string,
+  ): Promise<Recommendation[]> {
+    return this.recommendationService.generateRecommendations(email);
   }
 
-  // Fetch recommendations for a user by email
-  @Get(':studentEmail')
-  async getRecommendations(@Param('studentEmail') studentEmail: string): Promise<Recommendation[]> {
-    return this.recommendationService.getRecommendations(studentEmail);
-  }
+   // Fetch recommendations by user email
+   @Get('fetch-by-email/:email')
+   async fetchRecommendationsByEmail(
+     @Param('email') email: string,
+   ): Promise<Recommendation[]> {
+     return this.recommendationService.fetchRecommendationsByEmail(email);
+   }
 
   // Mark a recommendation as viewed by email and course title
   @Patch('view/:studentEmail/:courseTitle')
@@ -37,5 +41,8 @@ export class RecommendationController {
   ): Promise<Recommendation> {
     return this.recommendationService.acceptRecommendation(studentEmail, courseTitle);
   }
+
+
+  
 }
 

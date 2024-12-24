@@ -147,4 +147,9 @@ export class CoursesService {
   async getAllCoursesByTitle(title: string): Promise<Course> {
     return await this.courseModel.findOne({ title });
   }
+
+  async getCategoryByTitle(title: string): Promise<string | null> {
+    const course = await this.courseModel.findOne({ title }).exec();
+    return course ? course.category : null; // Return category or null if course is not found
+  }
 }
