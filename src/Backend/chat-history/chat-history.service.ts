@@ -17,13 +17,12 @@ import { Instructor } from 'src/schemas/instructor.schema';
 
 import { ST } from 'next/dist/shared/lib/utils';
 
-
 @Injectable()
 export class ChatHistoryService {
   constructor(
     @InjectModel(User.name, 'eLearningDB')
     private readonly userModel: Model<User>,
-   
+
     @InjectModel(Course.name, 'eLearningDB')
     private readonly courseModel: Model<Course>,
     @InjectModel(ChatHistory.name, 'eLearningDB')
@@ -167,9 +166,75 @@ export class ChatHistoryService {
 
     return { Groups };
   }
+  async getPrivateInstructorGroups(
+    Admin: string,
+    title: string,
+    privacy: string,
+  ) {
+    const Instructor = this.InstructorModel.findOne({ email: Admin });
+    if (!Instructor) {
+      throw new NotFoundException(`Member with email ${Admin} not found.`);
+    }
+    const Groups = await this.ChatHistoryModel.find(
+      { MembersEmail: { $in: [Admin] }, CourseTitle: title, privacy: privacy },
+      '-messages', // Exclude the 'messages' field
+    ).exec();
+    console.log(Admin, '  ', title, ' ', privacy);
+
+    if (!Groups || Groups.length === 0) {
+      throw new BadRequestException(
+        `${Admin} hasn't entered any group in the ${title} course.`,
+      );
+    }
+
+    return { Groups };
+  }
+  async getInstructorGroups(Admin: string, title: string, privacy: string) {
+    const admin = this.InstructorModel.findOne({ email: Admin });
+    if (!admin) {
+      throw new NotFoundException(`Member with email ${Admin} not found.`);
+    }
+    const Groups = await this.ChatHistoryModel.find(
+      {
+        MembersEmail: { $in: [Admin] },
+        CourseTitle: title,
+        isDiscusForum: true,
+      },
+      '-messages', // Exclude the 'messages' field
+    ).exec();
+    console.log(Admin, '  ', title, ' ', privacy);
+
+    if (!Groups || Groups.length === 0) {
+      throw new BadRequestException(
+        `${Admin} hasn't entered any Discussion Forum in the ${title} course.`,
+      );
+    }
+
+    return { Groups };
+  }
   async getGroupChat(Admin: string, title: string) {
     const Groups = await this.ChatHistoryModel.findOne(
       { MembersEmail: { $in: [Admin] }, Title: title },
+      'messages', // Include only the 'messages' field
+    ).exec();
+    console.log(Admin);
+    console.log('Groups : ', Groups);
+    console.log(title);
+    return { Groups };
+  }
+  async getInstructorGroupChat(Admin: string, title: string) {
+    const Groups = await this.ChatHistoryModel.findOne(
+      { MembersEmail: { $in: [Admin] }, Title: title, isDiscusForum: true },
+      'messages', // Include only the 'messages' field
+    ).exec();
+    console.log(Admin);
+    console.log('Groups : ', Groups);
+    console.log(title);
+    return { Groups };
+  }
+  async getPrivateInstructorGroupChat(Admin: string, title: string) {
+    const Groups = await this.ChatHistoryModel.findOne(
+      { MembersEmail: { $in: [Admin] }, Title: title, privacy: 'private' },
       'messages', // Include only the 'messages' field
     ).exec();
     console.log(Admin);
@@ -198,9 +263,7 @@ export class ChatHistoryService {
     } else throw new Error('No Group to Add on it your message');
   }
 
-
-
-  // 
+  //
   async CreateGroupsDiscussions(CreateGroupDto: CreateGroupDto) {
     const {
       Title,
@@ -217,32 +280,37 @@ export class ChatHistoryService {
     const students = await this.userModel.find({
       acceptedCourses: CourseTitle,
     });
-    const studentsEmails = students.map(student => student.email);
-    const studentsNames = students.map(student => student.name);
-    
+    const studentsEmails = students.map((student) => student.email);
+    const studentsNames = students.map((student) => student.name);
+    studentsEmails.push(Admin);
     // Step 3: Create and save the group
     const newGroup = new this.ChatHistoryModel({
       Title,
       Admin,
-      MembersEmail:studentsEmails,
-      MembersName:studentsNames,
+      MembersEmail: studentsEmails,
+      MembersName: studentsNames,
       ProfilePictureUrl,
       messages,
       CourseTitle,
       timestamp: new Date(),
+      isDiscusForum: true,
     });
     await newGroup.save();
 
     return {
       message: `${Title} Group created successfully`,
       group: newGroup,
-      
     };
   }
 
-
-  async getGroupChatByTitleAndCourse(Title: string, CourseTitle: string): Promise<ChatHistory | null> {
-    const groupChat = await this.ChatHistoryModel.findOne({ Title, CourseTitle });
+  async getGroupChatByTitleAndCourse(
+    Title: string,
+    CourseTitle: string,
+  ): Promise<ChatHistory | null> {
+    const groupChat = await this.ChatHistoryModel.findOne({
+      Title,
+      CourseTitle,
+    });
     return groupChat; // Returns null if no group chat is found
   }
 }
