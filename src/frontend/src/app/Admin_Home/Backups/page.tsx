@@ -63,23 +63,32 @@ export default function BackupsPage() {
 
   const downloadBackup = async (storagePath: string) => {
     try {
+      // Don't encode the storagePath again; it's already URL encoded
       const response = await axios.get('http://localhost:3000/backups/Hoss/OpenFile', {
         params: { storagePath },
         responseType: 'blob',
       });
-
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+  
+      const blob = response.data;
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', storagePath.split('/').pop() || 'backup.json');
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
+  
+      // Clean up the object URL
+      window.URL.revokeObjectURL(url);
+  
     } catch (err: any) {
       console.error('Error downloading backup:', err);
       setError(err.response?.data?.message || 'Failed to download backup');
     }
   };
+  
+  
+  
 
   if (loading) {
     return <div className="p-8 text-center text-gray-600">Loading backups...</div>;

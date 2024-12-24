@@ -340,9 +340,9 @@ const CourseContent: React.FC = () => {
     }
   };
   // Function to handle note title click
-  const handleOnChatClicked = (courseTitle: string) => {
+  const handleOnChatClicked = (courseTitle: string, privacy: string) => {
     router.push(
-      `/User_Home/chat_Hossam?title=${encodeURIComponent(courseTitle)}`,
+      `/User_Home/chat_Hossam?title=${encodeURIComponent(courseTitle)}&privacy=${encodeURIComponent(privacy)}`,
     );
   };
   return (
@@ -727,7 +727,7 @@ const CourseContent: React.FC = () => {
                   <div className="main-button">
                     <a
                       onClick={() =>
-                        handleOnChatClicked(CourseTitle || 'No Chat')
+                        handleOnChatClicked(CourseTitle || 'No Chat', 'public')
                       }
                     >
                       Start Chatting
@@ -749,7 +749,11 @@ const CourseContent: React.FC = () => {
                     peers for personalized support and collaboration.
                   </p>
                   <div className="main-button">
-                    <a href="/User_Home/chat_Hossam?title=Machine Learning">
+                    <a
+                      onClick={() =>
+                        handleOnChatClicked(CourseTitle || 'No Chat', 'private')
+                      }
+                    >
                       Start Private Chat
                     </a>
                   </div>

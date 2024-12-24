@@ -47,34 +47,41 @@ const CreateCourse = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const storedInstructor = localStorage.getItem('instructorData');
+      // Retrieve the instructor data and token from sessionStorage
+      const storedInstructor = sessionStorage.getItem('instructorData');
+      const token = sessionStorage.getItem('Ins_Token');
       if (!storedInstructor) throw new Error('Instructor data not found.');
-
+      if (!token) throw new Error('Authorization token not found.');
+  
       const { email } = JSON.parse(storedInstructor);
-
+  
       const res = await fetch(
-        `http://localhost:3000/instructor/${email}/create-course`,
+        `http://localhost:3000/instructor/${encodeURIComponent(email)}/create-course`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`, // Include the token in the header
+          },
           body: JSON.stringify({
             ...formData,
-            image: profilePictureUrl,
-            instructormail: email,
+            image: profilePictureUrl, // Ensure this is set correctly in your state
+            instructormail: email, // Instructor's email
           }),
-        },
+        }
       );
-
+  
       if (!res.ok) {
         throw new Error(`Failed to create course: ${res.statusText}`);
       }
-
+  
       alert('Course created successfully!');
-      router.push('/Ins_Home');
+      router.push('/Ins_Home'); // Redirect to the home page
     } catch (err: any) {
       alert(err.message || 'An unknown error occurred');
     }
   };
+  
 
   return (
     <div>

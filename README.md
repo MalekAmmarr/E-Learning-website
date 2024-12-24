@@ -30,13 +30,6 @@
 
 ```bash
 $ npm install
-$ npm install --save @nestjs/mongoose mongoose
-$ npm install --save-dev @types/mongoose
-$ npm install --save next react react-dom
-$ npm install --save-dev @types/react @types/react-dom @types/next
-$ npm install --save-dev @types/node
-$ npm install @nestjs/serve-static
-
 ```
 
 ## Compile and run the project

@@ -14,18 +14,25 @@ export class ChatHistoryController {
 
   // Endpoint for an instructor to get a student's progress by email
   // @UseGuards(AuthorizationGuard)
-  @Post('Create')
+  @Post('Create/:StudentOrInstructor')
   //@Roles('instructor', 'student')
-  async getStudentProgress(@Body() createGroupDto: CreateGroupDto) {
-    return this.chatHistoryService.CreateGroup(createGroupDto);
+  async getStudentProgress(
+    @Body() createGroupDto: CreateGroupDto,
+    @Param('StudentOrInstructor') StudentOrInstructor: string,
+  ) {
+    return this.chatHistoryService.CreateGroup(
+      createGroupDto,
+      StudentOrInstructor,
+    );
   }
-  @Get('getGroups/:Admin/:title')
+  @Get('getGroups/:Admin/:title/:privacy')
   //@Roles('instructor', 'student')
   async getStudentGroups(
     @Param('Admin') Admin: string,
     @Param('title') title: string,
+    @Param('privacy') privacy: string,
   ) {
-    return this.chatHistoryService.getGroups(Admin, title);
+    return this.chatHistoryService.getGroups(Admin, title, privacy);
   }
   @Get('getGroupChat/:Admin/:title')
   //@Roles('instructor', 'student')

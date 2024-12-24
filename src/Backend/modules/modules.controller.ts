@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Put, Query, UseGuards,Delete } from '@nestjs/common';
 import { CreateModuleDto } from './dto/CreateModuleDto';
 import { Module } from 'src/schemas/module.schema';
 import { ModulesService } from './modules.service';
@@ -58,4 +58,16 @@ export class ModulesController {
   async getModuleDetailsByQuizId(@Query('quizId') quizId: string) {
     return this.moduleService.getModuleDetailsByQuizId(quizId);
   }
+
+
+  @UseGuards(AuthorizationGuard)
+  @Delete(':quizId')
+  @Roles('instructor')
+  async deleteModule(@Param('quizId') quizId: string) {
+ 
+ {
+  return await this.moduleService.deleteModule(quizId);
+
+}}
+
 }

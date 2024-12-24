@@ -66,6 +66,18 @@ export class ModulesService {
     return await module.save();
   }
 
+  async deleteModule(quizId: string): Promise<void> {
+    
+    const result = await this.userinteractionModel.deleteOne({ quizId });
+  
+    if (result.deletedCount === 0) {
+      throw new NotFoundException(
+        `Module with course title "${quizId}" not found.`
+      );
+    }
+  }
+  
+
   async getQuizIdAndCourseTitleByInstructorEmail(
     instructorEmail: string
   ): Promise<{ quizId: string; courseTitle: string }[]> {
