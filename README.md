@@ -37,6 +37,8 @@ $ npm install
 ```bash
 # development
 $ npm start:Backend
+
+cd src/frontend
 $ npm run dev:FRONTEND
 
 # watch mode
