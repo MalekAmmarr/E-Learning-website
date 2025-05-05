@@ -79,6 +79,15 @@ A project presentation showcasing the system's features and implementation.
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+## Website preview
+
+![image](https://github.com/user-attachments/assets/c899df21-530f-4d9e-9f0d-b3bb75bfb32d)
+
+
+![image](https://github.com/user-attachments/assets/3cdcaea7-6b89-4065-b1d6-a1e5a18ed84b)
+
+
+
 ## Project setup
 
 ```bash
